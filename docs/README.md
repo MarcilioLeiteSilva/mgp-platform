@@ -89,19 +89,33 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **09. Integração com TenantGuard** | [`apps/api/src/common/guards/tenant.guard.ts`](../apps/api/src/common/guards/tenant.guard.ts) | `activeOrgId` propagado do JWT payload com fallback flexível para header `x-organization-id`. |
 | **10. Suíte de Testes Unitários de Autenticação** | [`apps/api/src/modules/auth/`](../apps/api/src/modules/auth/) | 51 testes unitários aprovados em 9 suítes completas com 100% de sucesso. |
 
+### 1.7. Fase 07 — Organizações, Usuários e Permissões (RBAC)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Modelo e Migration de Convites** | [`packages/database/prisma/migrations/20261102010000_invitations/`](../packages/database/prisma/migrations/20261102010000_invitations/) | Entidade `OrganizationInvitation` com status (`PENDING`, `ACCEPTED`, `REVOKED`, `EXPIRED`) e índices otimizados. |
+| **02. Gestão Cadastral da Organização** | [`apps/api/src/modules/organizations/organizations.service.ts`](../apps/api/src/modules/organizations/organizations.service.ts) | Atualização de dados cadastrais (`name`, `documentCnpjCpf`, `planTier`) restrita a `OWNER` ou `ADMIN` com auditoria. |
+| **03. Definição de Organização Padrão** | [`apps/api/src/modules/organizations/organizations.controller.ts`](../apps/api/src/modules/organizations/organizations.controller.ts) | Endpoint `PATCH /organizations/:id/default` alternando atomicamente a organização preferencial do usuário. |
+| **04. Gestão de Membros e Papéis RBAC** | [`apps/api/src/modules/organizations/organizations.service.ts`](../apps/api/src/modules/organizations/organizations.service.ts) | Atualização de papéis com hierarquia, adição de membros e listagem completa de equipe. |
+| **05. Salvaguardas Contra Orfandade de Tenant** | [`apps/api/src/modules/organizations/organizations.service.ts`](../apps/api/src/modules/organizations/organizations.service.ts) | Bloqueio rigoroso contra remoção, saída ou rebaixamento do único `OWNER` da organização. |
+| **06. Transferência Atômica de Posse** | [`apps/api/src/modules/organizations/organizations.service.ts`](../apps/api/src/modules/organizations/organizations.service.ts) | Endpoint `POST /organizations/:id/transfer-ownership` promovendo novo `OWNER` e rebaixando o anterior a `ADMIN`. |
+| **07. Fluxo de Convites com Tokens Criptográficos** | [`apps/api/src/modules/organizations/organizations.service.ts`](../apps/api/src/modules/organizations/organizations.service.ts) | Geração de tokens de 64 caracteres hexadecimais, expiração de 7 dias e cancelamento/revogação. |
+| **08. Aceite Público e Associação de Membresia** | [`apps/api/src/modules/organizations/invitations.controller.ts`](../apps/api/src/modules/organizations/invitations.controller.ts) | Endpoints `GET /invitations/:token` (público) e `POST /invitations/:token/accept` associando novos membros via transação. |
+| **09. Perfil de Usuário e Alteração de Senha** | [`apps/api/src/modules/users/`](../apps/api/src/modules/users/) | Consulta de perfil com contagem de sessões ativas, atualização cadastral e troca segura de senha com revogação em cadeia. |
+| **10. Suíte de Testes Automatizados (72 Testes)** | [`apps/api/src/**/*.spec.ts`](../apps/api/src/) | 10 suítes de testes unitários Jest aprovadas com 100% de sucesso (72 testes passing). |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
 
-Progresso atual: **6/10 fases concluídas (Fase 06 pronta para auditoria)**.
+Progresso atual: **7/10 fases concluídas (Fase 07 pronta para auditoria)**.
 
 - [x] **Fase 01 — Planejamento técnico e especificação** (Concluída e Homologada)
 - [x] **Fase 02 — Configuração do ambiente e infraestrutura** (Concluída e Homologada)
 - [x] **Fase 03 — Monorepo e estrutura do projeto** (Concluída e Homologada)
 - [x] **Fase 04 — Backend central NestJS** (Concluída e Homologada)
 - [x] **Fase 05 — Banco de dados e modelo multi-tenant** (Concluída e Homologada)
-- [x] **Fase 06 — Autenticação e segurança** (Concluída - Pronta para Auditoria)
-- [ ] **Fase 07 — Organizações, usuários e permissões** (Membros, convites, papéis e RBAC)
+- [x] **Fase 06 — Autenticação e segurança** (Concluída e Homologada)
+- [x] **Fase 07 — Organizações, usuários e permissões** (Concluída - Pronta para Auditoria)
 - [ ] **Fase 08 — Frontend e dashboard principal** (Next.js, Tailwind, navegação e layouts)
 - [ ] **Fase 09 — Administração e monitoramento** (Painel de superadmin e NOC operacional)
 - [ ] **Fase 10 — Integração, testes e auditoria final** (Testes ponta a ponta, homologação e aceite da Etapa 1)

@@ -21,34 +21,43 @@ enum UserRole {
   ADVERTISER
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
 model User {
-  id           String       @id @default(uuid())
-  email        String       @unique
-  fullName     String       @map("full_name")
-  passwordHash String       @map("password_hash")
-  isActive     Boolean      @default(true) @map("is_active")
-  isSuperadmin Boolean      @default(false) @map("is_superadmin")
-  memberships  Membership[]
-  sessions     Session[]
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
+  id              String                   @id @default(uuid())
+  email           String                   @unique
+  fullName        String                   @map("full_name")
+  passwordHash    String                   @map("password_hash")
+  isActive        Boolean                  @default(true) @map("is_active")
+  isSuperadmin    Boolean                  @default(false) @map("is_superadmin")
+  memberships     Membership[]
+  sessions        Session[]
+  sentInvitations OrganizationInvitation[] @relation("InvitationsSent")
+  createdAt       DateTime                 @default(now()) @map("created_at")
+  updatedAt       DateTime                 @updatedAt @map("updated_at")
 
   @@map("users")
 }
 
 model Organization {
-  id              String          @id @default(uuid())
+  id              String                   @id @default(uuid())
   name            String
-  slug            String          @unique
-  documentCnpjCpf String?         @map("document_cnpj_cpf")
-  planTier        String          @default("FREE") @map("plan_tier")
-  isVerified      Boolean         @default(false) @map("is_verified")
+  slug            String                   @unique
+  documentCnpjCpf String?                  @map("document_cnpj_cpf")
+  planTier        String                   @default("FREE") @map("plan_tier")
+  isVerified      Boolean                  @default(false) @map("is_verified")
   memberships     Membership[]
+  invitations     OrganizationInvitation[]
   apps            App[]
   campaigns       Campaign[]
   wallet          Wallet?
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
+  createdAt       DateTime                 @default(now()) @map("created_at")
+  updatedAt       DateTime                 @updatedAt @map("updated_at")
 
   @@map("organizations")
 }
@@ -81,6 +90,25 @@ model Session {
 
   @@index([userId, isRevoked])
   @@map("sessions")
+}
+
+model OrganizationInvitation {
+  id             String           @id @default(uuid())
+  organizationId String           @map("organization_id")
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           UserRole         @default(DEVELOPER)
+  token          String           @unique
+  invitedById    String           @map("invited_by_id")
+  invitedBy      User             @relation("InvitationsSent", fields: [invitedById], references: [id], onDelete: Cascade)
+  status         InvitationStatus @default(PENDING)
+  expiresAt      DateTime         @map("expires_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  @@index([organizationId, status])
+  @@index([email, status])
+  @@map("organization_invitations")
 }
 
 // ==============================================================================
