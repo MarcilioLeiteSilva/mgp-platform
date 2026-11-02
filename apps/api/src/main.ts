@@ -70,11 +70,11 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   const port = configService.port;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   logger.log(`================================================================`);
-  logger.log(`🚀 MGP Core API iniciada com sucesso na porta [${port}]`);
-  logger.log(`📖 Documentação Swagger disponível em: http://localhost:${port}/api/docs`);
+  logger.log(`🚀 MGP Core API iniciada com sucesso em http://0.0.0.0:${port}`);
+  logger.log(`📖 Documentação Swagger disponível em: /api/docs`);
   logger.log(`🩺 Health Probes: /health/liveness e /health/readiness`);
   logger.log(`================================================================`);
 }

@@ -16,8 +16,7 @@ app.post('/ads/request', (req: Request, res: Response) => {
   });
 });
 
-const port = process.env.PORT_ADSERVER || 3001;
-app.listen(port, () => {
-  console.info(`MGP Ad Server rodando em alta performance na porta ${port}`);
+const port = Number(process.env.PORT_ADSERVER) || 3001;
+app.listen(port, '0.0.0.0', () => {
+  console.info(`MGP Ad Server rodando em alta performance em http://0.0.0.0:${port}`);
 });
-
