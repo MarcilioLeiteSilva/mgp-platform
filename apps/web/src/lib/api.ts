@@ -23,14 +23,14 @@ class ApiClient {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(key, value);
-    } catch {}
+    } catch { }
   }
 
   private removeStorageItem(key: string): void {
     if (typeof window === 'undefined') return;
     try {
       localStorage.removeItem(key);
-    } catch {}
+    } catch { }
   }
 
   getToken(): string | null {
@@ -180,3 +180,4 @@ class ApiClient {
 }
 
 export const api = new ApiClient();
+

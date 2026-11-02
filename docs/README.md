@@ -117,11 +117,25 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **09. Gestão de Aplicativos Android** | [`apps/web/src/app/(dashboard)/apps/page.tsx`](../apps/web/src/app/(dashboard)/apps/page.tsx) | Listagem real de apps via `GET /apps`, criação via `POST /apps` e cópia segura de chaves SDK. |
 | **10. Carteira, Equipe, Perfil e Convites Públicos** | [`apps/web/src/app/(dashboard)/`](../apps/web/src/app/(dashboard)/) / [`apps/web/src/app/invitations/`](../apps/web/src/app/invitations/) | Extrato de livro-razão (`/wallet`), gestão de membros e convites (`/organization`), perfil e senha (`/settings`), e aceite público (`/invitations/[token]`). |
 
+### 1.9. Fase 09 — Administração e Monitoramento (Painel de Superadmin e NOC Operacional)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Guardião e Controle de Acesso Superadmin** | [`apps/api/src/common/guards/superadmin.guard.ts`](../apps/api/src/common/guards/superadmin.guard.ts) | `SuperadminGuard` com bloqueio `403 Forbidden` garantindo acesso estrito ao time operacional MGP. |
+| **02. DTOs de Moderação e Auditoria** | [`apps/api/src/modules/admin/dto/`](../apps/api/src/modules/admin/dto/) | DTOs tipados e validados (`UpdateUserStatusDto`, `UpdateOrganizationStatusDto`, `UpdateAppStatusDto`, `AuditLogQueryDto`). |
+| **03. Visão Geral Operacional e KPIs (`/admin/overview`)** | [`apps/api/src/modules/admin/admin.service.ts`](../apps/api/src/modules/admin/admin.service.ts) | Consolidação de organizações, usuários, apps, sessões ativas, saldos em custódia e latência de banco. |
+| **04. Gestão Global de Organizações e Planos** | [`apps/api/src/modules/admin/admin.controller.ts`](../apps/api/src/modules/admin/admin.controller.ts) | Endpoints de consulta e alteração de planos (`FREE`, `PRO`, `ENTERPRISE`) e verificação cadastral (`isVerified`). |
+| **05. Gestão Global de Usuários e Suspensão** | [`apps/api/src/modules/admin/admin.controller.ts`](../apps/api/src/modules/admin/admin.controller.ts) | Listagem e suspensão de contas com revogação imediata em lote de todas as sessões ativas (`sessions`). |
+| **06. Moderação de Aplicativos e SDK Keys** | [`apps/api/src/modules/admin/admin.controller.ts`](../apps/api/src/modules/admin/admin.controller.ts) | Inspeção e aprovação/suspensão de apps da rede com registro compulsório em auditoria. |
+| **07. Trilha de Auditoria Centralizada (`/admin/audit-logs`)** | [`apps/api/src/modules/admin/admin.controller.ts`](../apps/api/src/modules/admin/admin.controller.ts) | Consulta paginada da tabela `audit_logs` com filtros por entidade, operador e ação. |
+| **08. Telemetria de Filas Assíncronas (`/admin/system/queues`)** | [`apps/api/src/modules/admin/admin.controller.ts`](../apps/api/src/modules/admin/admin.controller.ts) | Monitoramento de saúde das 4 filas (`queue-telemetry`, `queue-ledger`, `queue-aso-sync`, `queue-fraud`). |
+| **09. Exportador de Métricas Prometheus (`/admin/metrics`)** | [`apps/api/src/modules/admin/admin.service.ts`](../apps/api/src/modules/admin/admin.service.ts) | Formato aberto Prometheus com métricas de uptime, heap, latência DB e totalizadores de rede. |
+| **10. Painel Web de Backoffice NOC (`apps/admin`)** | [`apps/admin/`](../apps/admin/) | Aplicação Next.js 14 completa com dark theme NOC, 8 rotas funcionais compiladas e Dockerfile de produção. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
 
-Progresso atual: **8/10 fases concluídas (Fase 08 pronta para auditoria)**.
+Progresso atual: **9/10 fases concluídas (Fase 09 pronta para auditoria)**.
 
 - [x] **Fase 01 — Planejamento técnico e especificação** (Concluída e Homologada)
 - [x] **Fase 02 — Configuração do ambiente e infraestrutura** (Concluída e Homologada)
@@ -130,8 +144,8 @@ Progresso atual: **8/10 fases concluídas (Fase 08 pronta para auditoria)**.
 - [x] **Fase 05 — Banco de dados e modelo multi-tenant** (Concluída e Homologada)
 - [x] **Fase 06 — Autenticação e segurança** (Concluída e Homologada)
 - [x] **Fase 07 — Organizações, usuários e permissões** (Concluída e Homologada)
-- [x] **Fase 08 — Frontend e dashboard principal** (Concluída - Pronta para Auditoria)
-- [ ] **Fase 09 — Administração e monitoramento** (Painel de superadmin e NOC operacional)
+- [x] **Fase 08 — Frontend e dashboard principal** (Concluída e Homologada)
+- [x] **Fase 09 — Administração e monitoramento** (Concluída - Pronta para Auditoria)
 - [ ] **Fase 10 — Integração, testes e auditoria final** (Testes ponta a ponta, homologação e aceite da Etapa 1)
 
 ---

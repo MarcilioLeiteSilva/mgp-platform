@@ -24,7 +24,7 @@ RUN pnpm --filter @mgp/contracts build
 RUN pnpm --filter @mgp/admin build
 
 # ------------------------------------------
-# Runner de Produção (Next.js Standalone)
+# Runner de Produção (Next.js Standalone Monorepo)
 # ------------------------------------------
 FROM node:20-alpine AS runner
 
@@ -32,17 +32,18 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 adminjs
 
-COPY --from=builder /app/apps/admin/public ./public
+COPY --from=builder /app/apps/admin/public ./apps/admin/public
 COPY --from=builder --chown=adminjs:nodejs /app/apps/admin/.next/standalone ./
-COPY --from=builder --chown=adminjs:nodejs /app/apps/admin/.next/static ./.next/static
+COPY --from=builder --chown=adminjs:nodejs /app/apps/admin/.next/static ./apps/admin/.next/static
 
 USER adminjs
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["node", "apps/admin/server.js"]

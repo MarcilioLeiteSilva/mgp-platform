@@ -9,3 +9,4 @@ export default function AppDashboardLayout({ children }: { children: React.React
     </AuthProvider>
   );
 }
+
