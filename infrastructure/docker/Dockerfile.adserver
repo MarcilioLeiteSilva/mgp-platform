@@ -9,7 +9,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10.30.2 --activate
 RUN apk add --no-cache libc6-compat
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json .npmrc* ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json .npmrc* ./
 COPY packages/ ./packages/
 COPY apps/ad-server/ ./apps/ad-server/
 

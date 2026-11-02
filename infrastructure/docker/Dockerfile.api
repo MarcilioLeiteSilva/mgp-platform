@@ -7,12 +7,12 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Ativa corepack com a versão exata do pnpm do monorepo
+# Ativa corepack com pnpm 10.x e instala dependências nativas para Alpine (OpenSSL para Prisma)
 RUN corepack enable && corepack prepare pnpm@10.30.2 --activate
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 
-# Copia arquivos de configuração do monorepo e packages
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json .npmrc* ./
+# Copia arquivos de configuração do monorepo, tipagens base e packages
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json .npmrc* ./
 COPY packages/ ./packages/
 COPY apps/api/ ./apps/api/
 
@@ -38,6 +38,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+
+# OpenSSL para runtime do Prisma no Alpine
+RUN apk add --no-cache openssl
 
 # Usuário de sistema sem privilégios de root para segurança
 RUN addgroup --system --gid 1001 nodejs
