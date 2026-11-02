@@ -60,6 +60,7 @@ async function bootstrap() {
     .addTag('Saúde e Observabilidade', 'Probes de liveness e readiness')
     .addTag('Autenticação e Identidade', 'Cadastro, login, refresh tokens e sessões')
     .addTag('Organizações e Multi-Tenancy', 'Isolamento de tenants e gestão de membros')
+    .addTag('Aplicativos e SDK', 'Gestão de apps, pacotes e chaves de integração')
     .addTag('Usuários', 'Perfis e configurações')
     .addTag('Administração Central (NOC)', 'Operações globais restritas')
     .build();

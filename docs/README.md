@@ -59,19 +59,33 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **07. Conexão de Banco de Dados** | [`apps/api/src/database/`](../apps/api/src/database/) | `PrismaService` singleton integrado com ciclo de vida do NestJS. |
 | **08. Esqueletos dos Módulos Centrais**| [`apps/api/src/modules/`](../apps/api/src/modules/) | Módulos `auth`, `users`, `organizations` e `admin` estruturados. |
 | **09. Testes Unitários Automatizados** | [`apps/api/src/modules/health/health.controller.spec.ts`](../apps/api/src/modules/health/health.controller.spec.ts) | Suíte de testes Jest com 100% de sucesso. |
-| **10. Script de Guia do EasyPanel** | Detalhado na resposta técnica | Passo a passo de provisionamento de serviços no EasyPanel. |
+| **10. Root Handler Informativo** | [`apps/api/src/app.controller.ts`](../apps/api/src/app.controller.ts) | Rota raiz `/` retornando status online e links de documentação/saúde. |
+
+### 1.5. Fase 05 — Banco de Dados e Modelo Multi-Tenant
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Migration Inicial do PostgreSQL** | [`packages/database/prisma/migrations/`](../packages/database/prisma/migrations/) | Migration DDL estruturando todas as tabelas, enums, índices e chaves estrangeiras. |
+| **02. Seed do Banco de Dados** | [`packages/database/prisma/seed.ts`](../packages/database/prisma/seed.ts) | Provisionamento de Superadmin, Master Org, Carteiras, Contas Contábeis, Org Demo e apps. |
+| **03. Scripts de Migração e Seed** | [`packages/database/package.json`](../packages/database/package.json) | Comandos `db:migrate` e `db:seed` automatizados no workspace. |
+| **04. Contexto e Decorators Multi-Tenant** | [`apps/api/src/common/decorators/`](../apps/api/src/common/decorators/) | `@CurrentTenant()`, `@TenantId()`, `@CurrentUser()` e `@Roles(...)`. |
+| **05. Guardião de Isolamento de Tenant** | [`apps/api/src/common/guards/tenant.guard.ts`](../apps/api/src/common/guards/tenant.guard.ts) | Validação de `X-Organization-Id` contra membresia real do usuário logado. |
+| **06. Guardião de Papéis RBAC com Hierarquia** | [`apps/api/src/common/guards/roles.guard.ts`](../apps/api/src/common/guards/roles.guard.ts) | Controle de acesso por permissões granulares (`OWNER`, `ADMIN`, `MANAGER`, etc.). |
+| **07. Gestão de Organizações e Carteiras** | [`apps/api/src/modules/organizations/`](../apps/api/src/modules/organizations/) | Criação de tenants em transação atômica ACID gerando Carteira com 3 contas. |
+| **08. Gestão de Aplicativos (Zero Data Leakage)** | [`apps/api/src/modules/apps/`](../apps/api/src/modules/apps/) | Endpoints multi-tenant com cláusula mandatória `organizationId` e geração de SDK Key. |
+| **09. Suíte de Testes de Isolamento Multi-Tenant** | [`apps/api/src/**/*.spec.ts`](../apps/api/src/) | 31 testes unitários e de isolamento automatizados aprovados (6 suítes). |
+| **10. Auditoria e Rastreabilidade** | [`apps/api/src/modules/organizations/organizations.service.ts`](../apps/api/src/modules/organizations/organizations.service.ts) | Registro de mutações críticas na tabela `audit_logs`. |
 
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
 
-Progresso atual: **4/10 fases concluídas (Fase 04 pronta para auditoria)**.
+Progresso atual: **5/10 fases concluídas (Fase 05 pronta para auditoria)**.
 
 - [x] **Fase 01 — Planejamento técnico e especificação** (Concluída e Homologada)
 - [x] **Fase 02 — Configuração do ambiente e infraestrutura** (Concluída e Homologada)
 - [x] **Fase 03 — Monorepo e estrutura do projeto** (Concluída e Homologada)
-- [x] **Fase 04 — Backend central NestJS** (Concluída - Pronta para Auditoria)
-- [ ] **Fase 05 — Banco de dados e modelo multi-tenant** (PostgreSQL, Prisma, Migrations e Tenants)
+- [x] **Fase 04 — Backend central NestJS** (Concluída e Homologada)
+- [x] **Fase 05 — Banco de dados e modelo multi-tenant** (Concluída - Pronta para Auditoria)
 - [ ] **Fase 06 — Autenticação e segurança** (Cadastro, Login, JWT Access/Refresh tokens com rotação)
 - [ ] **Fase 07 — Organizações, usuários e permissões** (Membros, convites, papéis e RBAC)
 - [ ] **Fase 08 — Frontend e dashboard principal** (Next.js, Tailwind, navegação e layouts)

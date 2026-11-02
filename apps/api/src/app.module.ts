@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { AppsModule } from './modules/apps/apps.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -17,6 +18,7 @@ import { AppController } from './app.controller';
     UsersModule,
     OrganizationsModule,
     AdminModule,
+    AppsModule,
   ],
   controllers: [AppController],
   providers: [],
