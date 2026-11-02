@@ -4,10 +4,9 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 
 ---
 
-## 1. Estrutura da Documentação (Fase 01 — Fundação Documental)
+## 1. Estrutura da Documentação
 
-A documentação da **Fase 01** atende rigorosamente a todos os 10 entregáveis exigidos pela especificação-mestre da plataforma:
-
+### 1.1. Fase 01 — Fundação Documental
 | Entregável | Documento de Referência | Descrição |
 | :--- | :--- | :--- |
 | **01. Arquitetura Geral** | [`docs/architecture/01-general-architecture.md`](./architecture/01-general-architecture.md) | Topologia do sistema, fluxo de dados ponta a ponta e ciclo de vida dos componentes. |
@@ -19,16 +18,29 @@ A documentação da **Fase 01** atende rigorosamente a todos os 10 entregáveis 
 | **07. Segurança, Antifraude & LGPD** | [`docs/security/01-security-and-antifraud.md`](./security/01-security-and-antifraud.md) | Proteção JWT, rotação de tokens, assinatura de eventos de anúncios, antifraude e compliance Google Play. |
 | **08. Logs, Auditoria & Observabilidade** | [`docs/architecture/05-logging-and-observability.md`](./architecture/05-logging-and-observability.md) | Logs estruturados Pino, auditoria de ações, health checks e métricas operacionais Prometheus. |
 | **09. Qualidade, Testes & Critérios de Aceite**| [`docs/architecture/06-quality-and-approval-criteria.md`](./architecture/06-quality-and-approval-criteria.md) | Pirâmide de testes, CI/CD, Definition of Done (DoD) e fluxo de auditoria por fase. |
-| **10. Controle de Fases do Projeto** | *Seção 2 deste documento abaixo* | Checklist de evolução das 10 Fases da Etapa 1. |
+
+### 1.2. Fase 02 — Ambiente e Infraestrutura
+| Entregável | Documento / Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Provisionamento Hostinger VPS & EasyPanel** | [`docs/infrastructure/01-vps-and-easypanel-setup.md`](./infrastructure/01-vps-and-easypanel-setup.md) | Guia de provisionamento, hardening, EasyPanel, DNS e emissão de SSL. |
+| **02. Script de Hardening da VPS** | [`infrastructure/scripts/vps-setup.sh`](../infrastructure/scripts/vps-setup.sh) | Script bash automatizado para UFW, Fail2ban, Swap 4GB e sysctl. |
+| **03. Docker & Isolamento de Redes** | [`docs/infrastructure/02-docker-and-networks.md`](./infrastructure/02-docker-and-networks.md) | Topologia de rede interna, isolamento de bancos e builds multi-stage. |
+| **04. Docker Compose para Desenvolvimento** | [`infrastructure/docker/docker-compose.yml`](../infrastructure/docker/docker-compose.yml) | Stack local com Postgres 16, Redis 7, MinIO e ClickHouse. |
+| **05. Dockerfiles de Produção** | [`infrastructure/docker/`](../infrastructure/docker/) | Multi-stage Dockerfiles para `api`, `ad-server`, `workers`, `web` e `admin`. |
+| **06. Template do EasyPanel** | [`infrastructure/easypanel/easypanel-template.json`](../infrastructure/easypanel/easypanel-template.json) | Template JSON de serviços, portas e volumes para EasyPanel. |
+| **07. Dimensionamento de Recursos** | [`infrastructure/easypanel/service-limits.md`](../infrastructure/easypanel/service-limits.md) | Sizing de CPU/RAM e parâmetros anti-OOM por container. |
+| **08. Matriz de Variáveis de Ambiente** | [`docs/infrastructure/03-environments-and-configs.md`](./infrastructure/03-environments-and-configs.md) | Separação entre Dev, Staging e Produção com validação Zod. |
+| **09. Arquivos de Ambiente (.env.example)** | [`infrastructure/env/`](../infrastructure/env/) | Exemplos completos de `.env` para Desenvolvimento, Staging e Produção. |
+| **10. Política de Backups & Restauração** | [`docs/infrastructure/04-backups-and-resource-limits.md`](./infrastructure/04-backups-and-resource-limits.md) | Scripts de backup e restauração com retenção de 30 dias. |
 
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
 
-Progresso atual: **1/10 fases concluídas (Fase 01 pronta para auditoria)**.
+Progresso atual: **2/10 fases concluídas (Fase 02 pronta para auditoria)**.
 
-- [x] **Fase 01 — Planejamento técnico e especificação** (Concluída - Fundação documental)
-- [ ] **Fase 02 — Configuração do ambiente e infraestrutura** (EasyPanel, Hostinger VPS, Docker, SSL)
+- [x] **Fase 01 — Planejamento técnico e especificação** (Concluída e Homologada)
+- [x] **Fase 02 — Configuração do ambiente e infraestrutura** (Concluída - Pronta para Auditoria)
 - [ ] **Fase 03 — Monorepo e estrutura do projeto** (GitHub, pnpm workspaces, TypeScript, ESLint, Prettier)
 - [ ] **Fase 04 — Backend central NestJS** (Bootstrap da API, Health, Swagger, Exception Filters)
 - [ ] **Fase 05 — Banco de dados e modelo multi-tenant** (PostgreSQL, Prisma, Migrations e Tenants)
@@ -46,4 +58,3 @@ Progresso atual: **1/10 fases concluídas (Fase 01 pronta para auditoria)**.
 2. **Sem dados ou botões fictícios**: Todo componente ou tela entregue deve estar conectado a fluxos e endpoints reais.
 3. **Imutabilidade de módulos aprovados**: Não refatorar ou reescrever módulos já homologados sem solicitação explícita.
 4. **Isolamento de Domínios**: A inteligência de mercado (ASO) e o motor publicitário (Ad Network) operam como serviços desacoplados para garantir resiliência e escalabilidade.
-

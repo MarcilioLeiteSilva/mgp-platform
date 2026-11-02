@@ -1,0 +1,56 @@
+# ==========================================
+# Multi-stage Dockerfile para apps/api (NestJS)
+# ==========================================
+
+# Estágio 1: Dependências e Build
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Instalação do pnpm e utilitários
+RUN corepack enable && corepack prepare pnpm@9.1.0 --activate
+RUN apk add --no-cache libc6-compat
+
+# Copia arquivos de manifesto do Monorepo
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY packages/ ./packages/
+COPY apps/api/ ./apps/api/
+
+# Instalação de dependências do monorepo com cache pnpm
+RUN pnpm install --frozen-lockfile
+
+# Geração dos artefatos Prisma
+RUN pnpm --filter @mgp/database prisma generate
+
+# Compilação da aplicação
+RUN pnpm --filter @mgp/api build
+
+# Remove dependências de desenvolvimento para otimizar runtime
+RUN pnpm prune --prod
+
+# ------------------------------------------
+# Estágio 2: Runner de Produção (Imagem Mínima)
+# ------------------------------------------
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Usuário sem privilégios de root para segurança
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nestjs
+
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/database/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/packages/database/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
+
+USER nestjs
+
+EXPOSE 3000
+
+CMD ["node", "apps/api/dist/main.js"]

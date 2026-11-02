@@ -1,0 +1,142 @@
+{
+  "name": "MGP Production",
+  "description": "Mobile Growth Platform — Produção EasyPanel Template",
+  "services": [
+    {
+      "name": "mgp-postgres",
+      "type": "postgres",
+      "image": "postgres:16-alpine",
+      "resources": {
+        "memoryLimit": 2048,
+        "memoryReservation": 1024,
+        "cpuLimit": 2.0,
+        "cpuReservation": 0.5
+      },
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "mgp_postgres_data",
+          "mountPath": "/var/lib/postgresql/data"
+        }
+      ],
+      "ports": []
+    },
+    {
+      "name": "mgp-redis",
+      "type": "redis",
+      "image": "redis:7-alpine",
+      "resources": {
+        "memoryLimit": 1024,
+        "memoryReservation": 512,
+        "cpuLimit": 1.5,
+        "cpuReservation": 0.25
+      },
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "mgp_redis_data",
+          "mountPath": "/data"
+        }
+      ],
+      "ports": []
+    },
+    {
+      "name": "mgp-api",
+      "type": "app",
+      "build": {
+        "type": "dockerfile",
+        "dockerfilePath": "infrastructure/docker/Dockerfile.api"
+      },
+      "domains": [
+        {
+          "host": "api.mgp.com.br",
+          "https": true,
+          "port": 3000
+        }
+      ],
+      "resources": {
+        "memoryLimit": 1024,
+        "memoryReservation": 512,
+        "cpuLimit": 1.5,
+        "cpuReservation": 0.5
+      }
+    },
+    {
+      "name": "mgp-adserver",
+      "type": "app",
+      "build": {
+        "type": "dockerfile",
+        "dockerfilePath": "infrastructure/docker/Dockerfile.adserver"
+      },
+      "domains": [
+        {
+          "host": "ads.mgp.com.br",
+          "https": true,
+          "port": 3001
+        }
+      ],
+      "resources": {
+        "memoryLimit": 1536,
+        "memoryReservation": 512,
+        "cpuLimit": 2.0,
+        "cpuReservation": 1.0
+      }
+    },
+    {
+      "name": "mgp-workers",
+      "type": "app",
+      "build": {
+        "type": "dockerfile",
+        "dockerfilePath": "infrastructure/docker/Dockerfile.workers"
+      },
+      "resources": {
+        "memoryLimit": 1024,
+        "memoryReservation": 512,
+        "cpuLimit": 1.0,
+        "cpuReservation": 0.25
+      }
+    },
+    {
+      "name": "mgp-web",
+      "type": "app",
+      "build": {
+        "type": "dockerfile",
+        "dockerfilePath": "infrastructure/docker/Dockerfile.web"
+      },
+      "domains": [
+        {
+          "host": "app.mgp.com.br",
+          "https": true,
+          "port": 3000
+        }
+      ],
+      "resources": {
+        "memoryLimit": 1024,
+        "memoryReservation": 512,
+        "cpuLimit": 1.0,
+        "cpuReservation": 0.25
+      }
+    },
+    {
+      "name": "mgp-admin",
+      "type": "app",
+      "build": {
+        "type": "dockerfile",
+        "dockerfilePath": "infrastructure/docker/Dockerfile.admin"
+      },
+      "domains": [
+        {
+          "host": "admin.mgp.com.br",
+          "https": true,
+          "port": 3000
+        }
+      ],
+      "resources": {
+        "memoryLimit": 512,
+        "memoryReservation": 256,
+        "cpuLimit": 1.0,
+        "cpuReservation": 0.25
+      }
+    }
+  ]
+}
