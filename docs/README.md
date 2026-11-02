@@ -41,22 +41,36 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **03. Estrutura de Diretórios** | [`apps/`](../apps/), [`packages/`](../packages/), [`sdk/`](../sdk/) | Apps (`api`, `ad-server`, `workers`, `web`, `admin`) e packages compartilhados. |
 | **04. Configuração TypeScript Base** | [`tsconfig.base.json`](../tsconfig.base.json) | Tipagem estrita ponta a ponta com target ES2022. |
 | **05. Gerenciamento de Pacotes Raiz** | [`package.json`](../package.json) / [`pnpm-lock.yaml`](../pnpm-lock.yaml) | Scripts de orquestração de compilação, testes, lint e formato. |
-| **06. ESLint & Prettier** | [`.eslintrc.json`](../.eslintrc.json) / [`.prettierrc`](../.prettierrc) | Padronização estrita de código e formatação automatizada. |
+| **06. ESLint & Prettier** | [`.eslintrc.json`](../.eslintrc.json) / [`.prettierrc`](../.prettierrc) | Padronização estática de código e formatação automatizada. |
 | **07. Convenção de Commits** | [`.commitlintrc.json`](../.commitlintrc.json) | Validação automática de Conventional Commits (`feat:`, `fix:`, etc.). |
 | **08. Branches Estruturadas** | Git branches: `main`, `staging`, `develop` | Estratégia de fluxo contínuo de homologação e produção. |
 | **09. GitHub Actions Workflows** | [`.github/workflows/`](../.github/workflows/) | CI completo (`ci.yml`) e gatilho de deploy em Staging (`deploy-staging.yml`). |
 | **10. Documentação Inicial do Monorepo** | [`README.md`](../README.md) | Guia do desenvolvedor com instruções de inicialização e comandos. |
 
+### 1.4. Fase 04 — Backend Central NestJS
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Bootstrap da Aplicação** | [`apps/api/src/main.ts`](../apps/api/src/main.ts) | Inicialização com CORS, prefixo global `/api/v1` e shutdown hooks. |
+| **02. Configuração de Ambiente** | [`apps/api/src/config/`](../apps/api/src/config/) | Serviço `AppConfigService` com validação de runtime via Zod. |
+| **03. Filtro Global de Exceções** | [`apps/api/src/common/filters/`](../apps/api/src/common/filters/) | `AllExceptionsFilter` padronizando respostas de erro com envelope normativo. |
+| **04. Interceptores de Resposta e Logs** | [`apps/api/src/common/interceptors/`](../apps/api/src/common/interceptors/) | `TransformResponseInterceptor` (`success: true`) e logs estruturados em JSON via `LoggingInterceptor`. |
+| **05. Probes de Saúde (HealthModule)** | [`apps/api/src/modules/health/`](../apps/api/src/modules/health/) | Endpoints `/health/liveness` e `/health/readiness` (checando PostgreSQL e Redis). |
+| **06. Documentação Swagger/OpenAPI** | Rota `/api/docs` | Swagger 3.0 interativo documentando todas as rotas com autenticação JWT. |
+| **07. Conexão de Banco de Dados** | [`apps/api/src/database/`](../apps/api/src/database/) | `PrismaService` singleton integrado com ciclo de vida do NestJS. |
+| **08. Esqueletos dos Módulos Centrais**| [`apps/api/src/modules/`](../apps/api/src/modules/) | Módulos `auth`, `users`, `organizations` e `admin` estruturados. |
+| **09. Testes Unitários Automatizados** | [`apps/api/src/modules/health/health.controller.spec.ts`](../apps/api/src/modules/health/health.controller.spec.ts) | Suíte de testes Jest com 100% de sucesso. |
+| **10. Script de Guia do EasyPanel** | Detalhado na resposta técnica | Passo a passo de provisionamento de serviços no EasyPanel. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
 
-Progresso atual: **3/10 fases concluídas (Fase 03 pronta para auditoria)**.
+Progresso atual: **4/10 fases concluídas (Fase 04 pronta para auditoria)**.
 
 - [x] **Fase 01 — Planejamento técnico e especificação** (Concluída e Homologada)
 - [x] **Fase 02 — Configuração do ambiente e infraestrutura** (Concluída e Homologada)
-- [x] **Fase 03 — Monorepo e estrutura do projeto** (Concluída - Pronta para Auditoria)
-- [ ] **Fase 04 — Backend central NestJS** (Bootstrap da API, Health, Swagger, Exception Filters)
+- [x] **Fase 03 — Monorepo e estrutura do projeto** (Concluída e Homologada)
+- [x] **Fase 04 — Backend central NestJS** (Concluída - Pronta para Auditoria)
 - [ ] **Fase 05 — Banco de dados e modelo multi-tenant** (PostgreSQL, Prisma, Migrations e Tenants)
 - [ ] **Fase 06 — Autenticação e segurança** (Cadastro, Login, JWT Access/Refresh tokens com rotação)
 - [ ] **Fase 07 — Organizações, usuários e permissões** (Membros, convites, papéis e RBAC)
