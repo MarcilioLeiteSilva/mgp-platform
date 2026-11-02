@@ -45,3 +45,4 @@ Para garantir que o servidor Hostinger VPS permaneça estável sob picos de trá
 1. **Memória Swap como Buffer de Proteção:** O swap de 4GB ativado na VPS assegura que se um processo atingir um pico temporário, o sistema operacional não mate subitamente o processo do PostgreSQL (`OOM Killer`).
 2. **PostgreSQL Work Mem Control:** O parâmetro `work_mem = 16MB` limita o consumo de RAM por query de ordenação e junção, impedindo que consultas analíticas pesadas no dashboard afetem a capacidade transacional da API.
 3. **Pacing de Cache no Redis:** O Redis opera com teto rígido de 768MB e política de expiração `volatile-lru`, garantindo que chaves de telemetria e cache de campanhas expirem antes de comprometerem a memória do servidor.
+

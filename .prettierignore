@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.next/
+out/
+build/
+coverage/
+.turbo/
+*.gz
+*.pdf
+pnpm-lock.yaml
+

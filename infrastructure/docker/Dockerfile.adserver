@@ -40,3 +40,4 @@ USER adserver
 EXPOSE 3001
 
 CMD ["node", "apps/ad-server/dist/main.js"]
+

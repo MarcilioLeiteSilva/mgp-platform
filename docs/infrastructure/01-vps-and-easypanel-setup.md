@@ -57,3 +57,4 @@ No seu registrador de domínio (ex: Registro.br ou Cloudflare), crie os seguinte
 3. Crie um novo projeto chamado **`MGP-Production`** (ou `MGP-Staging`).
 4. Importe o modelo de serviços usando [`infrastructure/easypanel/easypanel-template.json`](file:///f:/mobile_growth/infrastructure/easypanel/easypanel-template.json).
 5. O EasyPanel utiliza o Traefik internamente: ao atribuir cada domínio ao seu respectivo serviço e ativar o botão **HTTPS / SSL**, os certificados Let's Encrypt são gerados e renovados automaticamente sem intervenção manual.
+

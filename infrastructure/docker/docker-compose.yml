@@ -108,3 +108,4 @@ volumes:
     name: mgp_minio_data
   clickhouse_data:
     name: mgp_clickhouse_data
+

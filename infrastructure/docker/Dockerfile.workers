@@ -40,3 +40,4 @@ COPY --from=builder /app/apps/workers/package.json ./apps/workers/package.json
 USER worker
 
 CMD ["node", "apps/workers/dist/main.js"]
+

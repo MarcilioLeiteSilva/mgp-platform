@@ -66,3 +66,4 @@ flowchart TD
 Todos os Dockerfiles adotam a arquitetura Multi-Stage:
 * **Estágio `builder`:** Executa sobre `node:20-alpine`, instala dependências completas, compila TypeScript, gera cliente Prisma e remove dependências de desenvolvimento (`pnpm prune --prod`).
 * **Estágio `runner`:** Utiliza imagem limpa do Alpine Linux, cria um usuário de sistema sem privilégios administrativos (`nestjs`, `nextjs`, `adserver`), copia apenas o bundle compilado em `dist/` ou `.next/standalone`, resultando em containers leves (< 150MB), rápidos para inicializar e imunes a vulnerabilidades típicas de ferramentas de desenvolvimento.
+

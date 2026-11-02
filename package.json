@@ -1,0 +1,31 @@
+{
+  "name": "mgp-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mobile Growth Platform (MGP) — Plataforma de Inteligência, Aquisição e Monetização Mobile",
+  "author": "Marcilio Leite Silva",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.30.2",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@types/node": "^20.12.12",
+    "@typescript-eslint/eslint-plugin": "^7.10.0",
+    "@typescript-eslint/parser": "^7.10.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "turbo": "^2.0.0",
+    "typescript": "^5.4.5"
+  }
+}
+

@@ -43,3 +43,4 @@ echo "[$(date)] Restauração finalizada com sucesso! Executando verificação d
 docker exec -t "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -c "\dt"
 
 echo "[$(date)] Verificação concluída."
+

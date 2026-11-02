@@ -76,3 +76,4 @@ openssl rand -hex 32
 # Gerar segredo para AD_TOKEN_SIGNING_SECRET
 openssl rand -hex 32
 ```
+

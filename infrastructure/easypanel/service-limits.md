@@ -46,3 +46,4 @@ maxmemory 768mb
 maxmemory-policy volatile-lru
 ```
 * **Comportamento:** Ao atingir 768MB, chaves com tempo de expiração definido (como tokens e cache de campanhas) serão descartadas em modelo LRU (Least Recently Used), preservando as estruturas permanentes de filas BullMQ.
+

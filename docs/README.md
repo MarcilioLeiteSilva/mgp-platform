@@ -33,15 +33,29 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **09. Arquivos de Ambiente (.env.example)** | [`infrastructure/env/`](../infrastructure/env/) | Exemplos completos de `.env` para Desenvolvimento, Staging e Produção. |
 | **10. Política de Backups & Restauração** | [`docs/infrastructure/04-backups-and-resource-limits.md`](./infrastructure/04-backups-and-resource-limits.md) | Scripts de backup e restauração com retenção de 30 dias. |
 
+### 1.3. Fase 03 — Monorepo e Estrutura do Projeto
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Repositório Remoto GitHub** | `https://github.com/MarcilioLeiteSilva/mgp-platform` | Repositório oficial privado criado via GitHub CLI. |
+| **02. Monorepo Turborepo + pnpm** | [`pnpm-workspace.yaml`](../pnpm-workspace.yaml) / [`turbo.json`](../turbo.json) | Pipeline de build paralelo, cache inteligente e gestão de dependências. |
+| **03. Estrutura de Diretórios** | [`apps/`](../apps/), [`packages/`](../packages/), [`sdk/`](../sdk/) | Apps (`api`, `ad-server`, `workers`, `web`, `admin`) e packages compartilhados. |
+| **04. Configuração TypeScript Base** | [`tsconfig.base.json`](../tsconfig.base.json) | Tipagem estrita ponta a ponta com target ES2022. |
+| **05. Gerenciamento de Pacotes Raiz** | [`package.json`](../package.json) / [`pnpm-lock.yaml`](../pnpm-lock.yaml) | Scripts de orquestração de compilação, testes, lint e formato. |
+| **06. ESLint & Prettier** | [`.eslintrc.json`](../.eslintrc.json) / [`.prettierrc`](../.prettierrc) | Padronização estrita de código e formatação automatizada. |
+| **07. Convenção de Commits** | [`.commitlintrc.json`](../.commitlintrc.json) | Validação automática de Conventional Commits (`feat:`, `fix:`, etc.). |
+| **08. Branches Estruturadas** | Git branches: `main`, `staging`, `develop` | Estratégia de fluxo contínuo de homologação e produção. |
+| **09. GitHub Actions Workflows** | [`.github/workflows/`](../.github/workflows/) | CI completo (`ci.yml`) e gatilho de deploy em Staging (`deploy-staging.yml`). |
+| **10. Documentação Inicial do Monorepo** | [`README.md`](../README.md) | Guia do desenvolvedor com instruções de inicialização e comandos. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
 
-Progresso atual: **2/10 fases concluídas (Fase 02 pronta para auditoria)**.
+Progresso atual: **3/10 fases concluídas (Fase 03 pronta para auditoria)**.
 
 - [x] **Fase 01 — Planejamento técnico e especificação** (Concluída e Homologada)
-- [x] **Fase 02 — Configuração do ambiente e infraestrutura** (Concluída - Pronta para Auditoria)
-- [ ] **Fase 03 — Monorepo e estrutura do projeto** (GitHub, pnpm workspaces, TypeScript, ESLint, Prettier)
+- [x] **Fase 02 — Configuração do ambiente e infraestrutura** (Concluída e Homologada)
+- [x] **Fase 03 — Monorepo e estrutura do projeto** (Concluída - Pronta para Auditoria)
 - [ ] **Fase 04 — Backend central NestJS** (Bootstrap da API, Health, Swagger, Exception Filters)
 - [ ] **Fase 05 — Banco de dados e modelo multi-tenant** (PostgreSQL, Prisma, Migrations e Tenants)
 - [ ] **Fase 06 — Autenticação e segurança** (Cadastro, Login, JWT Access/Refresh tokens com rotação)

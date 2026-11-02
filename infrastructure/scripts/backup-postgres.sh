@@ -36,3 +36,4 @@ echo "[$(date)] Executando política de rotação: expurgando backups com mais d
 find "$BACKUP_DIR" -type f -name "mgp_db_backup_*.sql.gz" -mtime +"$RETENTION_DAYS" -exec rm -f {} \;
 
 echo "[$(date)] Processo de backup finalizado com êxito."
+

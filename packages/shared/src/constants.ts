@@ -1,0 +1,10 @@
+export const MGP_CONSTANTS = {
+  IMPRESSION_TOKEN_TTL_SECONDS: 300, // 5 minutos
+  CLICK_TOKEN_TTL_SECONDS: 600, // 10 minutos
+  VIEWABILITY_MIN_PERCENTAGE: 50, // 50% da área do banner visível
+  VIEWABILITY_MIN_DURATION_MS: 1000, // 1 segundo contínuo na tela
+  DEFAULT_PAGE_SIZE: 20,
+  MAX_PAGE_SIZE: 100,
+  MAX_ACTIVE_ORGANIZATIONS_PER_USER: 25,
+} as const;
+

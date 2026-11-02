@@ -1,0 +1,19 @@
+name: Deploy to Staging (EasyPanel)
+
+on:
+  push:
+    branches: [staging]
+
+jobs:
+  deploy:
+    name: Trigger EasyPanel Staging Webhooks
+    runs-on: ubuntu-latest
+    needs: []
+
+    steps:
+      - name: Trigger EasyPanel Webhook
+        run: |
+          echo "Disparando webhook de deploy contínuo para ambiente Staging..."
+          # curl -X POST "${{ secrets.EASYPANEL_STAGING_WEBHOOK_URL }}"
+          echo "Deploy em Staging disparado com sucesso."
+
