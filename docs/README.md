@@ -103,11 +103,25 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **09. Perfil de Usuário e Alteração de Senha** | [`apps/api/src/modules/users/`](../apps/api/src/modules/users/) | Consulta de perfil com contagem de sessões ativas, atualização cadastral e troca segura de senha com revogação em cadeia. |
 | **10. Suíte de Testes Automatizados (72 Testes)** | [`apps/api/src/**/*.spec.ts`](../apps/api/src/) | 10 suítes de testes unitários Jest aprovadas com 100% de sucesso (72 testes passing). |
 
+### 1.8. Fase 08 — Frontend e Dashboard Principal (Next.js, Tailwind, Navegação e Layouts)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Design System e Tailwind CSS** | [`apps/web/tailwind.config.js`](../apps/web/tailwind.config.js) / [`apps/web/src/app/globals.css`](../apps/web/src/app/globals.css) | Configuração de Tailwind CSS com paleta corporativa MGP (slate profundo, índigo, esmeralda e âmbar). |
+| **02. Cliente de API com Auto-Refresh** | [`apps/web/src/lib/api.ts`](../apps/web/src/lib/api.ts) | Cliente HTTP tipado com injeção automática de `Bearer <token>`, `X-Organization-Id` e renovação via `/auth/refresh`. |
+| **03. Contexto de Autenticação (`AuthProvider`)** | [`apps/web/src/lib/auth-context.tsx`](../apps/web/src/lib/auth-context.tsx) | Gerenciamento de sessão, perfil, organizações vinculadas, seleção de tenant ativo e métodos de autenticação. |
+| **04. Layout Shell Protetor** | [`apps/web/src/components/layout/dashboard-layout.tsx`](../apps/web/src/components/layout/dashboard-layout.tsx) | Shell com verificação de login, skeletons de carregamento e redirecionamento de usuários desautenticados. |
+| **05. Barra Lateral Responsiva (`Sidebar`)** | [`apps/web/src/components/layout/sidebar.tsx`](../apps/web/src/components/layout/sidebar.tsx) | Navegação lateral por rotas (`/dashboard`, `/apps`, `/wallet`, `/organization`, `/settings`), tenant ativo e status da rede. |
+| **06. Cabeçalho Executivo (`Header`)** | [`apps/web/src/components/layout/header.tsx`](../apps/web/src/components/layout/header.tsx) | Seletor de Tenant dinâmico (troca instantânea de organização), resumo financeiro da Carteira e menu do usuário. |
+| **07. Telas de Login e Cadastro Corporativo** | [`apps/web/src/app/(auth)/`](../apps/web/src/app/(auth)/) | Formulários reais conectados a `POST /auth/login` e `POST /auth/register` com validação e feedback visual. |
+| **08. Dashboard Executivo Multicontas** | [`apps/web/src/app/(dashboard)/dashboard/page.tsx`](../apps/web/src/app/(dashboard)/dashboard/page.tsx) | Visão geral conectada aos endpoints reais com os 3 cards do Ledger contábil (Advertiser, Exchange, Publisher). |
+| **09. Gestão de Aplicativos Android** | [`apps/web/src/app/(dashboard)/apps/page.tsx`](../apps/web/src/app/(dashboard)/apps/page.tsx) | Listagem real de apps via `GET /apps`, criação via `POST /apps` e cópia segura de chaves SDK. |
+| **10. Carteira, Equipe, Perfil e Convites Públicos** | [`apps/web/src/app/(dashboard)/`](../apps/web/src/app/(dashboard)/) / [`apps/web/src/app/invitations/`](../apps/web/src/app/invitations/) | Extrato de livro-razão (`/wallet`), gestão de membros e convites (`/organization`), perfil e senha (`/settings`), e aceite público (`/invitations/[token]`). |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
 
-Progresso atual: **7/10 fases concluídas (Fase 07 pronta para auditoria)**.
+Progresso atual: **8/10 fases concluídas (Fase 08 pronta para auditoria)**.
 
 - [x] **Fase 01 — Planejamento técnico e especificação** (Concluída e Homologada)
 - [x] **Fase 02 — Configuração do ambiente e infraestrutura** (Concluída e Homologada)
@@ -115,8 +129,8 @@ Progresso atual: **7/10 fases concluídas (Fase 07 pronta para auditoria)**.
 - [x] **Fase 04 — Backend central NestJS** (Concluída e Homologada)
 - [x] **Fase 05 — Banco de dados e modelo multi-tenant** (Concluída e Homologada)
 - [x] **Fase 06 — Autenticação e segurança** (Concluída e Homologada)
-- [x] **Fase 07 — Organizações, usuários e permissões** (Concluída - Pronta para Auditoria)
-- [ ] **Fase 08 — Frontend e dashboard principal** (Next.js, Tailwind, navegação e layouts)
+- [x] **Fase 07 — Organizações, usuários e permissões** (Concluída e Homologada)
+- [x] **Fase 08 — Frontend e dashboard principal** (Concluída - Pronta para Auditoria)
 - [ ] **Fase 09 — Administração e monitoramento** (Painel de superadmin e NOC operacional)
 - [ ] **Fase 10 — Integração, testes e auditoria final** (Testes ponta a ponta, homologação e aceite da Etapa 1)
 

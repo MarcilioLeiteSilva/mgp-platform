@@ -14,3 +14,4 @@ export class UpdateMemberRoleDto {
   @IsNotEmpty({ message: 'O novo papel é obrigatório.' })
   role!: UserRole;
 }
+

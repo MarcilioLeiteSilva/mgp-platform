@@ -10,3 +10,4 @@ export class TransferOwnershipDto {
   @IsNotEmpty({ message: 'O ID do novo proprietário é obrigatório.' })
   newOwnerUserId!: string;
 }
+

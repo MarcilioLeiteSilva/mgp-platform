@@ -19,3 +19,4 @@ export class ChangePasswordDto {
   @MinLength(8, { message: 'A nova senha deve ter no mínimo 8 caracteres.' })
   newPassword!: string;
 }
+

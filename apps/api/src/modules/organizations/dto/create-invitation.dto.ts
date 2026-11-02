@@ -22,3 +22,4 @@ export class CreateInvitationDto {
   @IsNotEmpty({ message: 'O papel do convite é obrigatório.' })
   role!: UserRole;
 }
+

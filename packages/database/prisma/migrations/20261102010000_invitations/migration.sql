@@ -31,3 +31,4 @@ ALTER TABLE "organization_invitations" ADD CONSTRAINT "organization_invitations_
 
 -- AddForeignKey
 ALTER TABLE "organization_invitations" ADD CONSTRAINT "organization_invitations_invited_by_id_fkey" FOREIGN KEY ("invited_by_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+

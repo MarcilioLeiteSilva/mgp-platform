@@ -12,3 +12,4 @@ export class UpdateProfileDto {
   @MaxLength(100, { message: 'O nome não pode exceder 100 caracteres.' })
   fullName?: string;
 }
+

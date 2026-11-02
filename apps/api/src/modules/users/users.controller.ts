@@ -24,7 +24,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 @ApiBearerAuth('JWT-auth')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Get('me')
   @ApiOperation({

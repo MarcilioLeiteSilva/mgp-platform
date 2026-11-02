@@ -57,3 +57,4 @@ export class InvitationsController {
     return this.orgService.acceptInvitation(token, userId);
   }
 }
+
