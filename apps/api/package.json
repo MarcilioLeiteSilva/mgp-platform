@@ -21,6 +21,8 @@
     "@nestjs/platform-express": "^10.3.8",
     "@nestjs/swagger": "^7.3.1",
     "@nestjs/terminus": "^10.2.3",
+    "class-transformer": "0.5.1",
+    "class-validator": "^0.14.1",
     "ioredis": "^5.11.1",
     "pino": "^10.4.0",
     "pino-pretty": "^13.2.0",
