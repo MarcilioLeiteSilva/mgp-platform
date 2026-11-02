@@ -15,7 +15,7 @@ async function bootstrap() {
 
   // 1. Prefixo Global da API REST (/api/v1)
   app.setGlobalPrefix('api/v1', {
-    exclude: ['health/liveness', 'health/readiness'],
+    exclude: ['', '/', 'health/liveness', 'health/readiness'],
   });
 
   // 2. CORS (Habilitado para domínios da plataforma)
@@ -56,6 +56,7 @@ async function bootstrap() {
       },
       'JWT-auth',
     )
+    .addTag('Plataforma', 'Status e metadados gerais da API')
     .addTag('Saúde e Observabilidade', 'Probes de liveness e readiness')
     .addTag('Autenticação e Identidade', 'Cadastro, login, refresh tokens e sessões')
     .addTag('Organizações e Multi-Tenancy', 'Isolamento de tenants e gestão de membros')
