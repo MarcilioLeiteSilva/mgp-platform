@@ -7,26 +7,27 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Instalação do pnpm e utilitários
-RUN corepack enable && corepack prepare pnpm@9.1.0 --activate
+# Ativa corepack com a versão exata do pnpm do monorepo
+RUN corepack enable && corepack prepare pnpm@10.30.2 --activate
 RUN apk add --no-cache libc6-compat
 
-# Copia arquivos de manifesto do Monorepo
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+# Copia arquivos de configuração do monorepo e packages
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json .npmrc* ./
 COPY packages/ ./packages/
 COPY apps/api/ ./apps/api/
 
-# Instalação de dependências do monorepo com cache pnpm
+# Instalação com congelamento de lockfile
 RUN pnpm install --frozen-lockfile
 
 # Geração dos artefatos Prisma
-RUN pnpm --filter @mgp/database prisma generate
+RUN pnpm --filter @mgp/database run prisma:generate
 
-# Compilação da aplicação
+# Compilação dos pacotes compartilhados e da aplicação
+RUN pnpm --filter @mgp/shared build
+RUN pnpm --filter @mgp/config build
+RUN pnpm --filter @mgp/contracts build
+RUN pnpm --filter @mgp/database build
 RUN pnpm --filter @mgp/api build
-
-# Remove dependências de desenvolvimento para otimizar runtime
-RUN pnpm prune --prod
 
 # ------------------------------------------
 # Estágio 2: Runner de Produção (Imagem Mínima)
@@ -38,14 +39,13 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Usuário sem privilégios de root para segurança
+# Usuário de sistema sem privilégios de root para segurança
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
 
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages/database/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/packages/database/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 
@@ -54,4 +54,3 @@ USER nestjs
 EXPOSE 3000
 
 CMD ["node", "apps/api/dist/main.js"]
-

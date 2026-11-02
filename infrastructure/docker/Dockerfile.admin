@@ -6,10 +6,10 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@9.1.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.30.2 --activate
 RUN apk add --no-cache libc6-compat
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json .npmrc* ./
 COPY packages/ ./packages/
 COPY apps/admin/ ./apps/admin/
 
@@ -18,6 +18,9 @@ RUN pnpm install --frozen-lockfile
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+RUN pnpm --filter @mgp/shared build
+RUN pnpm --filter @mgp/config build
+RUN pnpm --filter @mgp/contracts build
 RUN pnpm --filter @mgp/admin build
 
 # ------------------------------------------
@@ -43,4 +46,3 @@ USER adminjs
 EXPOSE 3000
 
 CMD ["node", "server.js"]
-

@@ -6,16 +6,19 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@9.1.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.30.2 --activate
 RUN apk add --no-cache libc6-compat
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json .npmrc* ./
 COPY packages/ ./packages/
 COPY apps/ad-server/ ./apps/ad-server/
 
 RUN pnpm install --frozen-lockfile
+
+RUN pnpm --filter @mgp/shared build
+RUN pnpm --filter @mgp/config build
+RUN pnpm --filter @mgp/contracts build
 RUN pnpm --filter @mgp/ad-server build
-RUN pnpm prune --prod
 
 # ------------------------------------------
 # Runner de Produção
@@ -32,6 +35,7 @@ RUN adduser --system --uid 1001 adserver
 
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/ad-server/dist ./apps/ad-server/dist
 COPY --from=builder /app/apps/ad-server/package.json ./apps/ad-server/package.json
 
@@ -40,4 +44,3 @@ USER adserver
 EXPOSE 3001
 
 CMD ["node", "apps/ad-server/dist/main.js"]
-
