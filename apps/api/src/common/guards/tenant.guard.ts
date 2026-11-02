@@ -23,9 +23,10 @@ export class TenantGuard implements CanActivate {
 
     let organizationId =
       (request.headers['x-organization-id'] as string) ||
-      (request.query?.organizationId as string);
+      (request.query?.organizationId as string) ||
+      user.activeOrgId;
 
-    // Se não informou organização no header, buscar a organização padrão do usuário
+    // Se não informou organização no header ou token, buscar a organização padrão do usuário
     if (!organizationId) {
       const defaultMembership = await this.prisma.membership.findFirst({
         where: {
@@ -37,7 +38,6 @@ export class TenantGuard implements CanActivate {
       if (defaultMembership) {
         organizationId = defaultMembership.organizationId;
       } else {
-        // Fallback para a primeira organização do usuário
         const anyMembership = await this.prisma.membership.findFirst({
           where: { userId: user.id },
         });
@@ -89,4 +89,3 @@ export class TenantGuard implements CanActivate {
     return true;
   }
 }
-

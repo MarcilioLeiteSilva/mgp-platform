@@ -75,18 +75,32 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **09. Suíte de Testes de Isolamento Multi-Tenant** | [`apps/api/src/**/*.spec.ts`](../apps/api/src/) | 31 testes unitários e de isolamento automatizados aprovados (6 suítes). |
 | **10. Auditoria e Rastreabilidade** | [`apps/api/src/modules/organizations/organizations.service.ts`](../apps/api/src/modules/organizations/organizations.service.ts) | Registro de mutações críticas na tabela `audit_logs`. |
 
+### 1.6. Fase 06 — Autenticação e Segurança
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Criptografia Segura com Bcrypt** | [`apps/api/src/modules/auth/password.service.ts`](../apps/api/src/modules/auth/password.service.ts) | Hash Bcrypt com custo 12 e compatibilidade estrita com credenciais seeded. |
+| **02. Guardião Global JWT com Bypass @Public** | [`apps/api/src/common/guards/jwt-auth.guard.ts`](../apps/api/src/common/guards/jwt-auth.guard.ts) | `JwtAuthGuard` global com suporte ao decorator `@Public()`, checagem de usuário e injeção de payload. |
+| **03. DTOs Tipados e Validados com OpenAPI** | [`apps/api/src/modules/auth/dto/`](../apps/api/src/modules/auth/dto/) | `RegisterDto`, `LoginDto`, `RefreshTokenDto` e `AuthResponseDto` com validação de formato e anotações Swagger. |
+| **04. Cadastro Transacional Atômico** | [`apps/api/src/modules/auth/auth.service.ts`](../apps/api/src/modules/auth/auth.service.ts) | Transação ACID criando User + Org + Membresia OWNER + Carteira com 3 contas contábeis + Sessão inicial. |
+| **05. Login e Emissão de Tokens com Sessões** | [`apps/api/src/modules/auth/auth.service.ts`](../apps/api/src/modules/auth/auth.service.ts) | Autenticação de credenciais, validação de usuário ativo, geração de JWT Access Token (15m) e Refresh Token (7d). |
+| **06. Rotação de Refresh Token com Detecção de Roubo** | [`apps/api/src/modules/auth/auth.service.ts`](../apps/api/src/modules/auth/auth.service.ts) | Hash criptográfico SHA-256 do token na tabela `sessions`; invalidação em cadeia de todas as sessões se um token revogado for reutilizado (Theft Detection). |
+| **07. Revogação de Sessão (Logout)** | [`apps/api/src/modules/auth/auth.service.ts`](../apps/api/src/modules/auth/auth.service.ts) | Invalidação atômica e irrevogável da sessão ativa. |
+| **08. Endpoint /auth/me com Organizações Vinculadas** | [`apps/api/src/modules/auth/auth.controller.ts`](../apps/api/src/modules/auth/auth.controller.ts) | Perfil completo do usuário autenticado e listagem das organizações nas quais possui membresia. |
+| **09. Integração com TenantGuard** | [`apps/api/src/common/guards/tenant.guard.ts`](../apps/api/src/common/guards/tenant.guard.ts) | `activeOrgId` propagado do JWT payload com fallback flexível para header `x-organization-id`. |
+| **10. Suíte de Testes Unitários de Autenticação** | [`apps/api/src/modules/auth/`](../apps/api/src/modules/auth/) | 51 testes unitários aprovados em 9 suítes completas com 100% de sucesso. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
 
-Progresso atual: **5/10 fases concluídas (Fase 05 pronta para auditoria)**.
+Progresso atual: **6/10 fases concluídas (Fase 06 pronta para auditoria)**.
 
 - [x] **Fase 01 — Planejamento técnico e especificação** (Concluída e Homologada)
 - [x] **Fase 02 — Configuração do ambiente e infraestrutura** (Concluída e Homologada)
 - [x] **Fase 03 — Monorepo e estrutura do projeto** (Concluída e Homologada)
 - [x] **Fase 04 — Backend central NestJS** (Concluída e Homologada)
-- [x] **Fase 05 — Banco de dados e modelo multi-tenant** (Concluída - Pronta para Auditoria)
-- [ ] **Fase 06 — Autenticação e segurança** (Cadastro, Login, JWT Access/Refresh tokens com rotação)
+- [x] **Fase 05 — Banco de dados e modelo multi-tenant** (Concluída e Homologada)
+- [x] **Fase 06 — Autenticação e segurança** (Concluída - Pronta para Auditoria)
 - [ ] **Fase 07 — Organizações, usuários e permissões** (Membros, convites, papéis e RBAC)
 - [ ] **Fase 08 — Frontend e dashboard principal** (Next.js, Tailwind, navegação e layouts)
 - [ ] **Fase 09 — Administração e monitoramento** (Painel de superadmin e NOC operacional)
