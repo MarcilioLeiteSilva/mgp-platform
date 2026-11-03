@@ -11,6 +11,7 @@ import { AppConfigService } from '../../config/app-config.service';
   imports: [
     AppConfigModule,
     JwtModule.registerAsync({
+      global: true,
       imports: [AppConfigModule],
       inject: [AppConfigService],
       useFactory: (config: AppConfigService) => ({
