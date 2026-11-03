@@ -149,7 +149,7 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
 
-Progresso atual: **10/10 fases concluídas (Etapa 1 — 100% Concluída e Aprovada)**.
+Progresso atual: **10/10 fases concluídas (Etapa 1 — 100% Concluída e Homologada)**.
 
 - [x] **Fase 01 — Planejamento técnico e especificação** (Concluída e Homologada)
 - [x] **Fase 02 — Configuração do ambiente e infraestrutura** (Concluída e Homologada)
@@ -164,7 +164,33 @@ Progresso atual: **10/10 fases concluídas (Etapa 1 — 100% Concluída e Aprova
 
 ---
 
-## 3. Regras de Execução e Governança
+## 3. Planejamento — ETAPA 2 (Motor de Inteligência & ASO)
+
+Progresso da Etapa 2: **Pronta para início na Fase 11**.
+
+- [ ] **Fase 11 — Motor de Coleta e Scraping da Google Play (Play Scraper Engine, Cache Redis e Rate Limiter)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
+- [ ] **Fase 12 — Modelagem de Dados ASO no Prisma (Catálogo, Palavras-chave e Histórico)**
+- [ ] **Fase 13 — Backend Central ASO (`AsoModule` no NestJS)**
+- [ ] **Fase 14 — Workers de Coleta e Sincronização Assíncrona (`apps/workers` - `queue-aso-sync`)**
+- [ ] **Fase 15 — Interface Visual do ASO Studio (`apps/web`)**
+- [ ] **Fase 16 — Integração, Testes e Homologação da Etapa 2**
+
+---
+
+## 4. Ponto de Retomada dos Trabalhos (Checklist para o Próximo Turno)
+
+1. **Estado do Repositório:**
+   * Branch `main` e `develop` sincronizadas com `origin` no commit `25fbfdc` (e commit subsequente de documentação).
+   * Working tree 100% limpa, sem pendências ou arquivos órfãos.
+2. **Saúde da Plataforma:**
+   * Auditoria geral executável a qualquer momento com: `pnpm audit:etapa1` (Score: 100%).
+   * Suíte completa de testes Jest executável com: `pnpm --filter @mgp/api test` (106 testes passing).
+3. **Ponto de Partida Imediato:**
+   * Retomar iniciando diretamente a **FASE 11 (Motor de Coleta e Scraping da Google Play)**, configurando o serviço de busca na Google Play Brasil, normalização de metadados de aplicativos e cache com TTL no Redis.
+
+---
+
+## 5. Regras de Execução e Governança
 
 1. **Uma fase por vez**: Nenhuma linha de código de fases subsequentes pode ser escrita sem aprovação formal da anterior.
 2. **Sem dados ou botões fictícios**: Todo componente ou tela entregue deve estar conectado a fluxos e endpoints reais.
