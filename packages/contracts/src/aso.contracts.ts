@@ -88,3 +88,62 @@ export interface TrackAppKeywordInput {
   lang?: string;
 }
 
+
+export const ASO_QUEUES = {
+  SYNC: 'queue-aso-sync',
+} as const;
+
+export enum AsoJobType {
+  SYNC_APP_METADATA = 'SYNC_APP_METADATA',
+  CHECK_KEYWORD_RANK = 'CHECK_KEYWORD_RANK',
+  DISPATCH_DAILY_RANKINGS = 'DISPATCH_DAILY_RANKINGS',
+  DISPATCH_METADATA_SYNC = 'DISPATCH_METADATA_SYNC',
+  AUDIT_APP = 'AUDIT_APP',
+}
+
+export interface SyncAppMetadataJobPayload {
+  asoAppId: string;
+  organizationId: string;
+  forceAudit?: boolean;
+}
+
+export interface CheckKeywordRankJobPayload {
+  asoAppId: string;
+  appKeywordId: string;
+  keyword: string;
+  appId: string; // package name (ex: com.nu.production)
+  country: string;
+  lang: string;
+  organizationId: string;
+}
+
+export interface DispatchDailyRankingsJobPayload {
+  organizationId?: string;
+}
+
+export interface DispatchMetadataSyncJobPayload {
+  organizationId?: string;
+}
+
+export interface AuditAppJobPayload {
+  asoAppId: string;
+  organizationId: string;
+}
+
+export type AsoJobPayloadMap = {
+  [AsoJobType.SYNC_APP_METADATA]: SyncAppMetadataJobPayload;
+  [AsoJobType.CHECK_KEYWORD_RANK]: CheckKeywordRankJobPayload;
+  [AsoJobType.DISPATCH_DAILY_RANKINGS]: DispatchDailyRankingsJobPayload;
+  [AsoJobType.DISPATCH_METADATA_SYNC]: DispatchMetadataSyncJobPayload;
+  [AsoJobType.AUDIT_APP]: AuditAppJobPayload;
+};
+
+export interface AsoJobResult {
+  success: boolean;
+  jobType: AsoJobType;
+  entityId?: string;
+  message?: string;
+  data?: Record<string, any>;
+  processedAt: string;
+  durationMs: number;
+}

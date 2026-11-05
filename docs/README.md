@@ -200,13 +200,13 @@ Progresso atual: **10/10 fases concluídas (Etapa 1 — 100% Concluída e Homolo
 
 ## 3. Planejamento — ETAPA 2 (Motor de Inteligência & ASO)
 
-Progresso da Etapa 2: **Fases 11, 12 e 13 Concluídas e Homologadas (3/6 fases concluídas — 50%)**.
+Progresso da Etapa 2: **Fases 11, 12, 13 e 14 Concluídas e Homologadas (4/6 fases concluídas — 66%)**.
 
 - [x] **Fase 11 — Motor de Coleta e Scraping da Google Play (Play Scraper Engine, Cache Redis e Rate Limiter)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 12 — Modelagem de Dados ASO no Prisma (Catálogo, Palavras-chave e Histórico)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 13 — Backend Central ASO (AsoModule no NestJS)** ✅ [CONCLUÍDA E HOMOLOGADA]
-- [ ] **Fase 14 — Workers de Coleta e Sincronização Assíncrona (`apps/workers` - `queue-aso-sync`)** ◀ **[PRÓXIMA FASE A EXECUTAR AMANHÃ]**
-- [ ] **Fase 15 — Interface Visual do ASO Studio (`apps/web`)**
+- [x] **Fase 14 — Workers de Coleta e Sincronização Assíncrona (`apps/workers` - `queue-aso-sync`)** ✅ [CONCLUÍDA E HOMOLOGADA]
+- [ ] **Fase 15 — Interface Visual do ASO Studio (`apps/web`)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 - [ ] **Fase 16 — Integração, Testes e Homologação da Etapa 2**
 
 ---
@@ -215,19 +215,20 @@ Progresso da Etapa 2: **Fases 11, 12 e 13 Concluídas e Homologadas (3/6 fases c
 
 1. **Estado do Repositório:**
    * Branches `main` e `develop` sincronizadas com `origin` (https://github.com/MarcilioLeiteSilva/mgp-platform).
-   * Commit mais recente da Fase 13: `570016f` (`feat(fase-13): backend central aso apps keywords auditoria e controller rest`).
    * Working tree 100% limpa, sem pendências ou arquivos órfãos.
 2. **Saúde da Plataforma:**
    * Auditoria geral Etapa 1: `pnpm audit:etapa1` (**Score: 100% — 93/93 checks**).
-   * Suíte completa de testes Jest da API: `pnpm --filter @mgp/api test` (**186 testes passing em 22 suítes, 0 falhas**).
-   * Compilação NestJS: `pnpm --filter @mgp/api build` (**100% verde**).
-3. **Ponto de Partida Imediato (Amanhã):**
-   * Retomar iniciando diretamente a **FASE 14 — Workers de Coleta e Sincronização Assíncrona (`apps/workers` - `queue-aso-sync`)**:
-     * Implementar o processador de fila BullMQ (`queue-aso-sync`) no worker independente (`apps/workers`).
-     * Criar jobs de agendamento (cron) para re-checagem diária de posições de palavras-chave ativas.
-     * Criar jobs de background para re-sincronização periódica de metadados e recálculo de auditoria ASO.
-     * Configurar políticas de retry com backoff exponencial/jitter, dead-letter queue (DLQ) e telemetria operacional.
-     * Adicionar testes unitários dos processadores e compilação do pacote `@mgp/workers`.
+   * Suíte completa de testes Jest da API: `pnpm --filter @mgp/api test` (**197 testes passing em 23 suítes, 0 falhas**).
+   * Suíte completa de testes Jest dos Workers: `pnpm --filter @mgp/workers test` (**15 testes passing em 4 suítes, 0 falhas**).
+   * Total de testes automatizados da plataforma: **212 testes aprovados (100% green)**.
+   * Compilação NestJS e Workers: `pnpm build` (**100% verde**).
+3. **Ponto de Partida Imediato:**
+   * Retomar iniciando diretamente a **FASE 15 — Interface Visual do ASO Studio (`apps/web`)**:
+     * Criar as telas do módulo ASO Studio no dashboard do usuário (`/aso`).
+     * Tela de Catálogo de Apps Monitorados e Concorrentes com métricas chave.
+     * Tela de Rastreamento de Palavras-Chave e Gráficos de Evolução de Ranking.
+     * Tela de Auditoria ASO com score visual, checklist por categoria e recomendações de melhoria.
+     * Conexão dos componentes aos endpoints reais da API e acionamento de sync assíncrono.
 
 ---
 

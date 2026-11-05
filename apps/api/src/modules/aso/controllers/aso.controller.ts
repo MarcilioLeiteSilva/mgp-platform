@@ -24,6 +24,7 @@ import { TenantId } from '../../../common/decorators/tenant.decorator';
 import { AsoAppsService } from '../services/aso-apps.service';
 import { AsoKeywordsService } from '../services/aso-keywords.service';
 import { AsoAuditService } from '../services/aso-audit.service';
+import { AsoQueueService } from '../services/aso-queue.service';
 import {
   KeywordRankingHistoryQueryDto,
   ListAsoAppsQueryDto,
@@ -45,6 +46,7 @@ export class AsoController {
     private readonly appsService: AsoAppsService,
     private readonly keywordsService: AsoKeywordsService,
     private readonly auditService: AsoAuditService,
+    private readonly queueService: AsoQueueService,
   ) {}
 
   private resolveOrgId(tenantId?: string, headerOrgId?: string, req?: any): string {
@@ -305,6 +307,61 @@ export class AsoController {
   ) {
     const orgId = this.resolveOrgId(tenantId, orgIdHeader, req);
     return this.auditService.getAuditHistory(orgId, asoAppId);
+  }
+
+  @Post('apps/:id/sync-async')
+  @ApiOperation({
+    summary: 'Enfileira sincronização de metadados em segundo plano via worker',
+    description: 'Adiciona tarefa assíncrona na fila queue-aso-sync com retries automáticos.',
+  })
+  @ApiParam({ name: 'id', description: 'UUID do aplicativo monitorado' })
+  @ApiResponse({ status: 202, description: 'Job enfileirado com sucesso.' })
+  async syncAppAsync(
+    @Param('id') asoAppId: string,
+    @TenantId() tenantId?: string,
+    @Headers('x-organization-id') orgIdHeader?: string,
+    @Req() req?: any,
+  ) {
+    const orgId = this.resolveOrgId(tenantId, orgIdHeader, req);
+    return this.queueService.enqueueSyncAppMetadata(asoAppId, orgId, true);
+  }
+
+  @Post('sync/dispatch-rankings')
+  @ApiOperation({
+    summary: 'Dispara checagem em lote de rankings para palavras-chave da organização',
+    description: 'Enfileira verificação com pacing escalonado para evitar rate limit na loja.',
+  })
+  @ApiResponse({ status: 202, description: 'Lote de verificação de rankings enfileirado.' })
+  async dispatchRankings(
+    @TenantId() tenantId?: string,
+    @Headers('x-organization-id') orgIdHeader?: string,
+    @Req() req?: any,
+  ) {
+    const orgId = this.resolveOrgId(tenantId, orgIdHeader, req);
+    return this.queueService.enqueueDailyRankingsDispatch(orgId);
+  }
+
+  @Post('sync/dispatch-metadata')
+  @ApiOperation({
+    summary: 'Dispara sincronização em lote de metadados dos aplicativos monitorados',
+  })
+  @ApiResponse({ status: 202, description: 'Lote de sincronização de metadados enfileirado.' })
+  async dispatchMetadata(
+    @TenantId() tenantId?: string,
+    @Headers('x-organization-id') orgIdHeader?: string,
+    @Req() req?: any,
+  ) {
+    const orgId = this.resolveOrgId(tenantId, orgIdHeader, req);
+    return this.queueService.enqueueMetadataSyncDispatch(orgId);
+  }
+
+  @Get('sync/metrics')
+  @ApiOperation({
+    summary: 'Obtém métricas operacionais e contadores da fila BullMQ queue-aso-sync',
+  })
+  @ApiResponse({ status: 200, description: 'Métricas da fila retornadas com sucesso.' })
+  async getQueueMetrics() {
+    return this.queueService.getQueueMetrics();
   }
 }
 

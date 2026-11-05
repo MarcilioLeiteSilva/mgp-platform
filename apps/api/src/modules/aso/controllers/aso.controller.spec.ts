@@ -3,6 +3,7 @@ import { AsoController } from './aso.controller';
 import { AsoAppsService } from '../services/aso-apps.service';
 import { AsoKeywordsService } from '../services/aso-keywords.service';
 import { AsoAuditService } from '../services/aso-audit.service';
+import { AsoQueueService } from '../services/aso-queue.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../../../common/guards/tenant.guard';
 
@@ -11,6 +12,7 @@ describe('AsoController (Endpoints REST do Módulo Central ASO)', () => {
   let appsService: AsoAppsService;
   let keywordsService: AsoKeywordsService;
   let auditService: AsoAuditService;
+  let queueService: AsoQueueService;
 
   const mockApp = {
     id: 'aso-app-1',
@@ -64,6 +66,16 @@ describe('AsoController (Endpoints REST do Módulo Central ASO)', () => {
             getAuditHistory: jest.fn().mockResolvedValue([mockAudit]),
           },
         },
+        {
+          provide: AsoQueueService,
+          useValue: {
+            enqueueSyncAppMetadata: jest.fn().mockResolvedValue({ jobId: 'job-1', status: 'ENQUEUED' }),
+            enqueueCheckKeywordRank: jest.fn().mockResolvedValue({ jobId: 'job-2', status: 'ENQUEUED' }),
+            enqueueDailyRankingsDispatch: jest.fn().mockResolvedValue({ jobId: 'job-3', status: 'ENQUEUED' }),
+            enqueueMetadataSyncDispatch: jest.fn().mockResolvedValue({ jobId: 'job-4', status: 'ENQUEUED' }),
+            getQueueMetrics: jest.fn().mockResolvedValue({ queueName: 'queue-aso-sync', waiting: 0, active: 1, completed: 10, failed: 0, delayed: 0, paused: false }),
+          },
+        },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -76,6 +88,7 @@ describe('AsoController (Endpoints REST do Módulo Central ASO)', () => {
     appsService = module.get<AsoAppsService>(AsoAppsService);
     keywordsService = module.get<AsoKeywordsService>(AsoKeywordsService);
     auditService = module.get<AsoAuditService>(AsoAuditService);
+    queueService = module.get<AsoQueueService>(AsoQueueService);
   });
 
   it('deve ser instanciado corretamente', () => {
@@ -202,6 +215,33 @@ describe('AsoController (Endpoints REST do Módulo Central ASO)', () => {
       const result = await controller.getAuditHistory('aso-app-1', 'org-1', undefined, {});
       expect(result).toHaveLength(1);
       expect(auditService.getAuditHistory).toHaveBeenCalledWith('org-1', 'aso-app-1');
+    });
+  });
+
+  describe('Queue & Background Sync Endpoints', () => {
+    it('POST /aso/apps/:id/sync-async - deve enfileirar sincronização assíncrona', async () => {
+      const result = await controller.syncAppAsync('aso-app-1', 'org-1', undefined, {});
+      expect(result.jobId).toBe('job-1');
+      expect(queueService.enqueueSyncAppMetadata).toHaveBeenCalledWith('aso-app-1', 'org-1', true);
+    });
+
+    it('POST /aso/sync/dispatch-rankings - deve disparar lote de rankings', async () => {
+      const result = await controller.dispatchRankings('org-1', undefined, {});
+      expect(result.jobId).toBe('job-3');
+      expect(queueService.enqueueDailyRankingsDispatch).toHaveBeenCalledWith('org-1');
+    });
+
+    it('POST /aso/sync/dispatch-metadata - deve disparar lote de metadados', async () => {
+      const result = await controller.dispatchMetadata('org-1', undefined, {});
+      expect(result.jobId).toBe('job-4');
+      expect(queueService.enqueueMetadataSyncDispatch).toHaveBeenCalledWith('org-1');
+    });
+
+    it('GET /aso/sync/metrics - deve retornar métricas da fila', async () => {
+      const result = await controller.getQueueMetrics();
+      expect(result.queueName).toBe('queue-aso-sync');
+      expect(result.active).toBe(1);
+      expect(queueService.getQueueMetrics).toHaveBeenCalled();
     });
   });
 });

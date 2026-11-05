@@ -40,4 +40,8 @@ export class AppConfigService {
   get jwtRefreshExpiresIn(): string {
     return this.config.JWT_REFRESH_EXPIRES_IN;
   }
+
+  get redisUrl(): string {
+    return this.config.REDIS_URL;
+  }
 }

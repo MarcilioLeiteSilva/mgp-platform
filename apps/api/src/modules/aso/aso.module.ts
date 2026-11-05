@@ -6,6 +6,7 @@ import { PlayScraperEngineService } from './services/play-scraper-engine.service
 import { AsoAppsService } from './services/aso-apps.service';
 import { AsoKeywordsService } from './services/aso-keywords.service';
 import { AsoAuditService } from './services/aso-audit.service';
+import { AsoQueueService } from './services/aso-queue.service';
 import { PlayScraperController } from './controllers/play-scraper.controller';
 import { AsoController } from './controllers/aso.controller';
 
@@ -19,6 +20,7 @@ import { AsoController } from './controllers/aso.controller';
     AsoAppsService,
     AsoKeywordsService,
     AsoAuditService,
+    AsoQueueService,
   ],
   exports: [
     AsoCacheService,
@@ -27,6 +29,7 @@ import { AsoController } from './controllers/aso.controller';
     AsoAppsService,
     AsoKeywordsService,
     AsoAuditService,
+    AsoQueueService,
   ],
 })
 export class AsoModule {}
