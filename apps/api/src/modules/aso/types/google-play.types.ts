@@ -69,3 +69,32 @@ export interface PlayCategoryItem {
   name: string;
 }
 
+export interface PlayAppOptions {
+  country?: string;
+  lang?: string;
+}
+
+export interface PlaySearchOptions {
+  country?: string;
+  lang?: string;
+  num?: number;
+}
+
+export interface PlaySuggestOptions {
+  country?: string;
+  lang?: string;
+}
+
+export interface PlayTopChartsOptions {
+  category?: string;
+  collection?: PlayCollection;
+  country?: string;
+  lang?: string;
+  num?: number;
+}
+
+export interface PlayDeveloperOptions {
+  country?: string;
+  lang?: string;
+  num?: number;
+}
