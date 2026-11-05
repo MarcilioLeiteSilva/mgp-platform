@@ -99,3 +99,4 @@ Com a homologação integral e pontuação 100% na Etapa 2, o ecossistema Mobile
 * **Fase 20:** Ad Server de Ultra-Baixa Latência (Go / Rust / Fastify)
 * **Fase 21:** Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)
 * **Fase 22:** Integração do SDK com o Ad Server e Homologação da Etapa 3
+
