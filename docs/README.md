@@ -179,6 +179,35 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **06. DTOs Tipados e Validados** | [`apps/api/src/modules/aso/dto/`](../apps/api/src/modules/aso/dto/) | DTOs para monitoramento de apps, keywords, filtros e histórico. |
 | **07. Suítes de Testes Automatizados Jest** | `apps/api/src/modules/aso/**/*.spec.ts` | 4 suítes cobrindo apps, keywords, auditoria e controller (22 suítes no total). |
 
+### 1.14. Fase 14 — Workers de Coleta e Sincronização Assíncrona (Etapa 2 - ASO)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Arquitetura de Workers & Filas** | [`docs/aso/03-aso-workers-and-queues.md`](./aso/03-aso-workers-and-queues.md) | Especificação técnica da fila BullMQ `queue-aso-sync`, pacing e crons. |
+| **02. Processador BullMQ ASO** | [`apps/workers/src/processors/aso-sync.processor.ts`](../apps/workers/src/processors/aso-sync.processor.ts) | Consumidor desacoplado com roteamento modular por tipo de job. |
+| **03. Handlers de Sincronização e Posições** | [`apps/workers/src/handlers/`](../apps/workers/src/handlers/) | Handlers modulares com pacing dinâmico contra rate limiting e bloqueios IP. |
+| **04. Agendador Cron Determinístico** | [`apps/workers/src/scheduler/aso-cron.scheduler.ts`](../apps/workers/src/scheduler/aso-cron.scheduler.ts) | Cron diário (03:00 UTC) para rankings e semanal (04:00 UTC domingos) para metadados. |
+| **05. Produtor BullMQ na API** | [`apps/api/src/modules/aso/services/aso-queue.service.ts`](../apps/api/src/modules/aso/services/aso-queue.service.ts) | Enfileiramento seguro com fallback resiliente e endpoints de telemetria. |
+| **06. Dockerfile Multi-Stage de Produção** | [`infrastructure/docker/Dockerfile.workers`](../infrastructure/docker/Dockerfile.workers) | Container alpine otimizado para execução contínua de workers. |
+| **07. Suíte de Testes Automatizados** | `apps/workers/src/**/*.spec.ts` | 4 suítes Jest cobrindo processador, scheduler e serviços auxiliares (15 testes passing). |
+
+### 1.15. Fase 15 — Interface Visual do ASO Studio (Etapa 2 - ASO)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Especificação do Frontend ASO Studio** | [`docs/aso/04-aso-studio-frontend.md`](./aso/04-aso-studio-frontend.md) | Guia de componentes, arquitetura de páginas e visualizações de dados. |
+| **02. Hub Principal do ASO Studio** | [`apps/web/src/app/(dashboard)/aso/page.tsx`](../apps/web/src/app/(dashboard)/aso/page.tsx) | KPIs agregados, abas Meus Apps / Concorrentes e Play Store Explorer. |
+| **03. Painel de Detalhe e Diagnóstico** | [`apps/web/src/app/(dashboard)/aso/[id]/page.tsx`](../apps/web/src/app/(dashboard)/aso/[id]/page.tsx) | Hero com dados da loja, tabela de keywords com badges e histórico. |
+| **04. Gauge Circular de Score ASO** | [`apps/web/src/components/aso/audit-gauge.tsx`](../apps/web/src/components/aso/audit-gauge.tsx) | Indicador visual em SVG circular com código de cores semafórico. |
+| **05. Gráfico de Série Temporal de Rankings** | [`apps/web/src/components/aso/ranking-chart.tsx`](../apps/web/src/components/aso/ranking-chart.tsx) | Gráfico SVG interativo com eixo Y invertido (topo = posição #1). |
+| **06. Modais Reais de Inclusão** | [`apps/web/src/components/aso/add-app-modal.tsx`](../apps/web/src/components/aso/add-app-modal.tsx) | Modais funcionais para cadastrar novos apps e adicionar termos de busca. |
+| **07. Telemetria de Workers na UI** | [`apps/web/src/components/aso/queue-status-badge.tsx`](../apps/web/src/components/aso/queue-status-badge.tsx) | Badge em tempo real exibindo status da fila assíncrona BullMQ. |
+
+### 1.16. Fase 16 — Integração, Testes E2E e Homologação da Etapa 2
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Suíte de Testes Ponta a Ponta (E2E)** | [`apps/api/src/test/aso-e2e.spec.ts`](../apps/api/src/test/aso-e2e.spec.ts) | 15 testes integrados validando Scraper, Prisma, Multi-Tenant, Workers e Frontend. |
+| **02. Script de Auditoria Automatizada** | [`infrastructure/scripts/audit-etapa2.js`](../infrastructure/scripts/audit-etapa2.js) | Executável com `pnpm audit:etapa2` avaliando 52 verificações com Score 100%. |
+| **03. Relatório Oficial de Certificação** | [`docs/aso/05-etapa2-audit-and-certification.md`](./aso/05-etapa2-audit-and-certification.md) | Parecer técnico formal certificando o encerramento da Etapa 2 e liberação da Etapa 3. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -198,40 +227,49 @@ Progresso atual: **10/10 fases concluídas (Etapa 1 — 100% Concluída e Homolo
 
 ---
 
-## 3. Planejamento — ETAPA 2 (Motor de Inteligência & ASO)
+## 3. Controle de Progresso — ETAPA 2 (Motor de Inteligência & ASO)
 
-Progresso da Etapa 2: **Fases 11, 12, 13, 14 e 15 Concluídas e Homologadas (5/6 fases concluídas — 83%)**.
+Progresso atual: **6/6 fases concluídas (Etapa 2 — 100% Concluída e Homologada)**.
 
 - [x] **Fase 11 — Motor de Coleta e Scraping da Google Play (Play Scraper Engine, Cache Redis e Rate Limiter)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 12 — Modelagem de Dados ASO no Prisma (Catálogo, Palavras-chave e Histórico)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 13 — Backend Central ASO (AsoModule no NestJS)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 14 — Workers de Coleta e Sincronização Assíncrona (`apps/workers` - `queue-aso-sync`)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 15 — Interface Visual do ASO Studio (`apps/web`)** ✅ [CONCLUÍDA E HOMOLOGADA]
-- [ ] **Fase 16 — Integração, Testes e Homologação da Etapa 2** ◀ **[PRÓXIMA FASE A EXECUTAR]**
+- [x] **Fase 16 — Integração, Testes e Homologação da Etapa 2** ✅ [CONCLUÍDA E HOMOLOGADA — SCORE 100%]
 
 ---
 
-## 4. Ponto de Retomada dos Trabalhos (Checklist para o Próximo Turno)
+## 4. Planejamento — ETAPA 3 (SDK Android, Ad Server & Motor Publicitário)
+
+- [ ] **Fase 17 — Arquitetura do SDK Android e Especificação de Telemetria** ◀ **[PRÓXIMA FASE A EXECUTAR]**
+- [ ] **Fase 18 — Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)**
+- [ ] **Fase 19 — Engine de Eventos, Atribuição e Antifraude no Backend**
+- [ ] **Fase 20 — Ad Server de Ultra-Baixa Latência (Fastify / High Performance)**
+- [ ] **Fase 21 — Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)**
+- [ ] **Fase 22 — Integração do SDK com o Ad Server e Homologação da Etapa 3**
+
+---
+
+## 5. Ponto de Retomada dos Trabalhos (Checklist para o Próximo Turno)
 
 1. **Estado do Repositório:**
    * Branches `main` e `develop` sincronizadas com `origin` (https://github.com/MarcilioLeiteSilva/mgp-platform).
    * Working tree 100% limpa, sem pendências ou arquivos órfãos.
 2. **Saúde da Plataforma:**
    * Auditoria geral Etapa 1: `pnpm audit:etapa1` (**Score: 100% — 93/93 checks**).
-   * Suíte completa de testes Jest da API: `pnpm --filter @mgp/api test` (**197 testes passing em 23 suítes, 0 falhas**).
+   * Auditoria geral Etapa 2: `pnpm audit:etapa2` (**Score: 100% — 52/52 checks**).
+   * Suíte completa de testes Jest da API: `pnpm --filter @mgp/api test` (**212 testes passing em 24 suítes, 0 falhas**).
    * Suíte completa de testes Jest dos Workers: `pnpm --filter @mgp/workers test` (**15 testes passing em 4 suítes, 0 falhas**).
-   * Total de testes automatizados da plataforma: **212 testes aprovados (100% green)**.
+   * Total de testes automatizados da plataforma: **227 testes aprovados (100% green)**.
    * Compilação Next.js do Frontend Web: `pnpm --filter @mgp/web build` (**100% verde — 12 rotas geradas**).
    * Compilação NestJS e Workers: `pnpm build` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Retomar iniciando diretamente a **FASE 16 — Integração, Testes e Homologação da Etapa 2**:
-     * Criar suíte de testes E2E ponta a ponta integrando Scraper -> Prisma -> REST API -> BullMQ Worker -> Frontend Web.
-     * Criar script de auditoria automatizada da Etapa 2 (`audit-etapa2.js`) com verificação rigorosa de todos os entregáveis das Fases 11 a 16.
-     * Executar homologação oficial da Etapa 2 com pontuação 100%.
+   * Iniciar diretamente a **ETAPA 3 — Fase 17: Arquitetura do SDK Android e Especificação de Telemetria**.
 
 ---
 
-## 5. Regras de Execução e Governança
+## 6. Regras de Execução e Governança
 
 1. **Uma fase por vez**: Nenhuma linha de código de fases subsequentes pode ser escrita sem aprovação formal da anterior.
 2. **Sem dados ou botões fictícios**: Todo componente ou tela entregue deve estar conectado a fluxos e endpoints reais.

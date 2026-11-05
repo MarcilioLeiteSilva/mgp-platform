@@ -13,6 +13,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "audit:etapa1": "node infrastructure/scripts/audit-etapa1.js",
+    "audit:etapa2": "node infrastructure/scripts/audit-etapa2.js",
     "db:generate": "pnpm --filter @mgp/database run prisma:generate",
     "db:migrate": "pnpm --filter @mgp/database run prisma:deploy",
     "db:seed": "pnpm --filter @mgp/database run db:seed",
