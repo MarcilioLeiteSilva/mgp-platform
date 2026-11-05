@@ -3,21 +3,30 @@ import { AuthModule } from '../auth/auth.module';
 import { AsoCacheService } from './services/aso-cache.service';
 import { AsoRateLimiterService } from './services/aso-rate-limiter.service';
 import { PlayScraperEngineService } from './services/play-scraper-engine.service';
+import { AsoAppsService } from './services/aso-apps.service';
+import { AsoKeywordsService } from './services/aso-keywords.service';
+import { AsoAuditService } from './services/aso-audit.service';
 import { PlayScraperController } from './controllers/play-scraper.controller';
+import { AsoController } from './controllers/aso.controller';
 
 @Module({
   imports: [AuthModule],
-  controllers: [PlayScraperController],
+  controllers: [PlayScraperController, AsoController],
   providers: [
     AsoCacheService,
     AsoRateLimiterService,
     PlayScraperEngineService,
+    AsoAppsService,
+    AsoKeywordsService,
+    AsoAuditService,
   ],
   exports: [
     AsoCacheService,
     AsoRateLimiterService,
     PlayScraperEngineService,
+    AsoAppsService,
+    AsoKeywordsService,
+    AsoAuditService,
   ],
 })
 export class AsoModule {}
-

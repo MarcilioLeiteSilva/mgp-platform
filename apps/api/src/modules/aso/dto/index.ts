@@ -4,4 +4,7 @@ export * from './suggest-keywords.dto';
 export * from './top-charts.dto';
 export * from './get-similar-apps.dto';
 export * from './get-developer-apps.dto';
-
+export * from './track-app.dto';
+export * from './track-keyword.dto';
+export * from './list-aso-apps-query.dto';
+export * from './keyword-ranking-history-query.dto';

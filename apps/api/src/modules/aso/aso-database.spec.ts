@@ -239,3 +239,4 @@ describe('ASO Data Models & Prisma Schema (Fase 12 — Modelagem de Dados ASO)',
     });
   });
 });
+

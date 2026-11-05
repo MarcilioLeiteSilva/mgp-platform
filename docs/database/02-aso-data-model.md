@@ -160,3 +160,4 @@ Avaliações periódicas da qualidade e otimização da página do aplicativo na
 - **Contratos Compartilhados:** [`packages/contracts/src/aso.contracts.ts`](file:///f:/mobile_growth/packages/contracts/src/aso.contracts.ts)
 - **Suíte de Testes de Banco:** [`apps/api/src/modules/aso/aso-database.spec.ts`](file:///f:/mobile_growth/apps/api/src/modules/aso/aso-database.spec.ts)
 - **Seed Demonstrativo:** Atualizado em [`packages/database/prisma/seed.ts`](file:///f:/mobile_growth/packages/database/prisma/seed.ts)
+

@@ -120,3 +120,4 @@ ALTER TABLE "aso_keyword_ranking_history" ADD CONSTRAINT "aso_keyword_ranking_hi
 
 -- AddForeignKey
 ALTER TABLE "aso_audit_scores" ADD CONSTRAINT "aso_audit_scores_aso_app_id_fkey" FOREIGN KEY ("aso_app_id") REFERENCES "aso_apps"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+

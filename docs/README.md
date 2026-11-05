@@ -168,6 +168,17 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **05. Suíte de Testes de Banco e Modelos** | [`apps/api/src/modules/aso/aso-database.spec.ts`](../apps/api/src/modules/aso/aso-database.spec.ts) | Testes unitários de persistência e integridade referencial com PrismaService. |
 | **06. Seed de Dados Demonstrativos** | [`packages/database/prisma/seed.ts`](../packages/database/prisma/seed.ts) | Provisionamento de app demonstrativo com keywords, posições e auditoria. |
 
+### 1.13. Fase 13 — Backend Central ASO (Etapa 2 - ASO)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Arquitetura do Backend ASO** | [`docs/aso/02-aso-backend-services.md`](./aso/02-aso-backend-services.md) | Especificação técnica de serviços, algoritmos heurísticos e rotas REST. |
+| **02. Serviço de Aplicativos Monitorados** | [`apps/api/src/modules/aso/services/aso-apps.service.ts`](../apps/api/src/modules/aso/services/aso-apps.service.ts) | Gestão de catálogo, concorrentes, sync de metadados e auditoria inicial. |
+| **03. Serviço de Palavras-Chave e Rankings** | [`apps/api/src/modules/aso/services/aso-keywords.service.ts`](../apps/api/src/modules/aso/services/aso-keywords.service.ts) | Rastreamento orgânico, detecção de posições e séries temporais. |
+| **04. Serviço de Auditoria Heurística** | [`apps/api/src/modules/aso/services/aso-audit.service.ts`](../apps/api/src/modules/aso/services/aso-audit.service.ts) | Algoritmo determinístico de pontuações (0-100) e recomendações acionáveis. |
+| **05. Controller REST Multi-Tenant** | [`apps/api/src/modules/aso/controllers/aso.controller.ts`](../apps/api/src/modules/aso/controllers/aso.controller.ts) | Endpoints `/api/v1/aso/*` protegidos por `JwtAuthGuard` e `TenantGuard`. |
+| **06. DTOs Tipados e Validados** | [`apps/api/src/modules/aso/dto/`](../apps/api/src/modules/aso/dto/) | DTOs para monitoramento de apps, keywords, filtros e histórico. |
+| **07. Suítes de Testes Automatizados Jest** | `apps/api/src/modules/aso/**/*.spec.ts` | 4 suítes cobrindo apps, keywords, auditoria e controller (22 suítes no total). |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
