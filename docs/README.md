@@ -158,6 +158,16 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **08. Módulo NestJS Registrado** | [`apps/api/src/modules/aso/aso.module.ts`](../apps/api/src/modules/aso/aso.module.ts) | Registro central e injeção do `AsoModule` no `AppModule`. |
 | **09. Suíte de Testes Automatizados Jest** | `apps/api/src/modules/aso/**/*.spec.ts` | 4 suítes com 100% de cobertura nos serviços e controller do motor de scraping. |
 
+### 1.12. Fase 12 — Modelagem de Dados ASO no Prisma (Etapa 2 - ASO)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Especificação da Modelagem de Dados ASO** | [`docs/database/02-aso-data-model.md`](./database/02-aso-data-model.md) | Diagrama ERD Mermaid, atributos e documentação detalhada dos modelos. |
+| **02. Schema do Prisma com 5 Modelos ASO** | [`packages/database/prisma/schema.prisma`](../packages/database/prisma/schema.prisma) | Modelos `AsoApp`, `AsoKeyword`, `AsoAppKeyword`, `AsoKeywordRankingHistory` e `AsoAuditScore`. |
+| **03. Migration SQL Versionada** | [`packages/database/prisma/migrations/20261105000000_aso_engine/`](../packages/database/prisma/migrations/20261105000000_aso_engine/) | DDL relacional com constraints de unicidade, índices e foreign keys. |
+| **04. Contratos e DTOs Tipados** | [`packages/contracts/src/aso.contracts.ts`](../packages/contracts/src/aso.contracts.ts) | Tipos e interfaces TypeScript padronizados para todo o monorepo. |
+| **05. Suíte de Testes de Banco e Modelos** | [`apps/api/src/modules/aso/aso-database.spec.ts`](../apps/api/src/modules/aso/aso-database.spec.ts) | Testes unitários de persistência e integridade referencial com PrismaService. |
+| **06. Seed de Dados Demonstrativos** | [`packages/database/prisma/seed.ts`](../packages/database/prisma/seed.ts) | Provisionamento de app demonstrativo com keywords, posições e auditoria. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -179,11 +189,11 @@ Progresso atual: **10/10 fases concluídas (Etapa 1 — 100% Concluída e Homolo
 
 ## 3. Planejamento — ETAPA 2 (Motor de Inteligência & ASO)
 
-Progresso da Etapa 2: **Fase 11 Concluída e Homologada (1/6 fases concluídas)**.
+Progresso da Etapa 2: **Fase 11 e Fase 12 Concluídas e Homologadas (2/6 fases concluídas)**.
 
 - [x] **Fase 11 — Motor de Coleta e Scraping da Google Play (Play Scraper Engine, Cache Redis e Rate Limiter)** ✅ [CONCLUÍDA E HOMOLOGADA]
-- [ ] **Fase 12 — Modelagem de Dados ASO no Prisma (Catálogo, Palavras-chave e Histórico)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 13 — Backend Central ASO (AsoModule no NestJS)**
+- [x] **Fase 12 — Modelagem de Dados ASO no Prisma (Catálogo, Palavras-chave e Histórico)** ✅ [CONCLUÍDA E HOMOLOGADA]
+- [ ] **Fase 13 — Backend Central ASO (AsoModule no NestJS)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 - [ ] **Fase 14 — Workers de Coleta e Sincronização Assíncrona (pps/workers - queue-aso-sync)**
 - [ ] **Fase 15 — Interface Visual do ASO Studio (pps/web)**
 - [ ] **Fase 16 — Integração, Testes e Homologação da Etapa 2**
@@ -197,10 +207,10 @@ Progresso da Etapa 2: **Fase 11 Concluída e Homologada (1/6 fases concluídas)*
    * Working tree 100% limpa, sem pendências ou arquivos órfãos.
 2. **Saúde da Plataforma:**
    * Auditoria geral Etapa 1: pnpm audit:etapa1 (Score: 100%).
-   * Suíte completa de testes Jest da API: pnpm --filter @mgp/api test (146 testes passing em 17 suítes, 0 falhas).
+   * Suíte completa de testes Jest da API: pnpm --filter @mgp/api test (151 testes passing em 18 suítes, 0 falhas).
    * Monorepo build completo: pnpm build (100% verde).
 3. **Ponto de Partida Imediato:**
-   * Retomar iniciando diretamente a **FASE 12 (Modelagem de Dados ASO no Prisma - Catálogo, Palavras-chave e Histórico)**, modelando as entidades AsoApp, AsoKeyword, AsoAppKeyword, AsoKeywordRankingHistory e AsoAuditScore.
+   * Retomar iniciando diretamente a **FASE 13 — Backend Central ASO (AsoModule no NestJS)**, implementando os serviços de gestão de aplicativos monitorados, gestão de palavras-chave rastreadas, cálculo de score de auditoria ASO e endpoints REST com isolamento multi-tenant.
 ---
 
 ## 5. Regras de Execução e Governança

@@ -56,6 +56,7 @@ model Organization {
   apps            App[]
   campaigns       Campaign[]
   wallet          Wallet?
+  asoApps         AsoApp[]
   createdAt       DateTime                 @default(now()) @map("created_at")
   updatedAt       DateTime                 @updatedAt @map("updated_at")
 
@@ -310,3 +311,110 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+// ==============================================================================
+// 6. Motor de Inteligência & ASO (App Store Optimization)
+// ==============================================================================
+
+model AsoApp {
+  id              String            @id @default(uuid())
+  organizationId  String            @map("organization_id")
+  organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  appId           String            @map("app_id")
+  platform        AppPlatform       @default(ANDROID)
+  title           String
+  developer       String
+  developerId     String?           @map("developer_id")
+  icon            String
+  genre           String?
+  genreId         String?           @map("genre_id")
+  score           Decimal?          @default(0.0) @db.Decimal(3, 2)
+  ratings         Int?              @default(0)
+  reviews         Int?              @default(0)
+  minInstalls     BigInt?           @default(0) @map("min_installs")
+  isMonitored     Boolean           @default(true) @map("is_monitored")
+  isCompetitor    Boolean           @default(false) @map("is_competitor")
+  targetAppId     String?           @map("target_app_id")
+  country         String            @default("br")
+  lang            String            @default("pt-BR")
+  metadata        Json?
+  lastScrapedAt   DateTime?         @map("last_scraped_at")
+  trackedKeywords AsoAppKeyword[]
+  auditScores     AsoAuditScore[]
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  @@unique([organizationId, appId, country, lang])
+  @@index([organizationId, isMonitored])
+  @@index([appId, country])
+  @@map("aso_apps")
+}
+
+model AsoKeyword {
+  id            String          @id @default(uuid())
+  keyword       String
+  country       String          @default("br")
+  lang          String          @default("pt-BR")
+  searchVolume  Int?            @default(0) @map("search_volume")
+  difficulty    Int?            @default(0)
+  relevance     Int?            @default(0)
+  lastTrackedAt DateTime?       @map("last_tracked_at")
+  appKeywords   AsoAppKeyword[]
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  @@unique([keyword, country, lang])
+  @@index([keyword])
+  @@index([country, lang])
+  @@map("aso_keywords")
+}
+
+model AsoAppKeyword {
+  id             String                      @id @default(uuid())
+  asoAppId       String                      @map("aso_app_id")
+  asoApp         AsoApp                      @relation(fields: [asoAppId], references: [id], onDelete: Cascade)
+  keywordId      String                      @map("keyword_id")
+  keyword        AsoKeyword                  @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  currentRank    Int?                        @map("current_rank")
+  previousRank   Int?                        @map("previous_rank")
+  bestRank       Int?                        @map("best_rank")
+  tag            String?
+  isActive       Boolean                     @default(true) @map("is_active")
+  lastTrackedAt  DateTime?                   @map("last_tracked_at")
+  rankingHistory AsoKeywordRankingHistory[]
+  createdAt      DateTime                    @default(now()) @map("created_at")
+  updatedAt      DateTime                    @updatedAt @map("updated_at")
+
+  @@unique([asoAppId, keywordId])
+  @@index([asoAppId, currentRank])
+  @@index([keywordId])
+  @@map("aso_app_keywords")
+}
+
+model AsoKeywordRankingHistory {
+  id           String        @id @default(uuid())
+  appKeywordId String        @map("app_keyword_id")
+  appKeyword   AsoAppKeyword @relation(fields: [appKeywordId], references: [id], onDelete: Cascade)
+  rank         Int
+  recordedAt   DateTime      @default(now()) @map("recorded_at")
+
+  @@index([appKeywordId, recordedAt])
+  @@map("aso_keyword_ranking_history")
+}
+
+model AsoAuditScore {
+  id                    String   @id @default(uuid())
+  asoAppId              String   @map("aso_app_id")
+  asoApp                AsoApp   @relation(fields: [asoAppId], references: [id], onDelete: Cascade)
+  overallScore          Int      @map("overall_score")
+  titleScore            Int      @map("title_score")
+  shortDescriptionScore Int      @map("short_description_score")
+  longDescriptionScore  Int      @map("long_description_score")
+  iconScore             Int      @map("icon_score")
+  screenshotsScore      Int      @map("screenshots_score")
+  ratingsScore          Int      @map("ratings_score")
+  recommendations       Json
+  auditDate             DateTime @default(now()) @map("audit_date")
+
+  @@index([asoAppId, auditDate])
+  @@map("aso_audit_scores")
+}

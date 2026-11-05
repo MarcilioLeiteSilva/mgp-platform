@@ -350,6 +350,124 @@ async function main() {
   });
   console.info(`✅ Organização Beta Apps provisionada para validação de isolamento: ${betaOrg.name}`);
 
+  // --------------------------------------------------------------------------
+  // 6. Dados Demonstrativos de Inteligência e ASO (Etapa 2 - Fase 12)
+  // --------------------------------------------------------------------------
+  const asoApp = await prisma.asoApp.upsert({
+    where: {
+      organizationId_appId_country_lang: {
+        organizationId: acmeOrg.id,
+        appId: 'com.acmegames.runner3d',
+        country: 'br',
+        lang: 'pt-BR',
+      },
+    },
+    update: {},
+    create: {
+      organizationId: acmeOrg.id,
+      appId: 'com.acmegames.runner3d',
+      title: 'Acme Runner 3D: Corrida Infinita',
+      developer: 'Acme Games Studio',
+      icon: 'https://placehold.co/512x512/0f172a/38bdf8?text=Runner3D',
+      genre: 'Action & Adventure',
+      genreId: 'GAME_ACTION',
+      score: 4.65,
+      ratings: 48500,
+      reviews: 12400,
+      minInstalls: BigInt(1000000),
+      isMonitored: true,
+      country: 'br',
+      lang: 'pt-BR',
+      metadata: {
+        screenshots: [
+          'https://placehold.co/1080x1920/1e293b/38bdf8?text=Screenshot+1',
+          'https://placehold.co/1080x1920/1e293b/38bdf8?text=Screenshot+2',
+        ],
+        description: 'Corra, desvie de obstáculos e alcance novos recordes no Acme Runner 3D!',
+      },
+      lastScrapedAt: new Date(),
+    },
+  });
+
+  const kw1 = await prisma.asoKeyword.upsert({
+    where: {
+      keyword_country_lang: {
+        keyword: 'jogos de corrida',
+        country: 'br',
+        lang: 'pt-BR',
+      },
+    },
+    update: {},
+    create: {
+      keyword: 'jogos de corrida',
+      country: 'br',
+      lang: 'pt-BR',
+      searchVolume: 92,
+      difficulty: 78,
+      relevance: 95,
+      lastTrackedAt: new Date(),
+    },
+  });
+
+  const appKw1 = await prisma.asoAppKeyword.upsert({
+    where: {
+      asoAppId_keywordId: {
+        asoAppId: asoApp.id,
+        keywordId: kw1.id,
+      },
+    },
+    update: {},
+    create: {
+      asoAppId: asoApp.id,
+      keywordId: kw1.id,
+      currentRank: 4,
+      previousRank: 6,
+      bestRank: 3,
+      tag: 'core',
+      isActive: true,
+      lastTrackedAt: new Date(),
+    },
+  });
+
+  await prisma.asoKeywordRankingHistory.create({
+    data: {
+      appKeywordId: appKw1.id,
+      rank: 4,
+      recordedAt: new Date(),
+    },
+  });
+
+  await prisma.asoAuditScore.create({
+    data: {
+      asoAppId: asoApp.id,
+      overallScore: 84,
+      titleScore: 90,
+      shortDescriptionScore: 85,
+      longDescriptionScore: 78,
+      iconScore: 92,
+      screenshotsScore: 80,
+      ratingsScore: 88,
+      recommendations: [
+        {
+          id: 'rec_title_01',
+          category: 'TITLE',
+          severity: 'INFO',
+          message: 'Título utiliza 32 caracteres com palavra-chave de alto volume.',
+          suggestedAction: 'Manter a densidade atual.',
+        },
+        {
+          id: 'rec_desc_01',
+          category: 'DESCRIPTION',
+          severity: 'MEDIUM',
+          message: 'Descrição longa pode incluir mais variações de keywords secundárias.',
+          suggestedAction: 'Expandir o texto para 2.500 caracteres adicionando recursos de gameplay.',
+        },
+      ],
+      auditDate: new Date(),
+    },
+  });
+  console.info(`✅ Dados de ASO provisionados para: ${asoApp.title}`);
+
   console.info('🎉 Seed do banco de dados MGP concluído com sucesso!');
 }
 
