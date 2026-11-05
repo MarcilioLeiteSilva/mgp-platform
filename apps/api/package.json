@@ -26,6 +26,7 @@
     "bcryptjs": "^3.0.3",
     "class-transformer": "0.5.1",
     "class-validator": "^0.14.1",
+    "google-play-scraper": "10.1.4",
     "ioredis": "^5.11.1",
     "pino": "^10.4.0",
     "pino-pretty": "^13.2.0",

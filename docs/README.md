@@ -145,6 +145,19 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **09. Script de Auditoria Automatizada** | [`infrastructure/scripts/audit-etapa1.js`](../infrastructure/scripts/audit-etapa1.js) | Executável com `pnpm audit:etapa1` avaliando 93 verificações em 10 dimensões com score 100%. |
 | **10. Relatório Oficial de Auditoria Final** | [`docs/architecture/07-etapa1-final-audit-report.md`](./architecture/07-etapa1-final-audit-report.md) | Parecer técnico formal certificando o encerramento da Etapa 1 e liberação da Etapa 2. |
 
+### 1.11. Fase 11 — Motor de Coleta e Scraping da Google Play (Etapa 2 - ASO)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Arquitetura do Engine de Coleta Play Store** | [`docs/aso/01-play-store-scraper-engine.md`](./aso/01-play-store-scraper-engine.md) | Especificação técnica do motor de scraping, topologia de cache e rate limiting. |
+| **02. Tipos e Contratos de Metadados Play Store** | [`apps/api/src/modules/aso/types/google-play.types.ts`](../apps/api/src/modules/aso/types/google-play.types.ts) | Modelos TypeScript para metadados de apps, busca, rankings e categorias. |
+| **03. Cache Redis Resiliente e Fallback em Memória** | [`apps/api/src/modules/aso/services/aso-cache.service.ts`](../apps/api/src/modules/aso/services/aso-cache.service.ts) | Serviço de cache com TTLs diferenciados e degradação suave contra falhas de conexão. |
+| **04. Controle de Concorrência e Rate Limiting** | [`apps/api/src/modules/aso/services/aso-rate-limiter.service.ts`](../apps/api/src/modules/aso/services/aso-rate-limiter.service.ts) | Semáforo assíncrono com espaçamento de picos e retry exponencial em erros transitórios. |
+| **05. Motor de Coleta e Normalização** | [`apps/api/src/modules/aso/services/play-scraper-engine.service.ts`](../apps/api/src/modules/aso/services/play-scraper-engine.service.ts) | Engine com carregamento dinâmico do `google-play-scraper`, normalização e cache. |
+| **06. DTOs Tipados e Validados com Swagger** | [`apps/api/src/modules/aso/dto/`](../apps/api/src/modules/aso/dto/) | DTOs de validação com `class-validator`, `class-transformer` e OpenAPI. |
+| **07. Controller REST Protegido por JWT** | [`apps/api/src/modules/aso/controllers/play-scraper.controller.ts`](../apps/api/src/modules/aso/controllers/play-scraper.controller.ts) | Endpoints REST `/api/v1/aso/scraper/*` protegidos por `JwtAuthGuard`. |
+| **08. Módulo NestJS Registrado** | [`apps/api/src/modules/aso/aso.module.ts`](../apps/api/src/modules/aso/aso.module.ts) | Registro central e injeção do `AsoModule` no `AppModule`. |
+| **09. Suíte de Testes Automatizados Jest** | `apps/api/src/modules/aso/**/*.spec.ts` | 4 suítes com 100% de cobertura nos serviços e controller do motor de scraping. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -166,13 +179,13 @@ Progresso atual: **10/10 fases concluídas (Etapa 1 — 100% Concluída e Homolo
 
 ## 3. Planejamento — ETAPA 2 (Motor de Inteligência & ASO)
 
-Progresso da Etapa 2: **Pronta para início na Fase 11**.
+Progresso da Etapa 2: **Fase 11 Concluída e Homologada (1/6 fases concluídas)**.
 
-- [ ] **Fase 11 — Motor de Coleta e Scraping da Google Play (Play Scraper Engine, Cache Redis e Rate Limiter)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 12 — Modelagem de Dados ASO no Prisma (Catálogo, Palavras-chave e Histórico)**
-- [ ] **Fase 13 — Backend Central ASO (`AsoModule` no NestJS)**
-- [ ] **Fase 14 — Workers de Coleta e Sincronização Assíncrona (`apps/workers` - `queue-aso-sync`)**
-- [ ] **Fase 15 — Interface Visual do ASO Studio (`apps/web`)**
+- [x] **Fase 11 — Motor de Coleta e Scraping da Google Play (Play Scraper Engine, Cache Redis e Rate Limiter)** ✅ [CONCLUÍDA E HOMOLOGADA]
+- [ ] **Fase 12 — Modelagem de Dados ASO no Prisma (Catálogo, Palavras-chave e Histórico)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
+- [ ] **Fase 13 — Backend Central ASO (AsoModule no NestJS)**
+- [ ] **Fase 14 — Workers de Coleta e Sincronização Assíncrona (pps/workers - queue-aso-sync)**
+- [ ] **Fase 15 — Interface Visual do ASO Studio (pps/web)**
 - [ ] **Fase 16 — Integração, Testes e Homologação da Etapa 2**
 
 ---
@@ -180,14 +193,14 @@ Progresso da Etapa 2: **Pronta para início na Fase 11**.
 ## 4. Ponto de Retomada dos Trabalhos (Checklist para o Próximo Turno)
 
 1. **Estado do Repositório:**
-   * Branch `main` e `develop` sincronizadas com `origin` no commit `25fbfdc` (e commit subsequente de documentação).
+   * Branch main e develop sincronizadas com origin.
    * Working tree 100% limpa, sem pendências ou arquivos órfãos.
 2. **Saúde da Plataforma:**
-   * Auditoria geral executável a qualquer momento com: `pnpm audit:etapa1` (Score: 100%).
-   * Suíte completa de testes Jest executável com: `pnpm --filter @mgp/api test` (106 testes passing).
+   * Auditoria geral Etapa 1: pnpm audit:etapa1 (Score: 100%).
+   * Suíte completa de testes Jest da API: pnpm --filter @mgp/api test (146 testes passing em 17 suítes, 0 falhas).
+   * Monorepo build completo: pnpm build (100% verde).
 3. **Ponto de Partida Imediato:**
-   * Retomar iniciando diretamente a **FASE 11 (Motor de Coleta e Scraping da Google Play)**, configurando o serviço de busca na Google Play Brasil, normalização de metadados de aplicativos e cache com TTL no Redis.
-
+   * Retomar iniciando diretamente a **FASE 12 (Modelagem de Dados ASO no Prisma - Catálogo, Palavras-chave e Histórico)**, modelando as entidades AsoApp, AsoKeyword, AsoAppKeyword, AsoKeywordRankingHistory e AsoAuditScore.
 ---
 
 ## 5. Regras de Execução e Governança
