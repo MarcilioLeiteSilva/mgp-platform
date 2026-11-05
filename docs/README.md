@@ -200,14 +200,14 @@ Progresso atual: **10/10 fases concluídas (Etapa 1 — 100% Concluída e Homolo
 
 ## 3. Planejamento — ETAPA 2 (Motor de Inteligência & ASO)
 
-Progresso da Etapa 2: **Fases 11, 12, 13 e 14 Concluídas e Homologadas (4/6 fases concluídas — 66%)**.
+Progresso da Etapa 2: **Fases 11, 12, 13, 14 e 15 Concluídas e Homologadas (5/6 fases concluídas — 83%)**.
 
 - [x] **Fase 11 — Motor de Coleta e Scraping da Google Play (Play Scraper Engine, Cache Redis e Rate Limiter)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 12 — Modelagem de Dados ASO no Prisma (Catálogo, Palavras-chave e Histórico)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 13 — Backend Central ASO (AsoModule no NestJS)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 14 — Workers de Coleta e Sincronização Assíncrona (`apps/workers` - `queue-aso-sync`)** ✅ [CONCLUÍDA E HOMOLOGADA]
-- [ ] **Fase 15 — Interface Visual do ASO Studio (`apps/web`)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 16 — Integração, Testes e Homologação da Etapa 2**
+- [x] **Fase 15 — Interface Visual do ASO Studio (`apps/web`)** ✅ [CONCLUÍDA E HOMOLOGADA]
+- [ ] **Fase 16 — Integração, Testes e Homologação da Etapa 2** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 
 ---
 
@@ -221,14 +221,13 @@ Progresso da Etapa 2: **Fases 11, 12, 13 e 14 Concluídas e Homologadas (4/6 fas
    * Suíte completa de testes Jest da API: `pnpm --filter @mgp/api test` (**197 testes passing em 23 suítes, 0 falhas**).
    * Suíte completa de testes Jest dos Workers: `pnpm --filter @mgp/workers test` (**15 testes passing em 4 suítes, 0 falhas**).
    * Total de testes automatizados da plataforma: **212 testes aprovados (100% green)**.
+   * Compilação Next.js do Frontend Web: `pnpm --filter @mgp/web build` (**100% verde — 12 rotas geradas**).
    * Compilação NestJS e Workers: `pnpm build` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Retomar iniciando diretamente a **FASE 15 — Interface Visual do ASO Studio (`apps/web`)**:
-     * Criar as telas do módulo ASO Studio no dashboard do usuário (`/aso`).
-     * Tela de Catálogo de Apps Monitorados e Concorrentes com métricas chave.
-     * Tela de Rastreamento de Palavras-Chave e Gráficos de Evolução de Ranking.
-     * Tela de Auditoria ASO com score visual, checklist por categoria e recomendações de melhoria.
-     * Conexão dos componentes aos endpoints reais da API e acionamento de sync assíncrono.
+   * Retomar iniciando diretamente a **FASE 16 — Integração, Testes e Homologação da Etapa 2**:
+     * Criar suíte de testes E2E ponta a ponta integrando Scraper -> Prisma -> REST API -> BullMQ Worker -> Frontend Web.
+     * Criar script de auditoria automatizada da Etapa 2 (`audit-etapa2.js`) com verificação rigorosa de todos os entregáveis das Fases 11 a 16.
+     * Executar homologação oficial da Etapa 2 com pontuação 100%.
 
 ---
 

@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Activity,
   Layers,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -25,6 +26,11 @@ const navigationItems = [
     name: 'Meus Aplicativos',
     href: '/apps',
     icon: Smartphone,
+  },
+  {
+    name: 'ASO Studio',
+    href: '/aso',
+    icon: Sparkles,
   },
   {
     name: 'Carteira & Finanças',
