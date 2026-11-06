@@ -229,6 +229,17 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **06. Ponto de Entrada MGP e Heartbeat** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/MGP.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/MGP.kt) | Métodos públicos MGP.initialize, trackEvent, flush, getSessionId e getPendingTelemetryCount. |
 | **07. Guia Oficial de Integração do SDK** | [`docs/sdk/03-sdk-implementation-guide.md`](./sdk/03-sdk-implementation-guide.md) | Manual passo a passo para publishers com Gradle, Application, ProGuard e Data Safety. |
 
+### 1.19. Fase 19 — Engine de Eventos, Atribuição e Antifraude no Backend (Etapa 3 - SDK & Ad Network)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Modelagem Relacional de Telemetria** | [`packages/database/prisma/schema.prisma`](../packages/database/prisma/schema.prisma) | Tabelas `telemetry_sessions` e `telemetry_events` com particionamento multi-tenant e índices. |
+| **02. Migration Versionada de Telemetria** | [`packages/database/prisma/migrations/20261106000000_telemetry_engine/`](../packages/database/prisma/migrations/20261106000000_telemetry_engine/) | DDL SQL gerado para PostgreSQL com relacionamentos com `App` e `Organization`. |
+| **03. Serviço de Antifraude e Criptografia** | [`apps/api/src/modules/telemetry/services/telemetry-antifraud.service.ts`](../apps/api/src/modules/telemetry/services/telemetry-antifraud.service.ts) | HMAC-SHA256 (`timingSafeEqual`), anti-replay com Redis (TTL 600s), detecção de emulador e root. |
+| **04. Ingestão e Produtor BullMQ** | [`apps/api/src/modules/telemetry/services/telemetry-ingestion.service.ts`](../apps/api/src/modules/telemetry/services/telemetry-ingestion.service.ts) | Validação em pipeline de alta performance desacoplada via fila `queue-telemetry`. |
+| **05. Controller REST de Telemetria** | [`apps/api/src/modules/telemetry/controllers/telemetry.controller.ts`](../apps/api/src/modules/telemetry/controllers/telemetry.controller.ts) | Endpoint público `POST /api/v1/telemetry/batch` e endpoint NOC `GET /api/v1/telemetry/metrics`. |
+| **06. Worker Consumer BullMQ** | [`apps/workers/src/processors/telemetry.processor.ts`](../apps/workers/src/processors/telemetry.processor.ts) | Processamento assíncrono, cálculo de duração de sessões e inserção em lote (`createMany`). |
+| **07. Especificação Técnica e de Antifraude** | [`docs/sdk/04-telemetry-engine-and-antifraud.md`](./sdk/04-telemetry-engine-and-antifraud.md) | Documentação normativa do motor de eventos, pipeline assíncrono e conformidade LGPD. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -263,12 +274,12 @@ Progresso atual: **6/6 fases concluídas (Etapa 2 — 100% Concluída e Homologa
 
 ## 4. Planejamento — ETAPA 3 (SDK Android, Ad Server & Motor Publicitário)
 
-Progresso atual: **2/6 fases concluídas (Etapa 3)**.
+Progresso atual: **3/6 fases concluídas (Etapa 3)**.
 
 - [x] **Fase 17 — Arquitetura do SDK Android e Especificação de Telemetria** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 18 — Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)** ✅ [CONCLUÍDA E HOMOLOGADA]
-- [ ] **Fase 19 — Engine de Eventos, Atribuição e Antifraude no Backend** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 20 — Ad Server de Ultra-Baixa Latência (Fastify / High Performance)**
+- [x] **Fase 19 — Engine de Eventos, Atribuição e Antifraude no Backend** ✅ [CONCLUÍDA E HOMOLOGADA]
+- [ ] **Fase 20 — Ad Server de Ultra-Baixa Latência (Fastify / High Performance)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 - [ ] **Fase 21 — Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)**
 - [ ] **Fase 22 — Integração do SDK com o Ad Server e Homologação da Etapa 3**
 
@@ -282,13 +293,14 @@ Progresso atual: **2/6 fases concluídas (Etapa 3)**.
 2. **Saúde da Plataforma:**
    * Auditoria geral Etapa 1: `node infrastructure/scripts/audit-etapa1.js` (**Score: 100% — 93/93 checks**).
    * Auditoria geral Etapa 2: `node infrastructure/scripts/audit-etapa2.js` (**Score: 100% — 82/82 checks**).
-   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**222 testes passing em 25 suítes, 0 falhas**).
-   * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**15 testes passing em 4 suítes, 0 falhas**).
-   * Total de testes automatizados da plataforma: **237 testes aprovados (100% green)**.
+   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**239 testes passing em 28 suítes, 0 falhas**).
+   * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**19 testes passing em 5 suítes, 0 falhas**).
+   * Total de testes automatizados da plataforma: **258 testes aprovados (100% green)**.
    * Compilação dos contratos compartilhados: `pnpm --filter @mgp/contracts build` (**100% verde**).
-   * Compilação Next.js do Frontend Web: `npm run build --prefix apps/web` (**100% verde**).
+   * Compilação dos workers assíncronos: `npm run build --prefix apps/workers` (**100% verde**).
+   * Compilação da API central NestJS: `npm run build --prefix apps/api` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Iniciar diretamente a **ETAPA 3 — Fase 19: Engine de Eventos, Atribuição e Antifraude no Backend**.
+   * Iniciar diretamente a **ETAPA 3 — Fase 20: Ad Server de Ultra-Baixa Latência (Fastify / High Performance)**.
 
 ---
 

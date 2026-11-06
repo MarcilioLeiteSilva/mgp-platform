@@ -8,6 +8,7 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { AdminModule } from './modules/admin/admin.module';
 import { AppsModule } from './modules/apps/apps.module';
 import { AsoModule } from './modules/aso/aso.module';
+import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -21,6 +22,7 @@ import { AppController } from './app.controller';
     AdminModule,
     AppsModule,
     AsoModule,
+    TelemetryModule,
   ],
   controllers: [AppController],
   providers: [],

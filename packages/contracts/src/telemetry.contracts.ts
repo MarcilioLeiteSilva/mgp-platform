@@ -114,3 +114,24 @@ export const TelemetryResponseSchema = z.object({
 
 export type TelemetryResponseDto = z.infer<typeof TelemetryResponseSchema>;
 
+/**
+ * Constantes de filas assíncronas do subsistema de telemetria.
+ */
+export const TELEMETRY_QUEUES = {
+  INGESTION: 'queue-telemetry',
+} as const;
+
+/**
+ * Carga do Job de telemetria processado pelos workers em segundo plano.
+ */
+export interface TelemetryBatchJobPayload {
+  batchId: string;
+  appId: string;
+  organizationId: string;
+  sdkKey: string;
+  clientIp?: string;
+  batch: TelemetryBatchDto;
+  receivedAt: string;
+}
+
+

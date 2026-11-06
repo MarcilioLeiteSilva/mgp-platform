@@ -57,6 +57,7 @@ model Organization {
   campaigns       Campaign[]
   wallet          Wallet?
   asoApps         AsoApp[]
+  telemetrySessions TelemetrySession[]
   createdAt       DateTime                 @default(now()) @map("created_at")
   updatedAt       DateTime                 @updatedAt @map("updated_at")
 
@@ -144,6 +145,8 @@ model App {
   status         AppStatus     @default(PENDING)
   sdkKey         String        @unique @default(uuid()) @map("sdk_key")
   adUnits        AdUnit[]
+  telemetrySessions TelemetrySession[]
+  telemetryEvents   TelemetryEventRecord[]
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
 
@@ -418,3 +421,63 @@ model AsoAuditScore {
   @@index([asoAppId, auditDate])
   @@map("aso_audit_scores")
 }
+
+// ==============================================================================
+// 6. Telemetria e Ciclo de Vida do Aplicativo
+// ==============================================================================
+
+model TelemetrySession {
+  id                String                 @id @default(uuid())
+  sessionId         String                 @unique @map("session_id")
+  appId             String                 @map("app_id")
+  app               App                    @relation(fields: [appId], references: [id], onDelete: Cascade)
+  organizationId    String                 @map("organization_id")
+  organization      Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  startedAt         DateTime               @default(now()) @map("started_at")
+  endedAt           DateTime?              @map("ended_at")
+  durationSeconds   Int                    @default(0) @map("duration_seconds")
+  lastHeartbeatAt   DateTime?              @map("last_heartbeat_at")
+  deviceModel       String?                @map("device_model")
+  osVersion         String?                @map("os_version")
+  locale            String?
+  timezone          String?
+  networkType       String?                @map("network_type")
+  carrier           String?
+  ipAddress         String?                @map("ip_address")
+  isEmulator        Boolean                @default(false) @map("is_emulator")
+  isRooted          Boolean                @default(false) @map("is_rooted")
+  advertisingId     String?                @map("advertising_id")
+  isLimitAdTracking Boolean                @default(false) @map("is_limit_ad_tracking")
+  events            TelemetryEventRecord[]
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
+
+  @@index([appId, startedAt])
+  @@index([organizationId, createdAt])
+  @@map("telemetry_sessions")
+}
+
+model TelemetryEventRecord {
+  id             String           @id @default(uuid())
+  eventId        String           @unique @map("event_id")
+  sessionId      String           @map("session_id")
+  session        TelemetrySession @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  appId          String           @map("app_id")
+  app            App              @relation(fields: [appId], references: [id], onDelete: Cascade)
+  organizationId String           @map("organization_id")
+  eventType      String           @map("event_type")
+  sequenceNumber Int?             @map("sequence_number")
+  properties     Json?
+  timestamp      DateTime
+  nonce          String
+  signature      String
+  isFraudulent   Boolean          @default(false) @map("is_fraudulent")
+  fraudReason    String?          @map("fraud_reason")
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  @@index([appId, eventType, timestamp])
+  @@index([sessionId])
+  @@index([organizationId, createdAt])
+  @@map("telemetry_events")
+}
+

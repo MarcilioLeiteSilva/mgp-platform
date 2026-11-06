@@ -12,6 +12,8 @@ import {
   createAsoSyncQueue,
   createAsoSyncWorker,
 } from './queue/aso-sync.worker';
+import { TelemetryProcessor } from './processors/telemetry.processor';
+import { createTelemetryWorker } from './queue/telemetry.worker';
 import { AsoCronScheduler } from './scheduler/aso-cron.scheduler';
 
 async function bootstrap() {
@@ -39,6 +41,10 @@ async function bootstrap() {
   );
   const asoWorker = createAsoSyncWorker(redisConnection, asoProcessor);
 
+  // Cria worker de Telemetria e Antifraude (queue-telemetry)
+  const telemetryProcessor = new TelemetryProcessor(prisma);
+  const telemetryWorker = createTelemetryWorker(redisConnection, telemetryProcessor);
+
   // Agenda cron jobs caso habilitado
   if (WORKER_CONFIG.ENABLE_CRON) {
     const scheduler = new AsoCronScheduler(asoQueue);
@@ -60,6 +66,7 @@ async function bootstrap() {
 
     try {
       await asoWorker.close();
+      await telemetryWorker.close();
       await asoQueue.close();
       await redisConnection.quit();
       await prisma.$disconnect();
