@@ -14,6 +14,7 @@
     "test": "turbo run test",
     "audit:etapa1": "node infrastructure/scripts/audit-etapa1.js",
     "audit:etapa2": "node infrastructure/scripts/audit-etapa2.js",
+    "audit:etapa3": "node infrastructure/scripts/audit-etapa3.js",
     "db:generate": "pnpm --filter @mgp/database run prisma:generate",
     "db:migrate": "pnpm --filter @mgp/database run prisma:deploy",
     "db:seed": "pnpm --filter @mgp/database run db:seed",

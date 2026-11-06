@@ -135,4 +135,44 @@ object MGP {
      */
     @JvmStatic
     fun isReady(): Boolean = isInitialized.get()
+
+    // ==============================================================================
+    // Métodos Utilitários de Anúncios (Ad Delivery Helpers)
+    // ==============================================================================
+
+    /**
+     * Carrega um anúncio Intersticial para exibição posterior em tela cheia.
+     */
+    @JvmStatic
+    fun loadInterstitial(
+        context: Context,
+        placementId: String,
+        callback: com.mgp.sdk.ads.interstitial.InterstitialAdLoadCallback
+    ) {
+        com.mgp.sdk.ads.interstitial.MgpInterstitialAd.load(context, placementId, callback)
+    }
+
+    /**
+     * Carrega um anúncio Recompensado (Rewarded Ad) para concessão de moedas/benefícios.
+     */
+    @JvmStatic
+    fun loadRewarded(
+        context: Context,
+        placementId: String,
+        callback: com.mgp.sdk.ads.rewarded.RewardedAdLoadCallback
+    ) {
+        com.mgp.sdk.ads.rewarded.MgpRewardedAd.load(context, placementId, callback)
+    }
+
+    /**
+     * Carrega um anúncio Nativo para customização livre de UI.
+     */
+    @JvmStatic
+    fun loadNativeAd(
+        context: Context,
+        placementId: String,
+        callback: com.mgp.sdk.ads.nativead.NativeAdLoadCallback
+    ) {
+        com.mgp.sdk.ads.nativead.MgpNativeAd.load(context, placementId, callback)
+    }
 }

@@ -14,6 +14,8 @@ import {
 } from './queue/aso-sync.worker';
 import { TelemetryProcessor } from './processors/telemetry.processor';
 import { createTelemetryWorker } from './queue/telemetry.worker';
+import { AdEventsProcessor } from './processors/ad-events.processor';
+import { createAdEventsWorkers } from './queue/ad-events.worker';
 import { AsoCronScheduler } from './scheduler/aso-cron.scheduler';
 
 async function bootstrap() {
@@ -45,6 +47,10 @@ async function bootstrap() {
   const telemetryProcessor = new TelemetryProcessor(prisma);
   const telemetryWorker = createTelemetryWorker(redisConnection, telemetryProcessor);
 
+  // Cria workers de Eventos Publicitários (impressões, cliques, recompensas)
+  const adEventsProcessor = new AdEventsProcessor(prisma);
+  const adEventsWorkers = createAdEventsWorkers(redisConnection, adEventsProcessor);
+
   // Agenda cron jobs caso habilitado
   if (WORKER_CONFIG.ENABLE_CRON) {
     const scheduler = new AsoCronScheduler(asoQueue);
@@ -55,7 +61,7 @@ async function bootstrap() {
     }
   }
 
-  console.info(`[Bootstrap] Worker ASO ativo e ouvindo na fila "queue-aso-sync". Concorrência: ${WORKER_CONFIG.CONCURRENCY}`);
+  console.info(`[Bootstrap] Workers ativos e ouvindo filas (ASO, Telemetria, Anúncios). Concorrência: ${WORKER_CONFIG.CONCURRENCY}`);
 
   // Tratamento de encerramento gracioso (Graceful Shutdown)
   let isShuttingDown = false;
@@ -67,6 +73,7 @@ async function bootstrap() {
     try {
       await asoWorker.close();
       await telemetryWorker.close();
+      await adEventsWorkers.closeAll();
       await asoQueue.close();
       await redisConnection.quit();
       await prisma.$disconnect();

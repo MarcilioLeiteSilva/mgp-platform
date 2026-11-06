@@ -12,3 +12,4 @@ ALTER TABLE "creatives" ADD COLUMN IF NOT EXISTS "reward_type" TEXT;
 ALTER TABLE "creatives" ADD COLUMN IF NOT EXISTS "reward_amount" INTEGER;
 ALTER TABLE "creatives" ADD COLUMN IF NOT EXISTS "required_watch_seconds" INTEGER DEFAULT 15;
 ALTER TABLE "creatives" ADD COLUMN IF NOT EXISTS "html_content" TEXT;
+

@@ -110,3 +110,4 @@ Para prevenir fraudes e resgates antecipados de recompensas:
      "rewardAmount": 50
    }
    ```
+

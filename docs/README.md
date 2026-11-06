@@ -266,6 +266,20 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **08. Suíte de Testes RTB e Formatos** | [`apps/ad-server/src/**/*.spec.ts`](../apps/ad-server/src/) | 29 testes cobrindo os 4 formatos, cálculo de eCPM, Second-Price e resgate de recompensa. |
 | **09. Especificação Normativa de RTB e Formatos** | [`docs/adserver/02-rtb-auction-and-formats.md`](./adserver/02-rtb-auction-and-formats.md) | Documento normativo oficial do motor de leilão competitivo e formatos. |
 
+### 1.22. Fase 22 — Integração do SDK com o Ad Server e Homologação da Etapa 3 (Etapa 3 - SDK & Ad Network)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Modelos de Dados de Anúncios no SDK** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/model/AdModels.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/model/AdModels.kt) | Modelos `AdRequest`, `AdResponse`, `CreativeData`, `VisibilityMetrics` e listeners de ciclo de vida. |
+| **02. Cliente HTTP de Anúncios do SDK** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/network/AdHttpClient.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/network/AdHttpClient.kt) | Cliente `HttpURLConnection` nativo de ultra-baixa latência conectando aos endpoints do Ad Server. |
+| **03. Componente Banner com Viewability MRC** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/banner/MgpBannerView.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/banner/MgpBannerView.kt) | Custom FrameLayout com aferição contínua de 50% de pixels visíveis por 1s contínuo (padrão IAB/MRC). |
+| **04. Interstitial com Skip Countdown** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/interstitial/MgpInterstitialAd.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/interstitial/MgpInterstitialAd.kt) | Fullscreen manager com contagem regressiva de skip offset (padrão 5s) e tracking de impressão/clique. |
+| **05. Rewarded Ad com Verificação Criptográfica**| [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/rewarded/MgpRewardedAd.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/rewarded/MgpRewardedAd.kt) | Trava obrigatória de tempo assistido, envio de `rewardToken` e callback seguro `OnUserEarnedRewardListener`. |
+| **06. Anúncios Nativos Desacoplados** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/nativead/MgpNativeAd.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/ads/nativead/MgpNativeAd.kt) | Binding livre de headline, body, icon, media, star rating e sponsor text na interface do app. |
+| **07. Processador de Eventos Publicitários** | [`apps/workers/src/processors/ad-events.processor.ts`](../apps/workers/src/processors/ad-events.processor.ts) | Consumer BullMQ para impressões, cliques e recompensas com liquidação contábil e auditoria. |
+| **08. Suíte de Testes Ponta a Ponta da Etapa 3** | [`apps/ad-server/src/test/etapa3-e2e.spec.ts`](../apps/ad-server/src/test/etapa3-e2e.spec.ts) | Teste integrado cobrindo os 4 formatos, leilão RTB, nonces, anti-replay e pipeline de workers. |
+| **09. Script de Auditoria Automatizada da Etapa 3** | [`infrastructure/scripts/audit-etapa3.js`](../infrastructure/scripts/audit-etapa3.js) | Executável com `pnpm audit:etapa3` avaliando 74 verificações rigorosas com Score 100%. |
+| **10. Relatório Oficial de Certificação da Etapa 3**| [`docs/sdk/05-etapa3-audit-and-certification.md`](./sdk/05-etapa3-audit-and-certification.md) | Parecer técnico formal certificando o encerramento da Etapa 3 e liberação da Etapa 4. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -298,20 +312,33 @@ Progresso atual: **6/6 fases concluídas (Etapa 2 — 100% Concluída e Homologa
 
 ---
 
-## 4. Planejamento — ETAPA 3 (SDK Android, Ad Server & Motor Publicitário)
+## 4. Controle de Progresso — ETAPA 3 (SDK Android, Ad Server & Motor Publicitário)
 
-Progresso atual: **5/6 fases concluídas (Etapa 3)**.
+Progresso atual: **6/6 fases concluídas (Etapa 3 — 100% Concluída e Homologada)**.
 
 - [x] **Fase 17 — Arquitetura do SDK Android e Especificação de Telemetria** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 18 — Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 19 — Engine de Eventos, Atribuição e Antifraude no Backend** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 20 — Ad Server de Ultra-Baixa Latência (Fastify / High Performance)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 21 — Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)** ✅ [CONCLUÍDA E HOMOLOGADA]
-- [ ] **Fase 22 — Integração do SDK com o Ad Server e Homologação da Etapa 3** ◀ **[PRÓXIMA FASE A EXECUTAR]**
+- [x] **Fase 22 — Integração do SDK com o Ad Server e Homologação da Etapa 3** ✅ [CONCLUÍDA E HOMOLOGADA — SCORE 100%]
 
 ---
 
-## 5. Ponto de Retomada dos Trabalhos (Checklist para o Próximo Turno)
+## 5. Planejamento — ETAPA 4 (Motor de Campanhas, Gestão Financeira & Marketplace)
+
+Progresso atual: **0/6 fases concluídas (Etapa 4)**.
+
+- [ ] **Fase 23 — Gestão de Campanhas, Criativos e Segmentação de Público** ◀ **[PRÓXIMA FASE A EXECUTAR]**
+- [ ] **Fase 24 — Painel de Publishers, Configuração de Ad Units e Relatórios de Monetização**
+- [ ] **Fase 25 — Motor de Payouts, Faturamento e Integração com Gateways de Pagamento**
+- [ ] **Fase 26 — Motor de Recomendações e Otimização Automática de Lances**
+- [ ] **Fase 27 — Painel de Controle de Fraudes e Detecção de Tráfego Inválido (IVT)**
+- [ ] **Fase 28 — Integração, Testes E2E e Homologação Final da Etapa 4**
+
+---
+
+## 6. Ponto de Retomada dos Trabalhos (Checklist para o Próximo Turno)
 
 1. **Estado do Repositório:**
    * Branches `main` e `develop` sincronizadas com `origin` (https://github.com/MarcilioLeiteSilva/mgp-platform).
@@ -319,21 +346,23 @@ Progresso atual: **5/6 fases concluídas (Etapa 3)**.
 2. **Saúde da Plataforma:**
    * Auditoria geral Etapa 1: `node infrastructure/scripts/audit-etapa1.js` (**Score: 100% — 93/93 checks**).
    * Auditoria geral Etapa 2: `node infrastructure/scripts/audit-etapa2.js` (**Score: 100% — 82/82 checks**).
+   * Auditoria geral Etapa 3: `node infrastructure/scripts/audit-etapa3.js` (**Score: 100% — 74/74 checks**).
+   * Total de verificações auditadas no monorepo: **249/249 checks aprovados (Score 100% global)**.
    * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**239 testes passing em 28 suítes, 0 falhas**).
-   * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**19 testes passing em 5 suítes, 0 falhas**).
-   * Suíte completa de testes Jest do Ad Server: `npm test --prefix apps/ad-server` (**29 testes passing em 4 suítes, 0 falhas**).
-   * Total de testes automatizados da plataforma: **287 testes aprovados (100% green)**.
+   * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**25 testes passing em 6 suítes, 0 falhas**).
+   * Suíte completa de testes Jest do Ad Server: `npm test --prefix apps/ad-server` (**37 testes passing em 5 suítes, 0 falhas**).
+   * Total de testes automatizados da plataforma: **301 testes aprovados (100% green)**.
    * Compilação dos contratos compartilhados: `pnpm --filter @mgp/contracts build` (**100% verde**).
    * Compilação do banco de dados & Prisma: `pnpm --filter @mgp/database build` (**100% verde**).
    * Compilação dos workers assíncronos: `npm run build --prefix apps/workers` (**100% verde**).
    * Compilação da API central NestJS: `npm run build --prefix apps/api` (**100% verde**).
    * Compilação do Ad Server Fastify: `npm run build --prefix apps/ad-server` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Iniciar diretamente a **ETAPA 3 — Fase 22: Integração do SDK com o Ad Server e Homologação da Etapa 3**.
+   * Iniciar diretamente a **ETAPA 4 — Fase 23: Gestão de Campanhas, Criativos e Segmentação de Público**.
 
 ---
 
-## 6. Regras de Execução e Governança
+## 7. Regras de Execução e Governança
 
 1. **Uma fase por vez**: Nenhuma linha de código de fases subsequentes pode ser escrita sem aprovação formal da anterior.
 2. **Sem dados ou botões fictícios**: Todo componente ou tela entregue deve estar conectado a fluxos e endpoints reais.
