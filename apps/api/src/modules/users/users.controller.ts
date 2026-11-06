@@ -7,6 +7,7 @@ import {
   Param,
   Req,
   Headers,
+  UseGuards,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -19,9 +20,11 @@ import {
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @ApiTags('Usuários')
 @ApiBearerAuth('JWT-auth')
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }

@@ -8,6 +8,7 @@ import {
   Param,
   Headers,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -24,9 +25,11 @@ import { AddMemberDto } from './dto/add-member.dto';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { TransferOwnershipDto } from './dto/transfer-ownership.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @ApiTags('Organizações e Multi-Tenancy')
 @ApiBearerAuth('JWT-auth')
+@UseGuards(JwtAuthGuard)
 @Controller('organizations')
 export class OrganizationsController {
   constructor(private readonly orgService: OrganizationsService) {}

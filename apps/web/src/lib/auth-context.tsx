@@ -78,13 +78,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const [userRes, orgsRes] = await Promise.all([
         api.get<UserProfile>('/users/me'),
-        api.get<OrganizationItem[]>('/organizations/me'),
+        api.get<any[]>('/organizations/me'),
       ]);
 
       if (userRes.success && userRes.data) {
         setUser(userRes.data);
 
-        const orgList = orgsRes.success && Array.isArray(orgsRes.data) ? orgsRes.data : [];
+        const rawOrgs = orgsRes.success && Array.isArray(orgsRes.data) ? orgsRes.data : [];
+        const orgList: OrganizationItem[] = rawOrgs.map((item: any) => {
+          if (item.organization) {
+            return {
+              id: item.organization.id,
+              name: item.organization.name,
+              slug: item.organization.slug,
+              role: item.role,
+              isDefault: item.isDefault,
+            };
+          }
+          return item;
+        });
+
+        // Fallback: extrair das memberships do perfil se necessário
+        if (orgList.length === 0 && (userRes.data as any)?.memberships) {
+          (userRes.data as any).memberships.forEach((m: any) => {
+            if (m.organization) {
+              orgList.push({
+                id: m.organization.id,
+                name: m.organization.name,
+                slug: m.organization.slug,
+                role: m.role,
+                isDefault: m.isDefault,
+              });
+            }
+          });
+        }
+
         setOrganizations(orgList);
 
         const storedOrgId = api.getActiveOrgId();
@@ -95,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (!active && orgList.length > 0) {
-          active = orgList[0];
+          active = orgList.find((o) => o.isDefault) || orgList[0];
         }
 
         if (active) {
@@ -127,6 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     const res = await api.post<{
       user: UserProfile;
+      organization?: { id: string; name: string; slug: string; role: string };
       tokens: { accessToken: string; refreshToken: string };
     }>('/auth/login', { email, password });
 
@@ -135,6 +164,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (res.data.tokens.refreshToken) {
         api.setRefreshToken(res.data.tokens.refreshToken);
       }
+      if (res.data.organization?.id) {
+        api.setActiveOrgId(res.data.organization.id);
+        setCurrentOrg({
+          id: res.data.organization.id,
+          name: res.data.organization.name,
+          slug: res.data.organization.slug,
+          role: res.data.organization.role,
+        });
+      }
+      setUser(res.data.user);
       await fetchUserData();
       return { success: true };
     }
