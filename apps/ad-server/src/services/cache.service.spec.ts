@@ -1,10 +1,9 @@
 import { CacheService } from './cache.service';
 
-describe('CacheService (Deduplicação de Nonce e Cache Rápido)', () => {
+describe('CacheService (Deduplicação de Nonce, Cache Rápido e Frequency Capping)', () => {
   let cache: CacheService;
 
   beforeEach(() => {
-    // Usa URL de teste; opera com fallback defensivo em memória
     cache = new CacheService('redis://127.0.0.1:6379');
   });
 
@@ -22,6 +21,24 @@ describe('CacheService (Deduplicação de Nonce e Cache Rápido)', () => {
     expect(secondCheck).toBe(false);
   });
 
+  it('deve gerenciar Frequency Capping permitindo até o limite e bloqueando o excedente', async () => {
+    const campaignId = 'cmp_test_cap';
+    const advertisingId = 'user_ad_id_123';
+    const limit = 2;
+
+    // 1ª exibição: permitida
+    const check1 = await cache.checkAndIncrementFrequency(campaignId, advertisingId, limit);
+    expect(check1).toBe(true);
+
+    // 2ª exibição: permitida
+    const check2 = await cache.checkAndIncrementFrequency(campaignId, advertisingId, limit);
+    expect(check2).toBe(true);
+
+    // 3ª exibição: bloqueada pelo frequency capping
+    const check3 = await cache.checkAndIncrementFrequency(campaignId, advertisingId, limit);
+    expect(check3).toBe(false);
+  });
+
   it('deve armazenar e recuperar dados do cache em memória', async () => {
     const testData = { id: 'app_1', name: 'Meu App' };
     await cache.set('test:key', testData, 10);
@@ -35,4 +52,3 @@ describe('CacheService (Deduplicação de Nonce e Cache Rápido)', () => {
     expect(retrieved).toBeNull();
   });
 });
-

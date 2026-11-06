@@ -2,8 +2,10 @@ import { FastifyPluginAsync } from 'fastify';
 import {
   ImpressionEventSchema,
   ClickEventSchema,
+  RewardEventSchema,
   AdImpressionJobPayload,
   AdClickJobPayload,
+  AdRewardJobPayload,
 } from '@mgp/contracts';
 import { CacheService } from '../services/cache.service';
 import { TokenService } from '../services/token.service';
@@ -77,7 +79,6 @@ export const eventsRoutes: FastifyPluginAsync<EventsRouteOptions> = async (
       receivedAt: new Date().toISOString(),
     };
 
-    // Não bloqueia a resposta se a fila sofrer degradação temporária
     opts.eventQueue.enqueueImpression(jobPayload).catch(() => {});
 
     return reply.status(204).send();
@@ -146,6 +147,86 @@ export const eventsRoutes: FastifyPluginAsync<EventsRouteOptions> = async (
   });
 
   /**
+   * POST /events/reward
+   * Validação de recompensa para anúncios premiados (Rewarded Ads).
+   * Garante que o usuário completou a duração exigida antes de conceder a recompensa.
+   */
+  fastify.post('/events/reward', async (request, reply) => {
+    const parseResult = RewardEventSchema.safeParse(request.body);
+    if (!parseResult.success) {
+      return reply.status(400).send({
+        success: false,
+        error: {
+          code: 'INVALID_EVENT_PAYLOAD',
+          message: 'Payload de recompensa malformado',
+          details: parseResult.error.errors,
+        },
+      });
+    }
+
+    const { rewardToken, nonce, completedAt, watchDurationSeconds } = parseResult.data;
+
+    // 1. Verificação Criptográfica do Token de Recompensa
+    const tokenPayload = opts.tokenService.verifyTrackingToken(rewardToken);
+    if (!tokenPayload) {
+      return reply.status(400).send({
+        success: false,
+        error: {
+          code: 'INVALID_OR_EXPIRED_TOKEN',
+          message: 'Token de recompensa inválido, violado ou expirado',
+        },
+      });
+    }
+
+    // 2. Validação da Duração Assistida
+    const requiredSeconds = tokenPayload.requiredWatchSeconds ?? 15;
+    if (watchDurationSeconds < requiredSeconds) {
+      return reply.status(400).send({
+        success: false,
+        error: {
+          code: 'INSUFFICIENT_WATCH_DURATION',
+          message: `Duração assistida (${watchDurationSeconds}s) inferior à exigida (${requiredSeconds}s)`,
+        },
+      });
+    }
+
+    // 3. Proteção Anti-Replay via Nonce atômico
+    const isNonceFresh = await opts.cache.checkAndRecordNonce(nonce, 600);
+    if (!isNonceFresh) {
+      return reply.status(409).send({
+        success: false,
+        error: {
+          code: 'NONCE_ALREADY_USED',
+          message: 'Tentativa de resgate de recompensa duplicada',
+        },
+      });
+    }
+
+    const clientIp =
+      (request.headers['x-forwarded-for'] as string) ||
+      request.ip ||
+      '127.0.0.1';
+
+    const jobPayload: AdRewardJobPayload = {
+      tokenPayload,
+      nonce,
+      completedAt,
+      watchDurationSeconds,
+      clientIp,
+      receivedAt: new Date().toISOString(),
+    };
+
+    opts.eventQueue.enqueueReward(jobPayload).catch(() => {});
+
+    return reply.status(200).send({
+      success: true,
+      verified: true,
+      rewardType: tokenPayload.rewardType || 'COINS',
+      rewardAmount: tokenPayload.rewardAmount || 10,
+    });
+  });
+
+  /**
    * GET /click/track
    * Redirecionador de clique com rastreamento intermediário e redirecionamento HTTP 302.
    */
@@ -180,7 +261,6 @@ export const eventsRoutes: FastifyPluginAsync<EventsRouteOptions> = async (
 
     opts.eventQueue.enqueueClick(jobPayload).catch(() => {});
 
-    // Redireciona o usuário para o destino final da campanha (actionUrl)
     return reply.redirect(tokenPayload.actionUrl, 302);
   });
 };

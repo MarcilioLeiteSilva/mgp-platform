@@ -4,17 +4,20 @@ import {
   AD_SERVER_QUEUES,
   AdImpressionJobPayload,
   AdClickJobPayload,
+  AdRewardJobPayload,
 } from '@mgp/contracts';
 
 export class EventQueueService {
   private impressionQueue: Queue<AdImpressionJobPayload> | null = null;
   private clickQueue: Queue<AdClickJobPayload> | null = null;
+  private rewardQueue: Queue<AdRewardJobPayload> | null = null;
   private redisConnection: IORedis | null = null;
   private isConnected = false;
 
   private metrics = {
     impressionsEnqueued: 0,
     clicksEnqueued: 0,
+    rewardsEnqueued: 0,
     failures: 0,
   };
 
@@ -71,6 +74,19 @@ export class EventQueueService {
           },
         },
       });
+
+      this.rewardQueue = new Queue<AdRewardJobPayload>(AD_SERVER_QUEUES.REWARDS, {
+        connection: this.redisConnection,
+        defaultJobOptions: {
+          removeOnComplete: 1000,
+          removeOnFail: 5000,
+          attempts: 3,
+          backoff: {
+            type: 'exponential',
+            delay: 1000,
+          },
+        },
+      });
     } catch {
       this.isConnected = false;
     }
@@ -91,7 +107,6 @@ export class EventQueueService {
       return true;
     } catch {
       this.metrics.failures++;
-      // Falha não derruba a resposta HTTP (204 No Content garantido com degradação graciosa)
       return false;
     }
   }
@@ -115,6 +130,25 @@ export class EventQueueService {
     }
   }
 
+  async enqueueReward(payload: AdRewardJobPayload): Promise<boolean> {
+    try {
+      if (this.rewardQueue && this.isConnected) {
+        await this.rewardQueue.add(
+          `reward_${payload.nonce}`,
+          payload,
+          {
+            jobId: `rew_${payload.nonce}`,
+          },
+        );
+      }
+      this.metrics.rewardsEnqueued++;
+      return true;
+    } catch {
+      this.metrics.failures++;
+      return false;
+    }
+  }
+
   getMetrics() {
     return { ...this.metrics };
   }
@@ -123,10 +157,10 @@ export class EventQueueService {
     try {
       if (this.impressionQueue) await this.impressionQueue.close();
       if (this.clickQueue) await this.clickQueue.close();
+      if (this.rewardQueue) await this.rewardQueue.close();
       if (this.redisConnection) await this.redisConnection.quit();
     } catch {
       // Ignora erro no shutdown
     }
   }
 }
-

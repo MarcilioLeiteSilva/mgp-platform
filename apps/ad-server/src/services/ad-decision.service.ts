@@ -16,17 +16,26 @@ export interface AdDecisionDeps {
   serverBaseUrl?: string;
 }
 
+interface RankedCandidate {
+  campaign: any;
+  creative: any;
+  ecpm: number;
+  priorityTier: number;
+}
+
 export class AdDecisionService {
   private readonly tokenTtlSeconds: number;
   private readonly serverBaseUrl: string;
 
   constructor(private readonly deps: AdDecisionDeps) {
     this.tokenTtlSeconds = deps.tokenTtlSeconds || 900;
-    this.serverBaseUrl = deps.serverBaseUrl || 'https://mgp-production-mgp-adserver.gtalg3.easypanel.host';
+    this.serverBaseUrl =
+      deps.serverBaseUrl ||
+      'https://mgp-production-mgp-adserver.gtalg3.easypanel.host';
   }
 
   /**
-   * Processa a solicitação de anúncio e executa o leilão/seleção em ultra-baixa latência.
+   * Processa a solicitação de anúncio e executa o leilão RTB em ultra-baixa latência (< 50ms).
    */
   async decideAd(
     request: AdRequestDto,
@@ -89,16 +98,18 @@ export class AdDecisionService {
 
     const floorEcpm = Number(adUnit.floorEcpm) || 0;
     const country = request.device.country || 'BR';
+    const advertisingId = request.device.advertisingId;
 
-    // 3. Busca de Campanhas Elegíveis
-    const eligibleCampaigns = await this.resolveEligibleCampaigns(
+    // 3. Busca e Avaliação de Campanhas Elegíveis (Targeting + Frequency Capping)
+    const eligibleCandidates = await this.resolveEligibleCandidates(
       country,
       request.format,
       app.organizationId,
       floorEcpm,
+      advertisingId,
     );
 
-    if (!eligibleCampaigns || eligibleCampaigns.length === 0) {
+    if (!eligibleCandidates || eligibleCandidates.length === 0) {
       return {
         requestId,
         fill: false,
@@ -106,9 +117,9 @@ export class AdDecisionService {
       };
     }
 
-    // 4. Seleção da Melhor Campanha (Prioridade: PAID com maior bid > EXCHANGE > HOUSE_AD)
-    const selectedCampaign = this.selectWinningCampaign(eligibleCampaigns);
-    if (!selectedCampaign || !selectedCampaign.creatives || selectedCampaign.creatives.length === 0) {
+    // 4. Execução do Leilão RTB (Second-Price Vickrey Auction com Floor)
+    const auctionResult = this.runRtbAuction(eligibleCandidates, floorEcpm);
+    if (!auctionResult) {
       return {
         requestId,
         fill: false,
@@ -116,54 +127,287 @@ export class AdDecisionService {
       };
     }
 
-    const creative = selectedCampaign.creatives[0];
+    const { winner, clearingPrice } = auctionResult;
+    const campaign = winner.campaign;
+    const creative = winner.creative;
     const now = Date.now();
     const expiresAt = now + this.tokenTtlSeconds * 1000;
 
-    // 5. Geração de Tokens Criptográficos Assinados
+    // 5. Metadados e Payload Específico por Formato
+    const isRewarded = request.format === AdFormat.REWARDED;
+    const isNative = request.format === AdFormat.NATIVE;
+    const isInterstitial = request.format === AdFormat.INTERSTITIAL;
+
+    const rewardType = isRewarded ? creative.rewardType || 'COINS' : undefined;
+    const rewardAmount = isRewarded
+      ? creative.rewardAmount || 10
+      : undefined;
+    const requiredWatchSeconds = isRewarded
+      ? creative.requiredWatchSeconds ?? 15
+      : undefined;
+
     const tokenPayload: AdTrackingTokenPayload = {
       requestId,
       adUnitId: adUnit.id,
-      campaignId: selectedCampaign.id,
+      campaignId: campaign.id,
       creativeId: creative.id,
       publisherAppId: app.id,
       publisherOrgId: app.organizationId,
-      advertiserOrgId: selectedCampaign.organizationId,
-      bidAmount: Number(selectedCampaign.bidAmount),
-      billingModel: selectedCampaign.billingModel,
+      advertiserOrgId: campaign.organizationId,
+      bidAmount: Number(campaign.bidAmount),
+      clearingPrice,
+      billingModel: campaign.billingModel,
       format: request.format,
       actionUrl: creative.actionUrl,
+      rewardType,
+      rewardAmount,
+      requiredWatchSeconds,
       issuedAt: now,
       expiresAt,
     };
 
-    const impressionToken = this.deps.tokenService.generateTrackingToken(tokenPayload);
-    const clickToken = this.deps.tokenService.generateTrackingToken(tokenPayload);
+    // 6. Geração de Tokens Criptográficos Assinados
+    const impressionToken =
+      this.deps.tokenService.generateTrackingToken(tokenPayload);
+    const clickToken =
+      this.deps.tokenService.generateTrackingToken(tokenPayload);
+    const rewardToken = isRewarded
+      ? this.deps.tokenService.generateTrackingToken(tokenPayload)
+      : undefined;
 
-    // URL de rastreamento de clique intermediária que registra a métrica e redireciona para a actionUrl real
     const trackingClickUrl = `${this.serverBaseUrl}/click/track?t=${encodeURIComponent(clickToken)}`;
+
+    // 7. Montagem do Criativo Enriquecido por Formato
+    const creativeResponse: any = {
+      id: creative.id,
+      type: creative.format as AdFormat,
+      width: isInterstitial || isRewarded ? 1080 : creative.width,
+      height: isInterstitial || isRewarded ? 1920 : creative.height,
+      title: creative.title,
+      description: creative.description || undefined,
+      imageUrl: creative.imageUrl,
+      actionUrl: trackingClickUrl,
+    };
+
+    if (isNative) {
+      creativeResponse.iconUrl = creative.iconUrl || creative.imageUrl;
+      creativeResponse.ctaText = creative.ctaText || 'Instalar';
+      creativeResponse.starRating = creative.starRating
+        ? Number(creative.starRating)
+        : 4.5;
+      creativeResponse.sponsorText =
+        creative.sponsorText || campaign.name || 'Patrocinado';
+    }
+
+    if (isInterstitial) {
+      creativeResponse.skipOffsetSeconds = creative.skipOffsetSeconds ?? 5;
+      if (creative.htmlContent) {
+        creativeResponse.htmlContent = creative.htmlContent;
+      }
+    }
+
+    if (isRewarded) {
+      creativeResponse.rewardType = rewardType;
+      creativeResponse.rewardAmount = rewardAmount;
+      creativeResponse.requiredWatchSeconds = requiredWatchSeconds;
+    }
 
     return {
       requestId,
       fill: true,
-      campaignId: selectedCampaign.id,
-      campaignType: selectedCampaign.type as CampaignType,
-      creative: {
-        id: creative.id,
-        type: creative.format as AdFormat,
-        width: creative.width,
-        height: creative.height,
-        title: creative.title,
-        description: creative.description || undefined,
-        imageUrl: creative.imageUrl,
-        actionUrl: trackingClickUrl,
+      campaignId: campaign.id,
+      campaignType: campaign.type as CampaignType,
+      pricing: {
+        model: campaign.billingModel as 'CPM' | 'CPC' | 'CPI',
+        bidAmount: Number(campaign.bidAmount),
+        clearingPrice,
       },
+      creative: creativeResponse,
       tracking: {
         impressionToken,
         clickToken,
+        rewardToken,
         expiresAt: new Date(expiresAt).toISOString(),
       },
     };
+  }
+
+  /**
+   * Calcula o eCPM efetivo baseado no modelo de precificação da campanha
+   */
+  calculateEcpm(campaign: any): number {
+    const bid = Number(campaign.bidAmount) || 0;
+    const model = campaign.billingModel;
+
+    if (model === 'CPM') {
+      return bid;
+    }
+
+    // Para modelo CPC: eCPM = bidCPC * CTR_preditivo * 1000
+    // CTR preditivo padrão de 2.0% (0.02)
+    if (model === 'CPC') {
+      const predictedCtr = 0.02;
+      return Number((bid * predictedCtr * 1000).toFixed(4));
+    }
+
+    // Para modelo CPI: eCPM = bidCPI * CTR_preditivo * CVR_preditivo * 1000
+    // CVR preditivo de 10% sobre cliques (0.10)
+    if (model === 'CPI') {
+      const predictedCtr = 0.02;
+      const predictedCvr = 0.1;
+      return Number((bid * predictedCtr * predictedCvr * 1000).toFixed(4));
+    }
+
+    return bid;
+  }
+
+  /**
+   * Executa o leilão RTB (Second-Price Vickrey Auction com Floor Price)
+   */
+  private runRtbAuction(
+    candidates: RankedCandidate[],
+    floorEcpm: number,
+  ): { winner: RankedCandidate; clearingPrice: number } | null {
+    if (candidates.length === 0) return null;
+
+    // Ordenação determinística: Prioridade de Tier (1: House/Direct, 2: Paid, 3: Exchange) e eCPM decrescente
+    const sorted = candidates.sort((a, b) => {
+      if (a.priorityTier !== b.priorityTier) {
+        return a.priorityTier - b.priorityTier;
+      }
+      return b.ecpm - a.ecpm;
+    });
+
+    const winner = sorted[0];
+
+    // Regra do Segundo Preço (Second-Price Auction):
+    // Se houver 2º colocado no mesmo tier de leilão, paga second.ecpm + $0.01 (limitado ao lance do vencedor)
+    // Se for único concorrente, paga o floorEcpm
+    let clearingPrice = floorEcpm;
+    const sameTierSecond = sorted.find(
+      (c, idx) => idx > 0 && c.priorityTier === winner.priorityTier,
+    );
+
+    if (sameTierSecond) {
+      clearingPrice = Math.min(
+        winner.ecpm,
+        Math.max(sameTierSecond.ecpm + 0.01, floorEcpm),
+      );
+    } else {
+      clearingPrice = Math.max(floorEcpm, Math.min(winner.ecpm, floorEcpm));
+      if (clearingPrice === 0 && winner.ecpm > 0) {
+        clearingPrice = Number((winner.ecpm * 0.8).toFixed(4));
+      }
+    }
+
+    return {
+      winner,
+      clearingPrice: Number(clearingPrice.toFixed(4)),
+    };
+  }
+
+  private async resolveEligibleCandidates(
+    country: string,
+    format: AdFormat,
+    publisherOrgId: string,
+    floorEcpm: number,
+    advertisingId?: string,
+  ): Promise<RankedCandidate[]> {
+    const cacheKey = `adserver:campaigns:${country}:${format}`;
+    let campaigns = await this.deps.cache.get<any[]>(cacheKey);
+
+    if (!campaigns) {
+      try {
+        campaigns = await this.deps.prisma.campaign.findMany({
+          where: {
+            status: 'ACTIVE',
+            targetCountry: country,
+            creatives: {
+              some: {
+                format,
+                isActive: true,
+              },
+            },
+          },
+          include: {
+            creatives: {
+              where: {
+                format,
+                isActive: true,
+              },
+            },
+          },
+        });
+
+        if (campaigns && campaigns.length > 0) {
+          await this.deps.cache.set(cacheKey, campaigns, 60); // 1 min cache
+        }
+      } catch {
+        campaigns = [];
+      }
+    }
+
+    if (!campaigns || campaigns.length === 0) {
+      return [];
+    }
+
+    const candidates: RankedCandidate[] = [];
+
+    for (const campaign of campaigns) {
+      // 1. Regra de auto-impressão
+      if (
+        campaign.type !== CampaignType.HOUSE_AD &&
+        campaign.organizationId === publisherOrgId
+      ) {
+        continue;
+      }
+
+      // 2. Frequency Capping
+      const capPerHour = campaign.frequencyCapPerHour || 3;
+      if (advertisingId && capPerHour > 0) {
+        const allowed =
+          await this.deps.cache.checkAndIncrementFrequency(
+            campaign.id,
+            advertisingId,
+            capPerHour,
+          );
+        if (!allowed) {
+          continue;
+        }
+      }
+
+      // 3. Cálculo de eCPM e Piso de Reserva
+      const ecpm = this.calculateEcpm(campaign);
+      if (ecpm < floorEcpm) {
+        continue;
+      }
+
+      // 4. Seleção de Criativo Ativo no Formato
+      const validCreatives = (campaign.creatives || []).filter(
+        (c: any) => c.format === format && c.isActive,
+      );
+
+      if (validCreatives.length === 0) {
+        continue;
+      }
+
+      // Tiering
+      let priorityTier = 2; // Paid
+      if (campaign.type === CampaignType.HOUSE_AD) {
+        priorityTier = 3; // Fallback
+      } else if (campaign.type === CampaignType.EXCHANGE) {
+        priorityTier = 2.5; // Exchange
+      }
+
+      candidates.push({
+        campaign,
+        creative: validCreatives[0],
+        ecpm,
+        priorityTier,
+      });
+    }
+
+    return candidates;
   }
 
   private async resolveApp(sdkKey: string): Promise<any | null> {
@@ -176,7 +420,7 @@ export class AdDecisionService {
         where: { sdkKey },
       });
       if (app) {
-        await this.deps.cache.set(cacheKey, app, 300); // 5 min
+        await this.deps.cache.set(cacheKey, app, 300);
       }
       return app;
     } catch {
@@ -194,94 +438,11 @@ export class AdDecisionService {
         where: { id: adUnitId },
       });
       if (adUnit) {
-        await this.deps.cache.set(cacheKey, adUnit, 180); // 3 min
+        await this.deps.cache.set(cacheKey, adUnit, 180);
       }
       return adUnit;
     } catch {
       return null;
     }
   }
-
-  private async resolveEligibleCampaigns(
-    country: string,
-    format: AdFormat,
-    publisherOrgId: string,
-    floorEcpm: number,
-  ): Promise<any[]> {
-    const cacheKey = `adserver:campaigns:${country}:${format}`;
-    const cached = await this.deps.cache.get<any[]>(cacheKey);
-    if (cached) {
-      return this.filterEligibleCampaigns(cached, publisherOrgId, floorEcpm);
-    }
-
-    try {
-      const campaigns = await this.deps.prisma.campaign.findMany({
-        where: {
-          status: 'ACTIVE',
-          targetCountry: country,
-          creatives: {
-            some: {
-              format,
-              isActive: true,
-            },
-          },
-        },
-        include: {
-          creatives: {
-            where: {
-              format,
-              isActive: true,
-            },
-          },
-        },
-      });
-
-      if (campaigns && campaigns.length > 0) {
-        await this.deps.cache.set(cacheKey, campaigns, 60); // 1 min cache
-      }
-
-      return this.filterEligibleCampaigns(campaigns, publisherOrgId, floorEcpm);
-    } catch {
-      return [];
-    }
-  }
-
-  private filterEligibleCampaigns(
-    campaigns: any[],
-    publisherOrgId: string,
-    floorEcpm: number,
-  ): any[] {
-    return campaigns.filter((c) => {
-      // Regra de auto-impressão: campanhas pagas de outros anunciantes ou campanhas da própria org do tipo HOUSE_AD
-      if (c.type !== 'HOUSE_AD' && c.organizationId === publisherOrgId) {
-        return false;
-      }
-      // Checagem de preço de reserva / floor eCPM
-      const bid = Number(c.bidAmount) || 0;
-      if (bid < floorEcpm) {
-        return false;
-      }
-      return true;
-    });
-  }
-
-  private selectWinningCampaign(campaigns: any[]): any | null {
-    if (campaigns.length === 0) return null;
-
-    // Ordenação determinística: PAID (maior bid) > EXCHANGE > HOUSE_AD
-    return campaigns.sort((a, b) => {
-      const typeRank = { PAID: 3, EXCHANGE: 2, HOUSE_AD: 1 };
-      const rankA = typeRank[a.type as keyof typeof typeRank] || 0;
-      const rankB = typeRank[b.type as keyof typeof typeRank] || 0;
-
-      if (rankA !== rankB) {
-        return rankB - rankA;
-      }
-
-      const bidA = Number(a.bidAmount) || 0;
-      const bidB = Number(b.bidAmount) || 0;
-      return bidB - bidA;
-    })[0];
-  }
 }
-

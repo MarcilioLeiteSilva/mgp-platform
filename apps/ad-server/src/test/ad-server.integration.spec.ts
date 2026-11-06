@@ -335,6 +335,99 @@ describe('MGP Ad Server Endpoints (Fastify Ultra-Low Latency Integration)', () =
     });
   });
 
+  describe('POST /events/reward (Rewarded Ads Video Completion)', () => {
+    let validRewardToken: string;
+
+    beforeAll(() => {
+      validRewardToken = tokenService.generateTrackingToken({
+        requestId: 'req_reward_test',
+        adUnitId,
+        campaignId: 'cmp_fastify_001',
+        creativeId: 'crt_fastify_001',
+        publisherAppId: appId,
+        publisherOrgId: 'org_pub',
+        advertiserOrgId: 'org_adv',
+        bidAmount: 6.0,
+        billingModel: 'CPM',
+        format: 'REWARDED',
+        actionUrl: 'https://exemplo.com/recompensa',
+        rewardType: 'GEMS',
+        rewardAmount: 25,
+        requiredWatchSeconds: 15,
+        issuedAt: Date.now(),
+        expiresAt: Date.now() + 60000,
+      });
+    });
+
+    it('deve validar concessão de recompensa e retornar 200 com payload estruturado', async () => {
+      const nonce = '00000000-0000-4000-8000-000000000030';
+      const response = await app.inject({
+        method: 'POST',
+        url: '/events/reward',
+        payload: {
+          rewardToken: validRewardToken,
+          nonce,
+          completedAt: new Date().toISOString(),
+          watchDurationSeconds: 16, // Superior aos 15s exigidos
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const json = response.json();
+      expect(json.success).toBe(true);
+      expect(json.verified).toBe(true);
+      expect(json.rewardType).toBe('GEMS');
+      expect(json.rewardAmount).toBe(25);
+    });
+
+    it('deve rejeitar resgate com duração assistida insuficiente (400 Bad Request)', async () => {
+      const nonce = '00000000-0000-4000-8000-000000000031';
+      const response = await app.inject({
+        method: 'POST',
+        url: '/events/reward',
+        payload: {
+          rewardToken: validRewardToken,
+          nonce,
+          completedAt: new Date().toISOString(),
+          watchDurationSeconds: 8, // Inferior aos 15s exigidos
+        },
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error.code).toBe('INSUFFICIENT_WATCH_DURATION');
+    });
+
+    it('deve rejeitar tentativa de resgate de recompensa duplicada com mesmo nonce (409 Conflict)', async () => {
+      const nonce = '00000000-0000-4000-8000-000000000032';
+      // 1ª tentativa
+      await app.inject({
+        method: 'POST',
+        url: '/events/reward',
+        payload: {
+          rewardToken: validRewardToken,
+          nonce,
+          completedAt: new Date().toISOString(),
+          watchDurationSeconds: 20,
+        },
+      });
+
+      // 2ª tentativa com mesmo nonce (Replay)
+      const replayResponse = await app.inject({
+        method: 'POST',
+        url: '/events/reward',
+        payload: {
+          rewardToken: validRewardToken,
+          nonce,
+          completedAt: new Date().toISOString(),
+          watchDurationSeconds: 20,
+        },
+      });
+
+      expect(replayResponse.statusCode).toBe(409);
+      expect(replayResponse.json().error.code).toBe('NONCE_ALREADY_USED');
+    });
+  });
+
   describe('GET /metrics', () => {
     it('deve retornar métricas operacionais consolidadas', async () => {
       const response = await app.inject({

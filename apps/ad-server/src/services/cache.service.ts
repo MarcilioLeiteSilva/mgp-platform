@@ -147,5 +147,49 @@ export class CacheService {
     this.memoryCache.clear();
     this.memoryNonces.clear();
   }
+
+  /**
+   * Limitação de Frequência (Frequency Capping).
+   * Retorna true se a exibição for permitida (não atingiu o limite por hora);
+   * Retorna false se o limite de impressões por hora tiver sido excedido.
+   */
+  async checkAndIncrementFrequency(
+    campaignId: string,
+    advertisingId: string,
+    limitPerHour: number,
+  ): Promise<boolean> {
+    if (!advertisingId || limitPerHour <= 0) {
+      return true;
+    }
+
+    const key = `freq:${campaignId}:${advertisingId}`;
+
+    if (this.redis && this.isConnected) {
+      try {
+        const count = await this.redis.incr(key);
+        if (count === 1) {
+          await this.redis.expire(key, 3600); // 1 hora
+        }
+        return count <= limitPerHour;
+      } catch {
+        // Fallback em memória
+      }
+    }
+
+    const now = Date.now();
+    const entry = this.memoryCache.get(key);
+    if (!entry || now > entry.expiresAt) {
+      this.memoryCache.set(key, { value: 1, expiresAt: now + 3600 * 1000 });
+      return true;
+    }
+
+    const currentCount = Number(entry.value) || 0;
+    if (currentCount >= limitPerHour) {
+      return false;
+    }
+
+    entry.value = currentCount + 1;
+    return true;
+  }
 }
 

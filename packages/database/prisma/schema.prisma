@@ -194,39 +194,50 @@ enum CampaignStatus {
 }
 
 model Campaign {
-  id             String               @id @default(uuid())
-  organizationId String               @map("organization_id")
-  organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  name           String
-  type           CampaignType         @default(PAID)
-  billingModel   CampaignBillingModel @default(CPM) @map("billing_model")
-  bidAmount      Decimal              @db.Decimal(10, 4) @map("bid_amount")
-  dailyBudget    Decimal              @db.Decimal(10, 4) @map("daily_budget")
-  totalBudget    Decimal              @db.Decimal(10, 4) @map("total_budget")
-  status         CampaignStatus       @default(DRAFT)
-  targetCountry  String               @default("BR") @map("target_country")
-  creatives      Creative[]
-  createdAt      DateTime             @default(now()) @map("created_at")
-  updatedAt      DateTime             @updatedAt @map("updated_at")
+  id                  String               @id @default(uuid())
+  organizationId      String               @map("organization_id")
+  organization        Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name                String
+  type                CampaignType         @default(PAID)
+  billingModel        CampaignBillingModel @default(CPM) @map("billing_model")
+  bidAmount           Decimal              @db.Decimal(10, 4) @map("bid_amount")
+  dailyBudget         Decimal              @db.Decimal(10, 4) @map("daily_budget")
+  totalBudget         Decimal              @db.Decimal(10, 4) @map("total_budget")
+  frequencyCapPerHour Int?                 @default(3) @map("frequency_cap_per_hour")
+  priorityTier        Int?                 @default(2) @map("priority_tier")
+  status              CampaignStatus       @default(DRAFT)
+  targetCountry       String               @default("BR") @map("target_country")
+  creatives           Creative[]
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
 
   @@index([organizationId, status])
   @@map("campaigns")
 }
 
 model Creative {
-  id          String   @id @default(uuid())
-  campaignId  String   @map("campaign_id")
-  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  format      AdFormat
-  title       String
-  description String?
-  imageUrl    String   @map("image_url")
-  actionUrl   String   @map("action_url")
-  width       Int      @default(320)
-  height      Int      @default(50)
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id                   String   @id @default(uuid())
+  campaignId           String   @map("campaign_id")
+  campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  format               AdFormat
+  title                String
+  description          String?
+  imageUrl             String   @map("image_url")
+  actionUrl            String   @map("action_url")
+  width                Int      @default(320)
+  height               Int      @default(50)
+  iconUrl              String?  @map("icon_url")
+  ctaText              String?  @default("Instalar") @map("cta_text")
+  starRating           Decimal? @db.Decimal(3, 2) @map("star_rating")
+  sponsorText          String?  @map("sponsor_text")
+  skipOffsetSeconds    Int?     @default(5) @map("skip_offset_seconds")
+  rewardType           String?  @map("reward_type")
+  rewardAmount         Int?     @map("reward_amount")
+  requiredWatchSeconds Int?     @default(15) @map("required_watch_seconds")
+  htmlContent          String?  @map("html_content")
+  isActive             Boolean  @default(true) @map("is_active")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
 
   @@map("creatives")
 }

@@ -253,6 +253,19 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **08. Suíte de Testes Automatizados** | [`apps/ad-server/src/**/*.spec.ts`](../apps/ad-server/src/) | 25 testes unitários e de integração Fastify aprovados (100% green). |
 | **09. Especificação Técnica e Arquitetural** | [`docs/adserver/01-adserver-architecture-and-specs.md`](./adserver/01-adserver-architecture-and-specs.md) | Documento normativo oficial do motor de ultra-baixa latência e leilão. |
 
+### 1.21. Fase 21 — Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded) (Etapa 3 - SDK & Ad Network)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Contratos de Formatos e Leilão** | [`packages/contracts/src/ad-server.contracts.ts`](../packages/contracts/src/ad-server.contracts.ts) | Schemas Zod para Banner, Native, Interstitial, Rewarded e RewardEventSchema. |
+| **02. Modelagem Relacional e Migrations** | [`packages/database/prisma/schema.prisma`](../packages/database/prisma/schema.prisma) | Campos de targeting, frequency capping e metadados de criativos dos 4 formatos. |
+| **03. Migration SQL Versionada** | [`packages/database/prisma/migrations/20261106010000_rtb_formats/`](../packages/database/prisma/migrations/20261106010000_rtb_formats/) | Migration DDL adicionando colunas de formato e capping em `creatives` e `campaigns`. |
+| **04. Motor RTB e Normalização de eCPM** | [`apps/ad-server/src/services/ad-decision.service.ts`](../apps/ad-server/src/services/ad-decision.service.ts) | Normalização de eCPM (CPM, CPC, CPI) e leilão de segundo preço (Vickrey Auction). |
+| **05. Frequency Capping em Redis** | [`apps/ad-server/src/services/cache.service.ts`](../apps/ad-server/src/services/cache.service.ts) | Controle de saturação por usuário/hora (`INCR freq:{campaignId}:{advertisingId}`). |
+| **06. Rota e Validador de Recompensas** | [`apps/ad-server/src/routes/events.route.ts`](../apps/ad-server/src/routes/events.route.ts) | Endpoint `POST /events/reward` com checagem de tempo assistido e anti-replay. |
+| **07. Fila Assíncrona de Recompensas** | [`apps/ad-server/src/services/event-queue.service.ts`](../apps/ad-server/src/services/event-queue.service.ts) | Produtor BullMQ para `queue-ad-rewards` integrado ao pipeline de eventos. |
+| **08. Suíte de Testes RTB e Formatos** | [`apps/ad-server/src/**/*.spec.ts`](../apps/ad-server/src/) | 29 testes cobrindo os 4 formatos, cálculo de eCPM, Second-Price e resgate de recompensa. |
+| **09. Especificação Normativa de RTB e Formatos** | [`docs/adserver/02-rtb-auction-and-formats.md`](./adserver/02-rtb-auction-and-formats.md) | Documento normativo oficial do motor de leilão competitivo e formatos. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -287,14 +300,14 @@ Progresso atual: **6/6 fases concluídas (Etapa 2 — 100% Concluída e Homologa
 
 ## 4. Planejamento — ETAPA 3 (SDK Android, Ad Server & Motor Publicitário)
 
-Progresso atual: **4/6 fases concluídas (Etapa 3)**.
+Progresso atual: **5/6 fases concluídas (Etapa 3)**.
 
 - [x] **Fase 17 — Arquitetura do SDK Android e Especificação de Telemetria** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 18 — Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 19 — Engine de Eventos, Atribuição e Antifraude no Backend** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 20 — Ad Server de Ultra-Baixa Latência (Fastify / High Performance)** ✅ [CONCLUÍDA E HOMOLOGADA]
-- [ ] **Fase 21 — Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 22 — Integração do SDK com o Ad Server e Homologação da Etapa 3**
+- [x] **Fase 21 — Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)** ✅ [CONCLUÍDA E HOMOLOGADA]
+- [ ] **Fase 22 — Integração do SDK com o Ad Server e Homologação da Etapa 3** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 
 ---
 
@@ -308,14 +321,15 @@ Progresso atual: **4/6 fases concluídas (Etapa 3)**.
    * Auditoria geral Etapa 2: `node infrastructure/scripts/audit-etapa2.js` (**Score: 100% — 82/82 checks**).
    * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**239 testes passing em 28 suítes, 0 falhas**).
    * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**19 testes passing em 5 suítes, 0 falhas**).
-   * Suíte completa de testes Jest do Ad Server: `npm test --prefix apps/ad-server` (**25 testes passing em 4 suítes, 0 falhas**).
-   * Total de testes automatizados da plataforma: **283 testes aprovados (100% green)**.
+   * Suíte completa de testes Jest do Ad Server: `npm test --prefix apps/ad-server` (**29 testes passing em 4 suítes, 0 falhas**).
+   * Total de testes automatizados da plataforma: **287 testes aprovados (100% green)**.
    * Compilação dos contratos compartilhados: `pnpm --filter @mgp/contracts build` (**100% verde**).
+   * Compilação do banco de dados & Prisma: `pnpm --filter @mgp/database build` (**100% verde**).
    * Compilação dos workers assíncronos: `npm run build --prefix apps/workers` (**100% verde**).
    * Compilação da API central NestJS: `npm run build --prefix apps/api` (**100% verde**).
    * Compilação do Ad Server Fastify: `npm run build --prefix apps/ad-server` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Iniciar diretamente a **ETAPA 3 — Fase 21: Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)**.
+   * Iniciar diretamente a **ETAPA 3 — Fase 22: Integração do SDK com o Ad Server e Homologação da Etapa 3**.
 
 ---
 

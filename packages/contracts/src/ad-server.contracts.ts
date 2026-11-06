@@ -19,12 +19,21 @@ export const AdRequestSchema = z.object({
 
 export type AdRequestDto = z.infer<typeof AdRequestSchema>;
 
+export const AdPricingSchema = z.object({
+  model: z.enum(['CPM', 'CPC', 'CPI']),
+  bidAmount: z.number().positive(),
+  clearingPrice: z.number().positive(),
+});
+
+export type AdPricingDto = z.infer<typeof AdPricingSchema>;
+
 export const AdResponseSchema = z.discriminatedUnion('fill', [
   z.object({
     requestId: z.string(),
     fill: z.literal(true),
     campaignId: z.string(),
     campaignType: z.nativeEnum(CampaignType),
+    pricing: AdPricingSchema.optional(),
     creative: z.object({
       id: z.string(),
       type: z.nativeEnum(AdFormat),
@@ -34,10 +43,23 @@ export const AdResponseSchema = z.discriminatedUnion('fill', [
       description: z.string().optional(),
       imageUrl: z.string().url(),
       actionUrl: z.string().url(),
+      // Metadados específicos do formato NATIVE
+      iconUrl: z.string().url().optional(),
+      ctaText: z.string().optional(),
+      starRating: z.number().min(0).max(5).optional(),
+      sponsorText: z.string().optional(),
+      // Metadados específicos do formato INTERSTITIAL
+      skipOffsetSeconds: z.number().int().min(0).optional(),
+      htmlContent: z.string().optional(),
+      // Metadados específicos do formato REWARDED
+      rewardType: z.string().optional(),
+      rewardAmount: z.number().int().positive().optional(),
+      requiredWatchSeconds: z.number().int().min(0).optional(),
     }),
     tracking: z.object({
       impressionToken: z.string(),
       clickToken: z.string(),
+      rewardToken: z.string().optional(),
       expiresAt: z.string(),
     }),
   }),
@@ -75,9 +97,18 @@ export const ClickEventSchema = z.object({
 
 export type ClickEventDto = z.infer<typeof ClickEventSchema>;
 
+export const RewardEventSchema = z.object({
+  rewardToken: z.string().min(1),
+  nonce: z.string().uuid(),
+  completedAt: z.string().datetime(),
+  watchDurationSeconds: z.number().min(0),
+});
+
+export type RewardEventDto = z.infer<typeof RewardEventSchema>;
+
 /**
  * Payload estruturado embarcado dentro dos tokens criptográficos de rastreamento
- * (ImpressionToken e ClickToken) gerados pelo Ad Server.
+ * (ImpressionToken, ClickToken e RewardToken) gerados pelo Ad Server.
  */
 export interface AdTrackingTokenPayload {
   requestId: string;
@@ -88,9 +119,13 @@ export interface AdTrackingTokenPayload {
   publisherOrgId: string;
   advertiserOrgId: string;
   bidAmount: number;
+  clearingPrice?: number;
   billingModel: string;
   format: string;
   actionUrl: string;
+  rewardType?: string;
+  rewardAmount?: number;
+  requiredWatchSeconds?: number;
   issuedAt: number;
   expiresAt: number;
 }
@@ -101,6 +136,7 @@ export interface AdTrackingTokenPayload {
 export const AD_SERVER_QUEUES = {
   IMPRESSIONS: 'queue-ad-impressions',
   CLICKS: 'queue-ad-clicks',
+  REWARDS: 'queue-ad-rewards',
 } as const;
 
 export interface AdImpressionJobPayload {
@@ -124,6 +160,15 @@ export interface AdClickJobPayload {
     touchY?: number;
     durationBeforeClickMs?: number;
   };
+  clientIp: string;
+  receivedAt: string;
+}
+
+export interface AdRewardJobPayload {
+  tokenPayload: AdTrackingTokenPayload;
+  nonce: string;
+  completedAt: string;
+  watchDurationSeconds: number;
   clientIp: string;
   receivedAt: string;
 }
