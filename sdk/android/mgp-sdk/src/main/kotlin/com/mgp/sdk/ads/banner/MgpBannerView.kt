@@ -324,3 +324,4 @@ class MgpBannerView @JvmOverloads constructor(
         adInteractionListener = null
     }
 }
+

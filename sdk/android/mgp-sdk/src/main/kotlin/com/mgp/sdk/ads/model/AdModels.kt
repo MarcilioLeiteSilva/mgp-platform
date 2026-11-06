@@ -157,3 +157,4 @@ interface AdInteractionListener {
 interface OnUserEarnedRewardListener {
     fun onUserEarnedReward(reward: RewardData)
 }
+

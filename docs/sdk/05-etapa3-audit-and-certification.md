@@ -148,3 +148,4 @@ flowchart TD
 ```
 
 A **ETAPA 3 está formalmente encerrada**. A plataforma está plenamente homologada para iniciar a **ETAPA 4 — Motor de Campanhas, Gestão Financeira & Ad Network Marketplace**.
+

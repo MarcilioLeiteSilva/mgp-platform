@@ -297,3 +297,4 @@ class MgpInterstitialAd private constructor(
         }
     }
 }
+
