@@ -37,3 +37,10 @@ desktop.ini
 coverage/
 .nyc_output/
 
+# Android & Gradle
+.gradle/
+*.iml
+local.properties
+.cxx/
+
+

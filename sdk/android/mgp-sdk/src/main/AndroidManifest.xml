@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mgp.sdk">
+
+    <!-- Conexão com API central e Ad Server de ultra-baixa latência -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Monitoramento de conectividade para despacho resiliente em lote -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Google Play Advertising ID em Android 13+ (API Level 33+) -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
+</manifest>
+

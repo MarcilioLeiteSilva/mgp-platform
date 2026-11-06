@@ -208,6 +208,16 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **02. Script de Auditoria Automatizada** | [`infrastructure/scripts/audit-etapa2.js`](../infrastructure/scripts/audit-etapa2.js) | Executável com `pnpm audit:etapa2` avaliando 52 verificações com Score 100%. |
 | **03. Relatório Oficial de Certificação** | [`docs/aso/05-etapa2-audit-and-certification.md`](./aso/05-etapa2-audit-and-certification.md) | Parecer técnico formal certificando o encerramento da Etapa 2 e liberação da Etapa 3. |
 
+### 1.17. Fase 17 — Arquitetura do SDK Android e Especificação de Telemetria (Etapa 3 - SDK & Ad Network)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Arquitetura do SDK Android** | [`docs/sdk/01-sdk-architecture.md`](./sdk/01-sdk-architecture.md) | Especificação técnica do SDK Kotlin (minSDK 24, targetSDK 34), ciclo de vida e concorrência. |
+| **02. Protocolo de Telemetria e Antifraude** | [`docs/sdk/02-telemetry-specification.md`](./sdk/02-telemetry-specification.md) | Taxonomia de eventos, payloads JSON, assinatura HMAC-SHA256, deduplicação de Nonce e buffer local. |
+| **03. Contratos de Telemetria no Monorepo** | [`packages/contracts/src/telemetry.contracts.ts`](../packages/contracts/src/telemetry.contracts.ts) | Schemas Zod e tipos TypeScript ponta a ponta integrados a `@mgp/contracts`. |
+| **04. Estrutura Base do SDK Kotlin** | [`sdk/android/`](../sdk/android/) | Configuração Gradle multi-módulo, AndroidManifest com permissões estritas e ProGuard consumer rules. |
+| **05. Modelos Centrais e Inspetor de Integridade** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/) | Classes `MGP`, `MgpConfig`, `MgpLifecycleTracker`, `TelemetryManager` e `DeviceIntegrity`. |
+| **06. Suítes de Testes Automatizados** | [`apps/api/src/test/telemetry-contracts.spec.ts`](../apps/api/src/test/telemetry-contracts.spec.ts) | Validação completa de contratos Zod, tipos de eventos e envelopes de telemetria (8 testes passing). |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -242,8 +252,10 @@ Progresso atual: **6/6 fases concluídas (Etapa 2 — 100% Concluída e Homologa
 
 ## 4. Planejamento — ETAPA 3 (SDK Android, Ad Server & Motor Publicitário)
 
-- [ ] **Fase 17 — Arquitetura do SDK Android e Especificação de Telemetria** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 18 — Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)**
+Progresso atual: **1/6 fases concluídas (Etapa 3)**.
+
+- [x] **Fase 17 — Arquitetura do SDK Android e Especificação de Telemetria** ✅ [CONCLUÍDA E HOMOLOGADA]
+- [ ] **Fase 18 — Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 - [ ] **Fase 19 — Engine de Eventos, Atribuição e Antifraude no Backend**
 - [ ] **Fase 20 — Ad Server de Ultra-Baixa Latência (Fastify / High Performance)**
 - [ ] **Fase 21 — Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)**
@@ -257,15 +269,15 @@ Progresso atual: **6/6 fases concluídas (Etapa 2 — 100% Concluída e Homologa
    * Branches `main` e `develop` sincronizadas com `origin` (https://github.com/MarcilioLeiteSilva/mgp-platform).
    * Working tree 100% limpa, sem pendências ou arquivos órfãos.
 2. **Saúde da Plataforma:**
-   * Auditoria geral Etapa 1: `pnpm audit:etapa1` (**Score: 100% — 93/93 checks**).
-   * Auditoria geral Etapa 2: `pnpm audit:etapa2` (**Score: 100% — 52/52 checks**).
-   * Suíte completa de testes Jest da API: `pnpm --filter @mgp/api test` (**212 testes passing em 24 suítes, 0 falhas**).
-   * Suíte completa de testes Jest dos Workers: `pnpm --filter @mgp/workers test` (**15 testes passing em 4 suítes, 0 falhas**).
-   * Total de testes automatizados da plataforma: **227 testes aprovados (100% green)**.
-   * Compilação Next.js do Frontend Web: `pnpm --filter @mgp/web build` (**100% verde — 12 rotas geradas**).
-   * Compilação NestJS e Workers: `pnpm build` (**100% verde**).
+   * Auditoria geral Etapa 1: `node infrastructure/scripts/audit-etapa1.js` (**Score: 100% — 93/93 checks**).
+   * Auditoria geral Etapa 2: `node infrastructure/scripts/audit-etapa2.js` (**Score: 100% — 82/82 checks**).
+   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**220 testes passing em 25 suítes, 0 falhas**).
+   * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**15 testes passing em 4 suítes, 0 falhas**).
+   * Total de testes automatizados da plataforma: **235 testes aprovados (100% green)**.
+   * Compilação dos contratos compartilhados: `pnpm --filter @mgp/contracts build` (**100% verde**).
+   * Compilação Next.js do Frontend Web: `npm run build --prefix apps/web` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Iniciar diretamente a **ETAPA 3 — Fase 17: Arquitetura do SDK Android e Especificação de Telemetria**.
+   * Iniciar diretamente a **ETAPA 3 — Fase 18: Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)**.
 
 ---
 
