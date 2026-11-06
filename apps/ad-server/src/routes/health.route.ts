@@ -25,3 +25,4 @@ export const healthRoutes: FastifyPluginAsync<{ cache: CacheService }> = async (
     });
   });
 };
+

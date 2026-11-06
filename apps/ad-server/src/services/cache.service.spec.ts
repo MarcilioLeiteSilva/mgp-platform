@@ -35,3 +35,4 @@ describe('CacheService (Deduplicação de Nonce e Cache Rápido)', () => {
     expect(retrieved).toBeNull();
   });
 });
+

@@ -98,3 +98,4 @@ Tanto para `/events/impression` quanto para `/events/click`, o cliente envia um 
 Eventos recebidos com sucesso são despachados sem bloqueio para as filas:
 - `queue-ad-impressions`: Fila de impressões verificadas para conciliação contábil e faturamento.
 - `queue-ad-clicks`: Fila de cliques verificados para atribuição de tráfego e relatórios analíticos.
+

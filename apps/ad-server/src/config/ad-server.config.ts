@@ -25,3 +25,4 @@ export function loadAdServerConfig(): AdServerConfig {
     CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
   };
 }
+

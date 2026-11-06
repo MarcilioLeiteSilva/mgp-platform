@@ -79,3 +79,4 @@ describe('TokenService (Assinatura e Verificação Criptográfica de Tokens de A
     expect(service.verifyTrackingToken(null as any)).toBeNull();
   });
 });
+

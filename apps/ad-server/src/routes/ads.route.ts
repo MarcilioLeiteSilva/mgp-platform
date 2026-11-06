@@ -55,3 +55,4 @@ export const adsRoutes: FastifyPluginAsync<AdsRouteOptions> = async (
     return reply.status(200).send(decision);
   });
 };
+

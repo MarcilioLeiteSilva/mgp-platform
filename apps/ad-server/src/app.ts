@@ -129,3 +129,4 @@ export function buildApp(deps: AppDeps = {}): FastifyInstance {
 
   return app;
 }
+
