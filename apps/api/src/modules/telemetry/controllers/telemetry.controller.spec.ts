@@ -91,3 +91,4 @@ describe('TelemetryController (REST API Ingestão e Métricas)', () => {
     expect(metrics.waiting).toBe(5);
   });
 });
+

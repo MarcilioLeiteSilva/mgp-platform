@@ -136,3 +136,4 @@ Tabela analítica imutável que registra cada evento individual:
     }
   }
   ```
+

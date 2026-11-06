@@ -240,6 +240,19 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **06. Worker Consumer BullMQ** | [`apps/workers/src/processors/telemetry.processor.ts`](../apps/workers/src/processors/telemetry.processor.ts) | Processamento assíncrono, cálculo de duração de sessões e inserção em lote (`createMany`). |
 | **07. Especificação Técnica e de Antifraude** | [`docs/sdk/04-telemetry-engine-and-antifraud.md`](./sdk/04-telemetry-engine-and-antifraud.md) | Documentação normativa do motor de eventos, pipeline assíncrono e conformidade LGPD. |
 
+### 1.20. Fase 20 — Ad Server de Ultra-Baixa Latência (Fastify / High Performance) (Etapa 3 - SDK & Ad Network)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Engine Fastify de Alta Performance** | [`apps/ad-server/src/app.ts`](../apps/ad-server/src/app.ts) | Servidor nativo Fastify com rate limiting, CORS e Pino structured logging. |
+| **02. Serviço Criptográfico de Tokens** | [`apps/ad-server/src/services/token.service.ts`](../apps/ad-server/src/services/token.service.ts) | Assinatura e verificação de impression e click tokens via HMAC-SHA256 (`timingSafeEqual`). |
+| **03. Cache e Anti-Replay com Redis** | [`apps/ad-server/src/services/cache.service.ts`](../apps/ad-server/src/services/cache.service.ts) | Deduplicação atômica de nonces (`SET NX EX 600`), cache de inventário e fallback em memória. |
+| **04. Motor de Decisão e Leilão de Anúncios** | [`apps/ad-server/src/services/ad-decision.service.ts`](../apps/ad-server/src/services/ad-decision.service.ts) | Resolução de inventário, priorização de campanhas (PAID > EXCHANGE > HOUSE_AD) e floor eCPM. |
+| **05. Despacho Assíncrono de Eventos** | [`apps/ad-server/src/services/event-queue.service.ts`](../apps/ad-server/src/services/event-queue.service.ts) | Produtor BullMQ para `queue-ad-impressions` e `queue-ad-clicks` com métricas operacionais. |
+| **06. Endpoints REST de Anúncios e Telemetria** | [`apps/ad-server/src/routes/`](../apps/ad-server/src/routes/) | `/health`, `/ads/request`, `/events/impression`, `/events/click`, `/click/track` e `/metrics`. |
+| **07. Dockerfile Multi-Stage Otimizado** | [`infrastructure/docker/Dockerfile.adserver`](../infrastructure/docker/Dockerfile.adserver) | Imagem Alpine leve e segura com suporte a Prisma e execução como usuário `adserver`. |
+| **08. Suíte de Testes Automatizados** | [`apps/ad-server/src/**/*.spec.ts`](../apps/ad-server/src/) | 25 testes unitários e de integração Fastify aprovados (100% green). |
+| **09. Especificação Técnica e Arquitetural** | [`docs/adserver/01-adserver-architecture-and-specs.md`](./adserver/01-adserver-architecture-and-specs.md) | Documento normativo oficial do motor de ultra-baixa latência e leilão. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -274,13 +287,13 @@ Progresso atual: **6/6 fases concluídas (Etapa 2 — 100% Concluída e Homologa
 
 ## 4. Planejamento — ETAPA 3 (SDK Android, Ad Server & Motor Publicitário)
 
-Progresso atual: **3/6 fases concluídas (Etapa 3)**.
+Progresso atual: **4/6 fases concluídas (Etapa 3)**.
 
 - [x] **Fase 17 — Arquitetura do SDK Android e Especificação de Telemetria** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 18 — Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)** ✅ [CONCLUÍDA E HOMOLOGADA]
 - [x] **Fase 19 — Engine de Eventos, Atribuição e Antifraude no Backend** ✅ [CONCLUÍDA E HOMOLOGADA]
-- [ ] **Fase 20 — Ad Server de Ultra-Baixa Latência (Fastify / High Performance)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 21 — Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)**
+- [x] **Fase 20 — Ad Server de Ultra-Baixa Latência (Fastify / High Performance)** ✅ [CONCLUÍDA E HOMOLOGADA]
+- [ ] **Fase 21 — Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 - [ ] **Fase 22 — Integração do SDK com o Ad Server e Homologação da Etapa 3**
 
 ---
@@ -295,12 +308,14 @@ Progresso atual: **3/6 fases concluídas (Etapa 3)**.
    * Auditoria geral Etapa 2: `node infrastructure/scripts/audit-etapa2.js` (**Score: 100% — 82/82 checks**).
    * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**239 testes passing em 28 suítes, 0 falhas**).
    * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**19 testes passing em 5 suítes, 0 falhas**).
-   * Total de testes automatizados da plataforma: **258 testes aprovados (100% green)**.
+   * Suíte completa de testes Jest do Ad Server: `npm test --prefix apps/ad-server` (**25 testes passing em 4 suítes, 0 falhas**).
+   * Total de testes automatizados da plataforma: **283 testes aprovados (100% green)**.
    * Compilação dos contratos compartilhados: `pnpm --filter @mgp/contracts build` (**100% verde**).
    * Compilação dos workers assíncronos: `npm run build --prefix apps/workers` (**100% verde**).
    * Compilação da API central NestJS: `npm run build --prefix apps/api` (**100% verde**).
+   * Compilação do Ad Server Fastify: `npm run build --prefix apps/ad-server` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Iniciar diretamente a **ETAPA 3 — Fase 20: Ad Server de Ultra-Baixa Latência (Fastify / High Performance)**.
+   * Iniciar diretamente a **ETAPA 3 — Fase 21: Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)**.
 
 ---
 

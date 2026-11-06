@@ -1,5 +1,5 @@
 # ==========================================
-# Multi-stage Dockerfile para apps/ad-server
+# Multi-stage Dockerfile para apps/ad-server (Fastify High-Performance)
 # ==========================================
 
 FROM node:20-alpine AS builder
@@ -7,17 +7,19 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@10.30.2 --activate
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json .npmrc* ./
 COPY packages/ ./packages/
 COPY apps/ad-server/ ./apps/ad-server/
 
 RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @mgp/database run prisma:generate
 
 RUN pnpm --filter @mgp/shared build
 RUN pnpm --filter @mgp/config build
 RUN pnpm --filter @mgp/contracts build
+RUN pnpm --filter @mgp/database build
 RUN pnpm --filter @mgp/ad-server build
 
 # ------------------------------------------
@@ -29,6 +31,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3001
+
+RUN apk add --no-cache openssl
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 adserver

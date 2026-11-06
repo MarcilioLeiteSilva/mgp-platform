@@ -37,6 +37,7 @@ export const AdResponseSchema = z.discriminatedUnion('fill', [
     }),
     tracking: z.object({
       impressionToken: z.string(),
+      clickToken: z.string(),
       expiresAt: z.string(),
     }),
   }),
@@ -61,3 +62,68 @@ export const ImpressionEventSchema = z.object({
 
 export type ImpressionEventDto = z.infer<typeof ImpressionEventSchema>;
 
+export const ClickEventSchema = z.object({
+  clickToken: z.string().min(1),
+  nonce: z.string().uuid(),
+  clickedAt: z.string().datetime(),
+  interactionMetrics: z.object({
+    touchX: z.number().optional(),
+    touchY: z.number().optional(),
+    durationBeforeClickMs: z.number().optional(),
+  }).optional(),
+});
+
+export type ClickEventDto = z.infer<typeof ClickEventSchema>;
+
+/**
+ * Payload estruturado embarcado dentro dos tokens criptográficos de rastreamento
+ * (ImpressionToken e ClickToken) gerados pelo Ad Server.
+ */
+export interface AdTrackingTokenPayload {
+  requestId: string;
+  adUnitId: string;
+  campaignId: string;
+  creativeId: string;
+  publisherAppId: string;
+  publisherOrgId: string;
+  advertiserOrgId: string;
+  bidAmount: number;
+  billingModel: string;
+  format: string;
+  actionUrl: string;
+  issuedAt: number;
+  expiresAt: number;
+}
+
+/**
+ * Nomes oficiais das filas BullMQ do subsistema de anúncios
+ */
+export const AD_SERVER_QUEUES = {
+  IMPRESSIONS: 'queue-ad-impressions',
+  CLICKS: 'queue-ad-clicks',
+} as const;
+
+export interface AdImpressionJobPayload {
+  tokenPayload: AdTrackingTokenPayload;
+  nonce: string;
+  renderedAt: string;
+  visibilityMetrics: {
+    viewablePercentage: number;
+    durationMs: number;
+  };
+  clientIp: string;
+  receivedAt: string;
+}
+
+export interface AdClickJobPayload {
+  tokenPayload: AdTrackingTokenPayload;
+  nonce: string;
+  clickedAt: string;
+  interactionMetrics?: {
+    touchX?: number;
+    touchY?: number;
+    durationBeforeClickMs?: number;
+  };
+  clientIp: string;
+  receivedAt: string;
+}

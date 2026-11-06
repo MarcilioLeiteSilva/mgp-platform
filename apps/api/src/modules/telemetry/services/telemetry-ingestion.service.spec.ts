@@ -162,3 +162,4 @@ describe('TelemetryIngestionService (Ingestão e Validação de Lotes)', () => {
     expect(result.rejectedCount).toBe(1);
   });
 });
+
