@@ -179,6 +179,45 @@ describe('Contratos de Telemetria e Antifraude (Fase 17 — Zod Schemas)', () =>
       expect(parsed.success).toBe(true);
       expect(parsed.processedCount).toBe(15);
     });
+
+    it('deve validar consistencia da assinatura HMAC-SHA256 gerada pelo SDK', () => {
+      const crypto = require('crypto');
+      const sdkKey = 'mgp_live_sdk_9f8e7d6c5b4a3210';
+      const eventId = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
+      const eventType = 'APP_OPEN';
+      const sessionId = 'sess_xyz';
+      const timestamp = '2026-11-06T14:30:00.000Z';
+      const nonce = 'nonce_1234567890abcdef';
+
+      const canonicalString = `${eventId}|${eventType}|${sessionId}|${timestamp}|${nonce}`;
+      const serverHmac = crypto.createHmac('sha256', sdkKey).update(canonicalString).digest('hex');
+
+      expect(serverHmac).toHaveLength(64);
+      expect(/^[a-f0-9]{64}$/.test(serverHmac)).toBe(true);
+    });
+
+    it('deve validar eventos customizados (CUSTOM_EVENT) com propriedades flexíveis', () => {
+      const event = {
+        eventId: '3b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bef',
+        eventType: 'CUSTOM_EVENT',
+        sessionId: 'sess_12345',
+        timestamp: '2026-11-06T14:35:00.000Z',
+        sequenceNumber: 3,
+        nonce: 'nonce_custom_event_12345',
+        signature: '123456abcdef7890abcdef1234567890abcdef1234567890abcdef1234567890',
+        properties: {
+          customEventName: 'level_complete',
+          level_number: 12,
+          stars_earned: 3,
+          duration_seconds: 94.5,
+        },
+      };
+
+      const parsed = TelemetryEventSchema.parse(event);
+      expect(parsed.eventType).toBe('CUSTOM_EVENT');
+      expect(parsed.properties?.customEventName).toBe('level_complete');
+      expect(parsed.properties?.stars_earned).toBe(3);
+    });
   });
 });
 

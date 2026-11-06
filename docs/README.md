@@ -218,6 +218,17 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **05. Modelos Centrais e Inspetor de Integridade** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/) | Classes `MGP`, `MgpConfig`, `MgpLifecycleTracker`, `TelemetryManager` e `DeviceIntegrity`. |
 | **06. Suítes de Testes Automatizados** | [`apps/api/src/test/telemetry-contracts.spec.ts`](../apps/api/src/test/telemetry-contracts.spec.ts) | Validação completa de contratos Zod, tipos de eventos e envelopes de telemetria (8 testes passing). |
 
+### 1.18. Fase 18 — Implementação do SDK Android (Core, Device Fingerprint, Heartbeat) (Etapa 3 - SDK & Ad Network)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Extrator de Hardware, App e Rede** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/core/DeviceContextExtractor.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/core/DeviceContextExtractor.kt) | Extração ética de contexto, Google Play Advertising ID e suporte a Limit Ad Tracking. |
+| **02. Buffer Local Persistente SQLite** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/telemetry/storage/TelemetryDatabaseHelper.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/telemetry/storage/TelemetryDatabaseHelper.kt) | Persistência offline embarcada, rotação circular (máx. 1.000 eventos) e recuperação FIFO. |
+| **03. Transmissor HTTP Nativo Resiliente** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/telemetry/network/TelemetryHttpClient.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/telemetry/network/TelemetryHttpClient.kt) | Cliente HttpURLConnection com serialização JSON manual sem dependências externas. |
+| **04. Worker em Segundo Plano WorkManager** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/telemetry/worker/TelemetrySyncWorker.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/telemetry/worker/TelemetrySyncWorker.kt) | Sincronização em background com restrição de rede ativa e backoff exponencial. |
+| **05. Gerenciador Central de Telemetria** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/telemetry/TelemetryManager.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/telemetry/TelemetryManager.kt) | Assinatura HMAC-SHA256, geração de Nonce, enfileiramento duplo e controle de flush. |
+| **06. Ponto de Entrada MGP e Heartbeat** | [`sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/MGP.kt`](../sdk/android/mgp-sdk/src/main/kotlin/com/mgp/sdk/MGP.kt) | Métodos públicos MGP.initialize, trackEvent, flush, getSessionId e getPendingTelemetryCount. |
+| **07. Guia Oficial de Integração do SDK** | [`docs/sdk/03-sdk-implementation-guide.md`](./sdk/03-sdk-implementation-guide.md) | Manual passo a passo para publishers com Gradle, Application, ProGuard e Data Safety. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -252,11 +263,11 @@ Progresso atual: **6/6 fases concluídas (Etapa 2 — 100% Concluída e Homologa
 
 ## 4. Planejamento — ETAPA 3 (SDK Android, Ad Server & Motor Publicitário)
 
-Progresso atual: **1/6 fases concluídas (Etapa 3)**.
+Progresso atual: **2/6 fases concluídas (Etapa 3)**.
 
 - [x] **Fase 17 — Arquitetura do SDK Android e Especificação de Telemetria** ✅ [CONCLUÍDA E HOMOLOGADA]
-- [ ] **Fase 18 — Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 19 — Engine de Eventos, Atribuição e Antifraude no Backend**
+- [x] **Fase 18 — Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)** ✅ [CONCLUÍDA E HOMOLOGADA]
+- [ ] **Fase 19 — Engine de Eventos, Atribuição e Antifraude no Backend** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 - [ ] **Fase 20 — Ad Server de Ultra-Baixa Latência (Fastify / High Performance)**
 - [ ] **Fase 21 — Motor de Decisão, Leilão RTB e Entrega de Formatos (Banners, Interstitials, Rewarded)**
 - [ ] **Fase 22 — Integração do SDK com o Ad Server e Homologação da Etapa 3**
@@ -271,13 +282,13 @@ Progresso atual: **1/6 fases concluídas (Etapa 3)**.
 2. **Saúde da Plataforma:**
    * Auditoria geral Etapa 1: `node infrastructure/scripts/audit-etapa1.js` (**Score: 100% — 93/93 checks**).
    * Auditoria geral Etapa 2: `node infrastructure/scripts/audit-etapa2.js` (**Score: 100% — 82/82 checks**).
-   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**220 testes passing em 25 suítes, 0 falhas**).
+   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**222 testes passing em 25 suítes, 0 falhas**).
    * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**15 testes passing em 4 suítes, 0 falhas**).
-   * Total de testes automatizados da plataforma: **235 testes aprovados (100% green)**.
+   * Total de testes automatizados da plataforma: **237 testes aprovados (100% green)**.
    * Compilação dos contratos compartilhados: `pnpm --filter @mgp/contracts build` (**100% verde**).
    * Compilação Next.js do Frontend Web: `npm run build --prefix apps/web` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Iniciar diretamente a **ETAPA 3 — Fase 18: Implementação do SDK Android (Core, Device Fingerprint, Heartbeat)**.
+   * Iniciar diretamente a **ETAPA 3 — Fase 19: Engine de Eventos, Atribuição e Antifraude no Backend**.
 
 ---
 

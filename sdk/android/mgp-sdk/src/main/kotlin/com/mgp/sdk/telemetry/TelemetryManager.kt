@@ -3,6 +3,11 @@ package com.mgp.sdk.telemetry
 import android.content.Context
 import android.util.Log
 import com.mgp.sdk.MgpConfig
+import com.mgp.sdk.core.DeviceContextExtractor
+import com.mgp.sdk.telemetry.network.TelemetryHttpClient
+import com.mgp.sdk.telemetry.network.TelemetryTransmissionResult
+import com.mgp.sdk.telemetry.storage.TelemetryDatabaseHelper
+import com.mgp.sdk.telemetry.worker.TelemetrySyncWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -12,20 +17,21 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicLong
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * Gerenciador central de captura, assinatura criptográfica e buffer de eventos de telemetria.
+ * Gerenciador central de captura, assinatura criptográfica HMAC-SHA256,
+ * persistência em SQLite e sincronização com o backend da MGP.
  */
 class TelemetryManager(
     private val context: Context,
     private val config: MgpConfig
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val memoryBuffer = ConcurrentLinkedQueue<TelemetryEvent>()
+    private val dbHelper = TelemetryDatabaseHelper(context)
+    private val httpClient = TelemetryHttpClient(config)
     private val sequenceCounter = AtomicLong(1L)
 
     private val isoDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
@@ -33,7 +39,7 @@ class TelemetryManager(
     }
 
     /**
-     * Enfileira um evento no buffer para processamento assíncrono.
+     * Enfileira um evento no buffer SQLite local com assinatura HMAC-SHA256 e Nonce.
      */
     fun enqueueEvent(
         eventType: TelemetryEventType,
@@ -61,39 +67,78 @@ class TelemetryManager(
             signature = signature
         )
 
-        memoryBuffer.offer(event)
+        scope.launch {
+            try {
+                dbHelper.insertEvent(event)
 
-        if (config.debugMode) {
-            Log.d("MGP_SDK", "[Telemetry] Evento enfileirado: ${event.eventType.rawValue} (seq: $seq)")
-        }
+                if (config.debugMode) {
+                    Log.d("MGP_SDK", "[Telemetry] Evento persistido localmente: ${event.eventType.rawValue} (id: $eventId, seq: $seq)")
+                }
 
-        // Se buffer atingir 10 eventos, tentar flush assíncrono imediato
-        if (memoryBuffer.size >= 10) {
-            flushAsync()
+                // Se houver 10 ou mais eventos acumulados, tenta flush imediato
+                if (dbHelper.getEventsCount() >= 10) {
+                    flushAsync()
+                }
+            } catch (e: Throwable) {
+                Log.e("MGP_SDK", "[Telemetry] Erro ao gravar evento no SQLite: ${e.message}")
+            }
         }
     }
 
     /**
-     * Dispara rotina de sincronização em background.
+     * Transmite imediatamente eventos pendentes do buffer local em thread de IO.
      */
     fun flushAsync() {
         scope.launch {
-            if (memoryBuffer.isEmpty()) return@launch
+            try {
+                val pendingEvents = dbHelper.getPendingEvents(limit = 50)
+                if (pendingEvents.isEmpty()) return@launch
 
-            val batchToTransmit = mutableListOf<TelemetryEvent>()
-            while (batchToTransmit.size < 50 && memoryBuffer.isNotEmpty()) {
-                val ev = memoryBuffer.poll() ?: break
-                batchToTransmit.add(ev)
-            }
+                val deviceContext = DeviceContextExtractor.extractDeviceContext(context)
+                val appContext = DeviceContextExtractor.extractAppContext(context)
+                val networkContext = DeviceContextExtractor.extractNetworkContext(context)
 
-            if (batchToTransmit.isNotEmpty() && config.debugMode) {
-                Log.d("MGP_SDK", "[Telemetry] Transmitindo lote de ${batchToTransmit.size} eventos para ${config.apiUrl}")
+                val result = httpClient.transmitBatch(
+                    events = pendingEvents,
+                    deviceContext = deviceContext,
+                    appContext = appContext,
+                    networkContext = networkContext
+                )
+
+                when (result) {
+                    is TelemetryTransmissionResult.Success -> {
+                        val sentIds = pendingEvents.map { it.eventId }
+                        dbHelper.deleteEvents(sentIds)
+                        if (config.debugMode) {
+                            Log.d("MGP_SDK", "[Telemetry] Flush concluído: ${result.processedCount} eventos enviados com sucesso.")
+                        }
+                    }
+                    is TelemetryTransmissionResult.ClientError -> {
+                        val badIds = pendingEvents.map { it.eventId }
+                        dbHelper.deleteEvents(badIds)
+                        Log.w("MGP_SDK", "[Telemetry] Rejeição pelo servidor (${result.statusCode}): ${result.message}. Eventos removidos.")
+                    }
+                    is TelemetryTransmissionResult.TransientError -> {
+                        if (config.debugMode) {
+                            Log.w("MGP_SDK", "[Telemetry] Falha transitória no flush. Agendando WorkManager em background...")
+                        }
+                        TelemetrySyncWorker.schedule(context)
+                    }
+                }
+            } catch (e: Throwable) {
+                Log.w("MGP_SDK", "[Telemetry] Falha no flush assíncrono: ${e.message}")
+                TelemetrySyncWorker.schedule(context)
             }
         }
     }
 
     /**
-     * Gera assinatura HMAC-SHA256 para prevenção de tampering e replay.
+     * Retorna a contagem atual de eventos retidos no buffer local.
+     */
+    fun getPendingCount(): Long = dbHelper.getEventsCount()
+
+    /**
+     * Computa a assinatura digital HMAC-SHA256 do evento.
      */
     private fun computeHmacSignature(data: String, key: String): String {
         return try {
@@ -108,4 +153,3 @@ class TelemetryManager(
         }
     }
 }
-

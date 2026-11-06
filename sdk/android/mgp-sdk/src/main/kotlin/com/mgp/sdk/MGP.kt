@@ -16,10 +16,15 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * Exemplo de Inicialização no Application do host:
  * ```kotlin
- * val config = MgpConfig.Builder("sua_sdk_key_aqui")
- *     .setDebugMode(BuildConfig.DEBUG)
- *     .build()
- * MGP.initialize(this, config)
+ * class MyApp : Application() {
+ *     override fun onCreate() {
+ *         super.onCreate()
+ *         val config = MgpConfig.Builder("mgp_live_sdk_chave")
+ *             .setDebugMode(BuildConfig.DEBUG)
+ *             .build()
+ *         MGP.initialize(this, config)
+ *     }
+ * }
  * ```
  */
 object MGP {
@@ -79,7 +84,7 @@ object MGP {
         val telemetry = telemetryManager
         val tracker = lifecycleTracker
         if (telemetry == null || tracker == null) {
-            Log.w("MGP_SDK", "[Core] Tentativa de trackEvent antes de MGP.initialize(). Ignorando evento: $eventName")
+            Log.w("MGP_SDK", "[Core] Tentativa de trackEvent antes de MGP.initialize(). Ignorando: $eventName")
             return
         }
 
@@ -94,6 +99,32 @@ object MGP {
     }
 
     /**
+     * Força a sincronização imediata de todos os eventos acumulados no buffer local.
+     */
+    @JvmStatic
+    fun flush() {
+        telemetryManager?.flushAsync()
+    }
+
+    /**
+     * Retorna o identificador da sessão ativa atual.
+     */
+    @JvmStatic
+    fun getSessionId(): String? = lifecycleTracker?.getCurrentSessionId()
+
+    /**
+     * Retorna a quantidade de eventos aguardando transmissão no buffer local.
+     */
+    @JvmStatic
+    fun getPendingTelemetryCount(): Long = telemetryManager?.getPendingCount() ?: 0L
+
+    /**
+     * Retorna a configuração ativa do SDK.
+     */
+    @JvmStatic
+    fun getConfig(): MgpConfig? = config
+
+    /**
      * Retorna a versão oficial de release do SDK.
      */
     @JvmStatic
@@ -105,4 +136,3 @@ object MGP {
     @JvmStatic
     fun isReady(): Boolean = isInitialized.get()
 }
-
