@@ -21,6 +21,11 @@ import {
 import { api } from '@/lib/api';
 import { CreateCampaignModal } from '@/components/campaigns/create-campaign-modal';
 import { CreativesModal } from '@/components/campaigns/creatives-modal';
+import {
+  RecommendationsCard,
+  CampaignRecommendationItem,
+} from '@/components/campaigns/recommendations-card';
+import { SmartBiddingModal } from '@/components/campaigns/smart-bidding-modal';
 
 interface CampaignItem {
   id: string;
@@ -58,6 +63,22 @@ export default function CampaignsPage() {
   // Modais
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [activeCreativesCampaign, setActiveCreativesCampaign] = useState<{ id: string; name: string } | null>(null);
+  const [activeBiddingCampaignId, setActiveBiddingCampaignId] = useState<string | null>(null);
+
+  // Recomendações de Otimização & Smart Bidding
+  const [recommendations, setRecommendations] = useState<CampaignRecommendationItem[]>([]);
+
+  const loadRecommendations = async () => {
+    try {
+      const res = await api.get<{ data: CampaignRecommendationItem[] }>(
+        '/recommendations?status=PENDING&limit=10',
+      );
+      const data = (res as any)?.data || (res as any)?.items || res;
+      setRecommendations(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Falha ao carregar recomendações de campanhas:', err);
+    }
+  };
 
   const loadCampaigns = async () => {
     setLoading(true);
@@ -82,6 +103,7 @@ export default function CampaignsPage() {
 
   useEffect(() => {
     loadCampaigns();
+    loadRecommendations();
   }, []);
 
   // Métricas calculadas
@@ -206,6 +228,13 @@ export default function CampaignsPage() {
           <p className="text-xs text-slate-500 mt-1">Debitado via Ledger Contábil</p>
         </div>
       </div>
+
+      {/* Motor de Recomendações & Smart Bidding (Fase 26) */}
+      <RecommendationsCard
+        recommendations={recommendations}
+        onRefresh={() => loadRecommendations()}
+        onOpenSmartBidding={(id) => setActiveBiddingCampaignId(id)}
+      />
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
@@ -404,6 +433,14 @@ export default function CampaignsPage() {
                     <ImageIcon className="w-4 h-4 text-indigo-400" />
                   </button>
 
+                  <button
+                    onClick={() => setActiveBiddingCampaignId(camp.id)}
+                    className="p-2 rounded-xl bg-slate-800 hover:bg-indigo-600/20 text-slate-300 hover:text-indigo-400 transition-colors border border-slate-700/80"
+                    title="Lances Inteligentes & Pacing"
+                  >
+                    <Sliders className="w-4 h-4" />
+                  </button>
+
                   {camp.status !== 'ACTIVE' && (
                     <button
                       onClick={() => handleDelete(camp.id)}
@@ -437,6 +474,17 @@ export default function CampaignsPage() {
           onUpdated={() => loadCampaigns()}
         />
       )}
+
+      {/* Modal de Lances Inteligentes & Pacing */}
+      <SmartBiddingModal
+        campaignId={activeBiddingCampaignId}
+        isOpen={!!activeBiddingCampaignId}
+        onClose={() => setActiveBiddingCampaignId(null)}
+        onSuccess={() => {
+          loadCampaigns();
+          loadRecommendations();
+        }}
+      />
     </div>
   );
 }

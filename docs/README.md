@@ -307,6 +307,17 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **05. Frontend Web de Carteira e Finanças** | [`apps/web/src/app/(dashboard)/wallet/page.tsx`](../apps/web/src/app/(dashboard)/wallet/page.tsx) | Extrato em tempo real, modais de recarga PIX e solicitação de saque de publisher. |
 | **06. Especificação Técnica de Billing** | [`docs/billing/01-payouts-and-billing-gateway.md`](./billing/01-payouts-and-billing-gateway.md) | Documentação de segregação contábil, conciliação e fluxos de saque/depósito. |
 
+### 1.26. Fase 26 — Motor de Recomendações e Otimização Automática de Lances (Etapa 4)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Modelagem Relacional de Smart Bidding** | [`packages/database/prisma/schema.prisma`](../packages/database/prisma/schema.prisma) | Entidade `CampaignRecommendation` e campos `biddingStrategy`, `pacingMode`, `targetCpa` e `autoOptimize`. |
+| **02. Migration SQL de Smart Bidding** | [`packages/database/prisma/migrations/20261107020000_smart_bidding_and_recommendations/`](../packages/database/prisma/migrations/20261107020000_smart_bidding_and_recommendations/) | Migration DDL versionada estruturando enums e tabela de recomendações. |
+| **03. Contratos de Validação Zod** | [`packages/contracts/src/recommendations.contracts.ts`](../packages/contracts/src/recommendations.contracts.ts) | Schemas Zod de estratégias de lances, filtros, simulação e descarte. |
+| **04. Algoritmo Smart Bidding & Pacing** | [`apps/api/src/modules/recommendations/smart-bidding.service.ts`](../apps/api/src/modules/recommendations/smart-bidding.service.ts) | Avaliação horária de pacing com amortecimento e curvas preditivas de lances. |
+| **05. Backend Central de Recomendações** | [`apps/api/src/modules/recommendations/`](../apps/api/src/modules/recommendations/) | Módulo NestJS com as 5 regras de otimização e aplicação atômica com 1 clique. |
+| **06. Frontend Web de Smart Bidding** | [`apps/web/src/components/campaigns/`](../apps/web/src/components/campaigns/) | Componentes `RecommendationsCard`, `SmartBiddingModal` e integração em `/campaigns`. |
+| **07. Especificação Técnica de Smart Bidding** | [`docs/campaigns/02-smart-bidding-and-recommendations.md`](./campaigns/02-smart-bidding-and-recommendations.md) | Documentação técnica normativa de algoritmos, fórmulas de pacing e endpoints. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -354,13 +365,13 @@ Progresso atual: **6/6 fases concluídas (Etapa 3 — 100% Concluída e Homologa
 
 ## 5. Planejamento — ETAPA 4 (Motor de Campanhas, Gestão Financeira & Marketplace)
 
-Progresso atual: **3/6 fases concluídas (Etapa 4)**.
+Progresso atual: **4/6 fases concluídas (Etapa 4)**.
 
 - [x] **Fase 23 — Gestão de Campanhas, Criativos e Segmentação de Público** ✅ **[HOMOLOGADA]**
 - [x] **Fase 24 — Painel de Publishers, Configuração de Ad Units e Relatórios de Monetização** ✅ **[HOMOLOGADA]**
 - [x] **Fase 25 — Motor de Payouts, Faturamento e Integração com Gateways de Pagamento** ✅ **[HOMOLOGADA]**
-- [ ] **Fase 26 — Motor de Recomendações e Otimização Automática de Lances** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 27 — Painel de Controle de Fraudes e Detecção de Tráfego Inválido (IVT)**
+- [x] **Fase 26 — Motor de Recomendações e Otimização Automática de Lances** ✅ **[HOMOLOGADA]**
+- [ ] **Fase 27 — Painel de Controle de Fraudes e Detecção de Tráfego Inválido (IVT)** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 - [ ] **Fase 28 — Integração, Testes E2E e Homologação Final da Etapa 4**
 
 ---
@@ -374,12 +385,12 @@ Progresso atual: **3/6 fases concluídas (Etapa 4)**.
    * Auditoria geral Etapa 1: `node infrastructure/scripts/audit-etapa1.js` (**Score: 100% — 93/93 checks**).
    * Auditoria geral Etapa 2: `node infrastructure/scripts/audit-etapa2.js` (**Score: 100% — 82/82 checks**).
    * Auditoria geral Etapa 3: `node infrastructure/scripts/audit-etapa3.js` (**Score: 100% — 74/74 checks**).
-   * Auditoria geral Etapa 4: `node infrastructure/scripts/audit-etapa4.js` (**Score: 100% — 80/80 checks**).
-   * Total de verificações auditadas no monorepo: **329/329 checks aprovados (Score 100% global)**.
-   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**302 testes passing em 34 suítes, 0 falhas**).
+   * Auditoria geral Etapa 4: `node infrastructure/scripts/audit-etapa4.js` (**Score: 100% — 106/106 checks**).
+   * Total de verificações auditadas no monorepo: **355/355 checks aprovados (Score 100% global)**.
+   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**323 testes passing em 37 suítes, 0 falhas**).
    * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**25 testes passing em 6 suítes, 0 falhas**).
    * Suíte completa de testes Jest do Ad Server: `npm test --prefix apps/ad-server` (**37 testes passing em 5 suítes, 0 falhas**).
-   * Total de testes automatizados da plataforma: **364 testes aprovados (100% green)**.
+   * Total de testes automatizados da plataforma: **385 testes aprovados (100% green)**.
    * Compilação dos contratos compartilhados: `pnpm --filter @mgp/contracts build` (**100% verde**).
    * Compilação do banco de dados & Prisma: `pnpm --filter @mgp/database build` (**100% verde**).
    * Compilação dos workers assíncronos: `npm run build --prefix apps/workers` (**100% verde**).
@@ -387,7 +398,7 @@ Progresso atual: **3/6 fases concluídas (Etapa 4)**.
    * Compilação do Ad Server Fastify: `npm run build --prefix apps/ad-server` (**100% verde**).
    * Compilação do Frontend Next.js: `pnpm --filter @mgp/web build` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Iniciar diretamente a **ETAPA 4 — Fase 26: Motor de Recomendações e Otimização Automática de Lances**.
+   * Iniciar diretamente a **ETAPA 4 — Fase 27: Painel de Controle de Fraudes e Detecção de Tráfego Inválido (IVT)**.
 
 ---
 

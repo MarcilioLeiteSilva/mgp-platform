@@ -287,6 +287,111 @@ evaluate(
   fileExists('docs/billing/01-payouts-and-billing-gateway.md')
 );
 
+// ==============================================================================
+// PARTE 4: FASE 26 — MOTOR DE RECOMENDAÇÕES E OTIMIZAÇÃO AUTOMÁTICA DE LANCES
+// ==============================================================================
+console.log(`\n${COLORS.bright}${COLORS.blue}▶ FASE 26: Motor de Recomendações e Otimização Automática de Lances (Smart Bidding & Pacing)${COLORS.reset}`);
+
+evaluate(
+  'Modelos e Enums de Smart Bidding e Recomendações estruturados no Prisma schema',
+  schemaContent.includes('model CampaignRecommendation') &&
+    schemaContent.includes('enum BiddingStrategy') &&
+    schemaContent.includes('enum PacingMode') &&
+    schemaContent.includes('enum RecommendationType')
+);
+
+evaluate(
+  'Migration SQL de smart bidding e recomendações existe',
+  fileExists('packages/database/prisma/migrations/20261107020000_smart_bidding_and_recommendations/migration.sql')
+);
+
+evaluate(
+  'Enums BiddingStrategy, PacingMode, RecommendationType, RecommendationStatus e RecommendationPriority exportados em @mgp/shared',
+  sharedEnums.includes('export enum BiddingStrategy') &&
+    sharedEnums.includes('export enum PacingMode') &&
+    sharedEnums.includes('export enum RecommendationType') &&
+    sharedEnums.includes('export enum RecommendationStatus') &&
+    sharedEnums.includes('export enum RecommendationPriority')
+);
+
+const recommendationsContracts = readFileContent('packages/contracts/src/recommendations.contracts.ts');
+evaluate(
+  'Contratos Zod de recomendações e smart bidding definidos em @mgp/contracts',
+  recommendationsContracts.includes('UpdateBiddingStrategySchema') &&
+    recommendationsContracts.includes('ListRecommendationsQuerySchema') &&
+    recommendationsContracts.includes('ApplyRecommendationSchema') &&
+    recommendationsContracts.includes('SimulateBidOptimizationSchema')
+);
+
+evaluate(
+  'Contratos de recomendações exportados no index de @mgp/contracts',
+  contractsIndex.includes('./recommendations.contracts')
+);
+
+evaluate('UpdateBiddingStrategyDto existe', fileExists('apps/api/src/modules/recommendations/dto/update-bidding-strategy.dto.ts'));
+evaluate('ListRecommendationsQueryDto existe', fileExists('apps/api/src/modules/recommendations/dto/list-recommendations-query.dto.ts'));
+evaluate('ApplyRecommendationDto existe', fileExists('apps/api/src/modules/recommendations/dto/apply-recommendation.dto.ts'));
+evaluate('DismissRecommendationDto existe', fileExists('apps/api/src/modules/recommendations/dto/dismiss-recommendation.dto.ts'));
+evaluate('SimulateBidDto existe', fileExists('apps/api/src/modules/recommendations/dto/simulate-bid.dto.ts'));
+
+evaluate('RecommendationsModule registrado no AppModule', appModuleContent.includes('RecommendationsModule'));
+
+const smartBiddingServiceContent = readFileContent('apps/api/src/modules/recommendations/smart-bidding.service.ts');
+evaluate(
+  'SmartBiddingService implementa avaliação de pacing horária e simulação de lances',
+  smartBiddingServiceContent.includes('evaluatePacing') &&
+    smartBiddingServiceContent.includes('simulateBid') &&
+    smartBiddingServiceContent.includes('pacingMultiplier')
+);
+
+const recommendationsServiceContent = readFileContent('apps/api/src/modules/recommendations/recommendations.service.ts');
+evaluate(
+  'RecommendationsService implementa as 5 regras de recomendação (BID_ADJUSTMENT, PACING_OPTIMIZATION, BUDGET_SCALING, CREATIVE_FATIGUE, AUDIENCE_EXPANSION)',
+  recommendationsServiceContent.includes('RecommendationType.BID_ADJUSTMENT') &&
+    recommendationsServiceContent.includes('RecommendationType.PACING_OPTIMIZATION') &&
+    recommendationsServiceContent.includes('RecommendationType.BUDGET_SCALING') &&
+    recommendationsServiceContent.includes('RecommendationType.CREATIVE_FATIGUE') &&
+    recommendationsServiceContent.includes('RecommendationType.AUDIENCE_EXPANSION')
+);
+
+evaluate(
+  'RecommendationsService implementa aplicação atômica via $transaction com AuditLog',
+  recommendationsServiceContent.includes('$transaction') &&
+    recommendationsServiceContent.includes('RECOMMENDATION_APPLIED') &&
+    recommendationsServiceContent.includes('RecommendationStatus.APPLIED')
+);
+
+const recommendationsControllerContent = readFileContent('apps/api/src/modules/recommendations/recommendations.controller.ts');
+evaluate('Endpoint GET /recommendations mapeado', recommendationsControllerContent.includes('@Get()'));
+evaluate('Endpoint POST /recommendations/generate mapeado', recommendationsControllerContent.includes("@Post('generate')"));
+evaluate('Endpoint POST /recommendations/:id/apply mapeado', recommendationsControllerContent.includes("@Post(':id/apply')"));
+evaluate('Endpoint POST /recommendations/:id/dismiss mapeado', recommendationsControllerContent.includes("@Post(':id/dismiss')"));
+evaluate(
+  'Endpoints de estratégia e simulação de lances de campanhas mapeados',
+  recommendationsControllerContent.includes('bidding-strategy') &&
+    recommendationsControllerContent.includes('simulate-bid')
+);
+
+evaluate('Testes unitários de SmartBiddingService implementados', fileExists('apps/api/src/modules/recommendations/smart-bidding.service.spec.ts'));
+evaluate('Testes unitários de RecommendationsService implementados', fileExists('apps/api/src/modules/recommendations/recommendations.service.spec.ts'));
+evaluate('Testes unitários de RecommendationsController implementados', fileExists('apps/api/src/modules/recommendations/recommendations.controller.spec.ts'));
+
+evaluate('Componente RecommendationsCard implementado com One-Click Apply', fileExists('apps/web/src/components/campaigns/recommendations-card.tsx'));
+evaluate('Componente SmartBiddingModal implementado com simulação de curva preditiva de lances', fileExists('apps/web/src/components/campaigns/smart-bidding-modal.tsx'));
+
+const campaignsPageContent = readFileContent('apps/web/src/app/(dashboard)/campaigns/page.tsx');
+evaluate(
+  'Página /campaigns integrada ao motor de recomendações e lances inteligentes',
+  campaignsPageContent.includes('RecommendationsCard') &&
+    campaignsPageContent.includes('SmartBiddingModal') &&
+    campaignsPageContent.includes('/recommendations')
+);
+
+evaluate(
+  'Guia técnico de Smart Bidding e Recomendações documentado',
+  fileExists('docs/campaigns/02-smart-bidding-and-recommendations.md')
+);
+
 // Resumo Final
 console.log(`\n${COLORS.bright}================================================================================${COLORS.reset}`);
 const scorePct = Math.round((passedChecks / totalChecks) * 100);
@@ -294,7 +399,7 @@ const statusColor = scorePct === 100 ? COLORS.green : COLORS.red;
 console.log(` RESULTADO FINAL: ${statusColor}${passedChecks}/${totalChecks} verificações aprovadas (${scorePct}%)${COLORS.reset}`);
 
 if (scorePct === 100) {
-  console.log(`${COLORS.green}${COLORS.bright} 🎉 FASES 23, 24 E 25 INTEGRALMENTE HOMOLOGADAS E CONFORMES COM TODOS OS REQUISITOS!${COLORS.reset}`);
+  console.log(`${COLORS.green}${COLORS.bright} 🎉 FASES 23, 24, 25 E 26 INTEGRALMENTE HOMOLOGADAS E CONFORMES COM TODOS OS REQUISITOS!${COLORS.reset}`);
 } else {
   console.log(`${COLORS.red}${COLORS.bright} ⚠ Algumas verificações não passaram. Revise os itens acima.${COLORS.reset}`);
 }

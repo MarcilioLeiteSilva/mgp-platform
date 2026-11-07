@@ -195,27 +195,66 @@ enum CampaignStatus {
   SUSPENDED
 }
 
+enum BiddingStrategy {
+  MANUAL
+  TARGET_CPA
+  MAX_CLICKS
+  MAX_IMPRESSIONS
+  SMART_PACING
+}
+
+enum PacingMode {
+  ACCELERATED
+  EVEN
+  SMART_DYNAMIC
+}
+
+enum RecommendationType {
+  BID_ADJUSTMENT
+  PACING_OPTIMIZATION
+  BUDGET_SCALING
+  CREATIVE_FATIGUE
+  AUDIENCE_EXPANSION
+}
+
+enum RecommendationStatus {
+  PENDING
+  APPLIED
+  DISMISSED
+}
+
+enum RecommendationPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
 model Campaign {
-  id                  String               @id @default(uuid())
-  organizationId      String               @map("organization_id")
-  organization        Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id                  String                 @id @default(uuid())
+  organizationId      String                 @map("organization_id")
+  organization        Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   name                String
-  type                CampaignType         @default(PAID)
-  billingModel        CampaignBillingModel @default(CPM) @map("billing_model")
-  bidAmount           Decimal              @db.Decimal(10, 4) @map("bid_amount")
-  dailyBudget         Decimal              @db.Decimal(10, 4) @map("daily_budget")
-  totalBudget         Decimal              @db.Decimal(10, 4) @map("total_budget")
-  spentAmount         Decimal              @default(0.0) @db.Decimal(10, 4) @map("spent_amount")
-  frequencyCapPerHour Int?                 @default(3) @map("frequency_cap_per_hour")
-  priorityTier        Int?                 @default(2) @map("priority_tier")
-  status              CampaignStatus       @default(DRAFT)
-  targetCountry       String               @default("BR") @map("target_country")
-  targetCategories    String?              @default("ALL") @map("target_categories")
-  startDate           DateTime?            @map("start_date")
-  endDate             DateTime?            @map("end_date")
+  type                CampaignType           @default(PAID)
+  billingModel        CampaignBillingModel   @default(CPM) @map("billing_model")
+  bidAmount           Decimal                @db.Decimal(10, 4) @map("bid_amount")
+  dailyBudget         Decimal                @db.Decimal(10, 4) @map("daily_budget")
+  totalBudget         Decimal                @db.Decimal(10, 4) @map("total_budget")
+  spentAmount         Decimal                @default(0.0) @db.Decimal(10, 4) @map("spent_amount")
+  frequencyCapPerHour Int?                   @default(3) @map("frequency_cap_per_hour")
+  priorityTier        Int?                   @default(2) @map("priority_tier")
+  status              CampaignStatus         @default(DRAFT)
+  biddingStrategy     BiddingStrategy        @default(MANUAL) @map("bidding_strategy")
+  pacingMode          PacingMode             @default(EVEN) @map("pacing_mode")
+  targetCpa           Decimal?               @db.Decimal(10, 4) @map("target_cpa")
+  autoOptimize        Boolean                @default(false) @map("auto_optimize")
+  targetCountry       String                 @default("BR") @map("target_country")
+  targetCategories    String?                @default("ALL") @map("target_categories")
+  startDate           DateTime?              @map("start_date")
+  endDate             DateTime?              @map("end_date")
   creatives           Creative[]
-  createdAt           DateTime             @default(now()) @map("created_at")
-  updatedAt           DateTime             @updatedAt @map("updated_at")
+  recommendations     CampaignRecommendation[]
+  createdAt           DateTime               @default(now()) @map("created_at")
+  updatedAt           DateTime               @updatedAt @map("updated_at")
 
   @@index([organizationId, status])
   @@map("campaigns")
@@ -246,6 +285,28 @@ model Creative {
   updatedAt            DateTime @updatedAt @map("updated_at")
 
   @@map("creatives")
+}
+
+model CampaignRecommendation {
+  id              String                 @id @default(uuid())
+  campaignId      String                 @map("campaign_id")
+  campaign        Campaign               @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  organizationId  String                 @map("organization_id")
+  type            RecommendationType
+  priority        RecommendationPriority @default(MEDIUM)
+  title           String
+  message         String
+  suggestedAction String                 @map("suggested_action")
+  expectedImpact  String                 @map("expected_impact")
+  actionPayload   Json                   @map("action_payload")
+  status          RecommendationStatus   @default(PENDING)
+  appliedAt       DateTime?              @map("applied_at")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  @@index([organizationId, status])
+  @@index([campaignId, status])
+  @@map("campaign_recommendations")
 }
 
 // ==============================================================================

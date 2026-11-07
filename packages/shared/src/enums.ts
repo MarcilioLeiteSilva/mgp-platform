@@ -79,4 +79,39 @@ export enum PaymentMethod {
   BOLETO = 'BOLETO',
 }
 
+export enum BiddingStrategy {
+  MANUAL = 'MANUAL',
+  TARGET_CPA = 'TARGET_CPA',
+  MAX_CLICKS = 'MAX_CLICKS',
+  MAX_IMPRESSIONS = 'MAX_IMPRESSIONS',
+  SMART_PACING = 'SMART_PACING',
+}
+
+export enum PacingMode {
+  ACCELERATED = 'ACCELERATED',
+  EVEN = 'EVEN',
+  SMART_DYNAMIC = 'SMART_DYNAMIC',
+}
+
+export enum RecommendationType {
+  BID_ADJUSTMENT = 'BID_ADJUSTMENT',
+  PACING_OPTIMIZATION = 'PACING_OPTIMIZATION',
+  BUDGET_SCALING = 'BUDGET_SCALING',
+  CREATIVE_FATIGUE = 'CREATIVE_FATIGUE',
+  AUDIENCE_EXPANSION = 'AUDIENCE_EXPANSION',
+}
+
+export enum RecommendationStatus {
+  PENDING = 'PENDING',
+  APPLIED = 'APPLIED',
+  DISMISSED = 'DISMISSED',
+}
+
+export enum RecommendationPriority {
+  HIGH = 'HIGH',
+  MEDIUM = 'MEDIUM',
+  LOW = 'LOW',
+}
+
+
 

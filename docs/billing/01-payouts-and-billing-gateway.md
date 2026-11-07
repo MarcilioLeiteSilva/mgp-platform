@@ -98,3 +98,4 @@ O módulo de Faturamento e Payouts conecta a camada financeira dos anunciantes e
                 ├─ tx.payoutRequest.create(status = PENDING)
                 └─ tx.walletLedger.create(type = PAYOUT_WITHDRAWAL, amount = -amount)
 ```
+
