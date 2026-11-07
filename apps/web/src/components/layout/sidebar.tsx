@@ -14,6 +14,7 @@ import {
   Layers,
   Sparkles,
   Megaphone,
+  LayoutGrid,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -27,6 +28,11 @@ const navigationItems = [
     name: 'Meus Aplicativos',
     href: '/apps',
     icon: Smartphone,
+  },
+  {
+    name: 'Blocos de Anúncios',
+    href: '/ad-units',
+    icon: LayoutGrid,
   },
   {
     name: 'Campanhas',

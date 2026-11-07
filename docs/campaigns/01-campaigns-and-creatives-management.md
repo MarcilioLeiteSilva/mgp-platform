@@ -98,3 +98,4 @@ Todas as mutações (`createCampaign`, `updateCampaign`, `updateCampaignStatus`,
 - `entityType` (`CAMPAIGN` ou `CREATIVE`)
 - `entityId`
 - `metadata` com diff dos dados antes/depois, IP e User-Agent.
+

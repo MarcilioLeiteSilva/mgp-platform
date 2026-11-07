@@ -10,6 +10,7 @@ import { AppsModule } from './modules/apps/apps.module';
 import { AsoModule } from './modules/aso/aso.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
+import { AdUnitsModule } from './modules/ad-units/ad-units.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -25,6 +26,7 @@ import { AppController } from './app.controller';
     AsoModule,
     TelemetryModule,
     CampaignsModule,
+    AdUnitsModule,
   ],
   controllers: [AppController],
   providers: [],
