@@ -280,6 +280,33 @@ Bem-vindo à documentação técnica e arquitetural da **Mobile Growth Platform 
 | **09. Script de Auditoria Automatizada da Etapa 3** | [`infrastructure/scripts/audit-etapa3.js`](../infrastructure/scripts/audit-etapa3.js) | Executável com `pnpm audit:etapa3` avaliando 74 verificações rigorosas com Score 100%. |
 | **10. Relatório Oficial de Certificação da Etapa 3**| [`docs/sdk/05-etapa3-audit-and-certification.md`](./sdk/05-etapa3-audit-and-certification.md) | Parecer técnico formal certificando o encerramento da Etapa 3 e liberação da Etapa 4. |
 
+### 1.23. Fase 23 — Gestão de Campanhas, Criativos e Segmentação de Público (Etapa 4)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Modelagem Relacional de Campanhas** | [`packages/database/prisma/schema.prisma`](../packages/database/prisma/schema.prisma) | Campos de orçamento, gastos acumulados, período e categorias de público-alvo. |
+| **02. Migration SQL de Gestão de Campanhas** | [`packages/database/prisma/migrations/20261106020000_campaign_management/`](../packages/database/prisma/migrations/20261106020000_campaign_management/) | Migration DDL versionada estruturando os novos campos operacionais de campanhas. |
+| **03. Contratos de Validação Zod** | [`packages/contracts/src/campaigns.contracts.ts`](../packages/contracts/src/campaigns.contracts.ts) | Schemas Zod de criação, atualização de status e criativos multi-formato. |
+| **04. Backend Central de Campanhas** | [`apps/api/src/modules/campaigns/`](../apps/api/src/modules/campaigns/) | Módulo NestJS com isolamento multi-tenant estrito e travas de saldo e criativos. |
+| **05. Frontend Web de Campanhas** | [`apps/web/src/app/(dashboard)/campaigns/`](../apps/web/src/app/(dashboard)/campaigns/) | Interface Next.js 14 completa com modais de criação e gestão de criativos. |
+
+### 1.24. Fase 24 — Painel de Publishers, Configuração de Ad Units e Relatórios (Etapa 4)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Modelagem Relacional de Ad Units** | [`packages/database/prisma/schema.prisma`](../packages/database/prisma/schema.prisma) | Entidade `AdUnit` com floor eCPM, formato, refresh interval e vínculo a App. |
+| **02. Backend Central de Ad Units** | [`apps/api/src/modules/ad-units/`](../apps/api/src/modules/ad-units/) | Módulo NestJS com isolamento multi-tenant, CRUD, agregação analítica e 70% rev-share. |
+| **03. Frontend Web de Ad Units** | [`apps/web/src/app/(dashboard)/ad-units/`](../apps/web/src/app/(dashboard)/ad-units/) | Interface com métricas consolidadas, criação de blocos e gerador de código Kotlin. |
+| **04. Especificação Técnica de Ad Units** | [`docs/publishers/01-ad-units-and-monetization.md`](./publishers/01-ad-units-and-monetization.md) | Guia completo de blocos de anúncios, floor eCPM e integração no SDK Android. |
+
+### 1.25. Fase 25 — Motor de Payouts, Faturamento e Gateways de Pagamento (Etapa 4)
+| Entregável | Arquivo de Referência | Descrição |
+| :--- | :--- | :--- |
+| **01. Modelagem Relacional de Faturamento** | [`packages/database/prisma/schema.prisma`](../packages/database/prisma/schema.prisma) | Entidades `DepositInvoice` e `PayoutRequest` com status, métodos e índices. |
+| **02. Migration SQL de Faturamento e Payouts**| [`packages/database/prisma/migrations/20261107010000_payouts_and_billing/`](../packages/database/prisma/migrations/20261107010000_payouts_and_billing/) | Migration DDL versionada para faturas de depósito PIX e ordens de repasse. |
+| **03. Contratos de Validação Zod de Billing** | [`packages/contracts/src/billing.contracts.ts`](../packages/contracts/src/billing.contracts.ts) | Schemas Zod de top-up PIX, webhook com idempotência e solicitação de saque (R$ 50 min). |
+| **04. Backend Central de Faturamento** | [`apps/api/src/modules/billing/`](../apps/api/src/modules/billing/) | Módulo NestJS com conciliação contábil no `WalletLedger` via Prisma `$transaction`. |
+| **05. Frontend Web de Carteira e Finanças** | [`apps/web/src/app/(dashboard)/wallet/page.tsx`](../apps/web/src/app/(dashboard)/wallet/page.tsx) | Extrato em tempo real, modais de recarga PIX e solicitação de saque de publisher. |
+| **06. Especificação Técnica de Billing** | [`docs/billing/01-payouts-and-billing-gateway.md`](./billing/01-payouts-and-billing-gateway.md) | Documentação de segregação contábil, conciliação e fluxos de saque/depósito. |
+
 ---
 
 ## 2. Controle de Progresso — ETAPA 1 (Fundação e Infraestrutura)
@@ -327,12 +354,12 @@ Progresso atual: **6/6 fases concluídas (Etapa 3 — 100% Concluída e Homologa
 
 ## 5. Planejamento — ETAPA 4 (Motor de Campanhas, Gestão Financeira & Marketplace)
 
-Progresso atual: **2/6 fases concluídas (Etapa 4)**.
+Progresso atual: **3/6 fases concluídas (Etapa 4)**.
 
 - [x] **Fase 23 — Gestão de Campanhas, Criativos e Segmentação de Público** ✅ **[HOMOLOGADA]**
 - [x] **Fase 24 — Painel de Publishers, Configuração de Ad Units e Relatórios de Monetização** ✅ **[HOMOLOGADA]**
-- [ ] **Fase 25 — Motor de Payouts, Faturamento e Integração com Gateways de Pagamento** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 26 — Motor de Recomendações e Otimização Automática de Lances**
+- [x] **Fase 25 — Motor de Payouts, Faturamento e Integração com Gateways de Pagamento** ✅ **[HOMOLOGADA]**
+- [ ] **Fase 26 — Motor de Recomendações e Otimização Automática de Lances** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 - [ ] **Fase 27 — Painel de Controle de Fraudes e Detecção de Tráfego Inválido (IVT)**
 - [ ] **Fase 28 — Integração, Testes E2E e Homologação Final da Etapa 4**
 
@@ -347,12 +374,12 @@ Progresso atual: **2/6 fases concluídas (Etapa 4)**.
    * Auditoria geral Etapa 1: `node infrastructure/scripts/audit-etapa1.js` (**Score: 100% — 93/93 checks**).
    * Auditoria geral Etapa 2: `node infrastructure/scripts/audit-etapa2.js` (**Score: 100% — 82/82 checks**).
    * Auditoria geral Etapa 3: `node infrastructure/scripts/audit-etapa3.js` (**Score: 100% — 74/74 checks**).
-   * Auditoria geral Etapa 4: `node infrastructure/scripts/audit-etapa4.js` (**Score: 100% — 49/49 checks**).
-   * Total de verificações auditadas no monorepo: **298/298 checks aprovados (Score 100% global)**.
-   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**283 testes passing em 32 suítes, 0 falhas**).
+   * Auditoria geral Etapa 4: `node infrastructure/scripts/audit-etapa4.js` (**Score: 100% — 80/80 checks**).
+   * Total de verificações auditadas no monorepo: **329/329 checks aprovados (Score 100% global)**.
+   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**302 testes passing em 34 suítes, 0 falhas**).
    * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**25 testes passing em 6 suítes, 0 falhas**).
    * Suíte completa de testes Jest do Ad Server: `npm test --prefix apps/ad-server` (**37 testes passing em 5 suítes, 0 falhas**).
-   * Total de testes automatizados da plataforma: **345 testes aprovados (100% green)**.
+   * Total de testes automatizados da plataforma: **364 testes aprovados (100% green)**.
    * Compilação dos contratos compartilhados: `pnpm --filter @mgp/contracts build` (**100% verde**).
    * Compilação do banco de dados & Prisma: `pnpm --filter @mgp/database build` (**100% verde**).
    * Compilação dos workers assíncronos: `npm run build --prefix apps/workers` (**100% verde**).
@@ -360,7 +387,7 @@ Progresso atual: **2/6 fases concluídas (Etapa 4)**.
    * Compilação do Ad Server Fastify: `npm run build --prefix apps/ad-server` (**100% verde**).
    * Compilação do Frontend Next.js: `pnpm --filter @mgp/web build` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Iniciar diretamente a **ETAPA 4 — Fase 25: Motor de Payouts, Faturamento e Integração com Gateways de Pagamento**.
+   * Iniciar diretamente a **ETAPA 4 — Fase 26: Motor de Recomendações e Otimização Automática de Lances**.
 
 ---
 

@@ -58,6 +58,8 @@ model Organization {
   wallet          Wallet?
   asoApps         AsoApp[]
   telemetrySessions TelemetrySession[]
+  payoutRequests  PayoutRequest[]
+  depositInvoices DepositInvoice[]
   createdAt       DateTime                 @default(now()) @map("created_at")
   updatedAt       DateTime                 @updatedAt @map("updated_at")
 
@@ -278,13 +280,15 @@ model Wallet {
 }
 
 model WalletAccount {
-  id            String            @id @default(uuid())
-  walletId      String            @map("wallet_id")
-  wallet        Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  type          WalletAccountType
-  currency      String            @default("BRL")
-  cachedBalance Decimal           @default(0.0) @db.Decimal(14, 4) @map("cached_balance")
-  ledgerEntries WalletLedger[]
+  id              String            @id @default(uuid())
+  walletId        String            @map("wallet_id")
+  wallet          Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  type            WalletAccountType
+  currency        String            @default("BRL")
+  cachedBalance   Decimal           @default(0.0) @db.Decimal(14, 4) @map("cached_balance")
+  ledgerEntries   WalletLedger[]
+  payoutRequests  PayoutRequest[]
+  depositInvoices DepositInvoice[]
 
   @@unique([walletId, type])
   @@map("wallet_accounts")
@@ -305,6 +309,77 @@ model WalletLedger {
 
   @@index([accountId, createdAt])
   @@map("wallet_ledger")
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+enum PayoutMethod {
+  PIX
+  BANK_TRANSFER
+  STRIPE_CONNECT
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  EXPIRED
+  FAILED
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+  BOLETO
+}
+
+model PayoutRequest {
+  id              String        @id @default(uuid())
+  organizationId  String        @map("organization_id")
+  organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  walletAccountId String        @map("wallet_account_id")
+  walletAccount   WalletAccount @relation(fields: [walletAccountId], references: [id], onDelete: Restrict)
+  amount          Decimal       @db.Decimal(14, 4)
+  currency        String        @default("BRL")
+  status          PayoutStatus  @default(PENDING)
+  payoutMethod    PayoutMethod  @default(PIX) @map("payout_method")
+  recipientKey    String        @map("recipient_key")
+  recipientData   Json?         @map("recipient_data")
+  processedAt     DateTime?     @map("processed_at")
+  failureReason   String?       @map("failure_reason")
+  idempotencyKey  String        @unique @map("idempotency_key")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  @@index([organizationId, createdAt])
+  @@map("payout_requests")
+}
+
+model DepositInvoice {
+  id               String        @id @default(uuid())
+  organizationId   String        @map("organization_id")
+  organization     Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  walletAccountId  String        @map("wallet_account_id")
+  walletAccount    WalletAccount @relation(fields: [walletAccountId], references: [id], onDelete: Restrict)
+  amount           Decimal       @db.Decimal(14, 4)
+  currency         String        @default("BRL")
+  status           PaymentStatus @default(PENDING)
+  paymentMethod    PaymentMethod @default(PIX) @map("payment_method")
+  gatewayReference String?       @unique @map("gateway_reference")
+  pixQrCode        String?       @map("pix_qr_code")
+  pixCopiaECola    String?       @map("pix_copia_e_cola")
+  paidAt           DateTime?     @map("paid_at")
+  idempotencyKey   String        @unique @map("idempotency_key")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  @@index([organizationId, createdAt])
+  @@map("deposit_invoices")
 }
 
 // ==============================================================================

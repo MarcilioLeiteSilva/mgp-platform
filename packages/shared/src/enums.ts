@@ -52,3 +52,31 @@ export enum LedgerTransactionType {
   SYSTEM_ADJUSTMENT = 'SYSTEM_ADJUSTMENT',
 }
 
+export enum PayoutStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+  REJECTED = 'REJECTED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum PayoutMethod {
+  PIX = 'PIX',
+  BANK_TRANSFER = 'BANK_TRANSFER',
+  STRIPE_CONNECT = 'STRIPE_CONNECT',
+}
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  EXPIRED = 'EXPIRED',
+  FAILED = 'FAILED',
+}
+
+export enum PaymentMethod {
+  PIX = 'PIX',
+  CREDIT_CARD = 'CREDIT_CARD',
+  BOLETO = 'BOLETO',
+}
+
+

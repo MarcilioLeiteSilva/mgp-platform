@@ -7,6 +7,7 @@
  * Cobre exaustivamente:
  * - Fase 23: Gestão de Campanhas, Criativos e Segmentação de Público
  * - Fase 24: Painel de Publishers, Configuração de Ad Units e Relatórios de Monetização
+ * - Fase 25: Motor de Payouts, Faturamento e Integração com Gateways de Pagamento
  */
 
 const fs = require('fs');
@@ -59,7 +60,7 @@ function readFileContent(relPath) {
   return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
 }
 
-printHeader('AUDITORIA ETAPA 4 — FASES 23 & 24 (CAMPANHAS, AD UNITS & MONETIZAÇÃO)');
+printHeader('AUDITORIA ETAPA 4 — FASES 23, 24 & 25 (CAMPANHAS, AD UNITS, FATURAMENTO & PAYOUTS)');
 
 // ==============================================================================
 // PARTE 1: FASE 23 — GESTÃO DE CAMPANHAS E CRIATIVOS
@@ -198,6 +199,94 @@ evaluate(
   fileExists('docs/publishers/01-ad-units-and-monetization.md')
 );
 
+// ==============================================================================
+// PARTE 3: FASE 25 — MOTOR DE PAYOUTS, FATURAMENTO & GATEWAYS DE PAGAMENTO
+// ==============================================================================
+console.log(`\n${COLORS.bright}${COLORS.blue}▶ FASE 25: Motor de Payouts, Faturamento e Gateways de Pagamento${COLORS.reset}`);
+
+evaluate(
+  'Modelos DepositInvoice e PayoutRequest estruturados no Prisma schema',
+  schemaContent.includes('model DepositInvoice') && schemaContent.includes('model PayoutRequest')
+);
+evaluate(
+  'Migration SQL de faturamento e payouts existe',
+  fileExists('packages/database/prisma/migrations/20261107010000_payouts_and_billing/migration.sql')
+);
+
+evaluate(
+  'Enums PayoutStatus, PayoutMethod, PaymentStatus e PaymentMethod exportados em @mgp/shared',
+  sharedEnums.includes('export enum PayoutStatus') &&
+    sharedEnums.includes('export enum PayoutMethod') &&
+    sharedEnums.includes('export enum PaymentStatus') &&
+    sharedEnums.includes('export enum PaymentMethod')
+);
+
+const billingContracts = readFileContent('packages/contracts/src/billing.contracts.ts');
+evaluate('Contrato Zod CreateDepositInvoiceSchema definido com validação de valor mínimo', billingContracts.includes('CreateDepositInvoiceSchema'));
+evaluate('Contrato Zod ConfirmDepositWebhookSchema definido', billingContracts.includes('ConfirmDepositWebhookSchema'));
+evaluate('Contrato Zod RequestPayoutSchema definido com validação de saque mínimo (R$ 50)', billingContracts.includes('RequestPayoutSchema'));
+evaluate('Contrato Zod ListPayoutsQuerySchema definido', billingContracts.includes('ListPayoutsQuerySchema'));
+evaluate('Contrato Zod ListLedgerTransactionsQuerySchema definido', billingContracts.includes('ListLedgerTransactionsQuerySchema'));
+evaluate('Contratos de billing exportados no index de @mgp/contracts', contractsIndex.includes('./billing.contracts'));
+
+evaluate('CreateDepositDto existe', fileExists('apps/api/src/modules/billing/dto/create-deposit.dto.ts'));
+evaluate('RequestPayoutDto existe', fileExists('apps/api/src/modules/billing/dto/request-payout.dto.ts'));
+evaluate('ConfirmDepositWebhookDto existe', fileExists('apps/api/src/modules/billing/dto/confirm-deposit-webhook.dto.ts'));
+evaluate('ListPayoutsQueryDto existe', fileExists('apps/api/src/modules/billing/dto/list-payouts-query.dto.ts'));
+evaluate('ListTransactionsQueryDto existe', fileExists('apps/api/src/modules/billing/dto/list-transactions-query.dto.ts'));
+
+evaluate('BillingModule registrado no AppModule', appModuleContent.includes('BillingModule'));
+
+const billingServiceContent = readFileContent('apps/api/src/modules/billing/billing.service.ts');
+evaluate(
+  'BillingService valida saldo prévio antes de debitar saque de publisher',
+  billingServiceContent.includes('Saldo insuficiente para saque')
+);
+evaluate(
+  'BillingService executa conciliação atômica no WalletLedger via Prisma $transaction',
+  billingServiceContent.includes('$transaction') &&
+    billingServiceContent.includes('DEPOSIT_FIAT') &&
+    billingServiceContent.includes('PAYOUT_WITHDRAWAL')
+);
+evaluate(
+  'BillingService implementa idempotência em confirmações de pagamento',
+  billingServiceContent.includes('PaymentStatus.PAID') && billingServiceContent.includes('já confirmada')
+);
+evaluate(
+  'BillingService registra auditoria em depósitos e saques',
+  billingServiceContent.includes('DEPOSIT_PAYMENT_CONFIRMED') && billingServiceContent.includes('PAYOUT_REQUESTED')
+);
+
+const billingControllerContent = readFileContent('apps/api/src/modules/billing/billing.controller.ts');
+evaluate('Endpoint GET /billing/wallet mapeado', billingControllerContent.includes("@Get('wallet')"));
+evaluate('Endpoint POST /billing/deposits mapeado', billingControllerContent.includes("@Post('deposits')"));
+evaluate('Endpoint POST /billing/deposits/:reference/confirm mapeado', billingControllerContent.includes("@Post('deposits/:reference/confirm')"));
+evaluate('Endpoint POST /billing/payouts mapeado', billingControllerContent.includes("@Post('payouts')"));
+evaluate('Endpoint GET /billing/payouts mapeado', billingControllerContent.includes("@Get('payouts')"));
+evaluate('Endpoint GET /billing/transactions mapeado', billingControllerContent.includes("@Get('transactions')"));
+
+evaluate('Testes unitários de BillingService implementados', fileExists('apps/api/src/modules/billing/billing.service.spec.ts'));
+evaluate('Testes unitários de BillingController implementados', fileExists('apps/api/src/modules/billing/billing.controller.spec.ts'));
+
+evaluate('Componente DepositModal implementado com geração de PIX', fileExists('apps/web/src/components/wallet/deposit-modal.tsx'));
+evaluate('Componente PayoutModal implementado com validação de saldo de publisher', fileExists('apps/web/src/components/wallet/payout-modal.tsx'));
+
+const walletPageContent = readFileContent('apps/web/src/app/(dashboard)/wallet/page.tsx');
+evaluate(
+  'Tela /wallet exibe as 3 contas contábeis, histórico de saques e extrato do WalletLedger',
+  walletPageContent.includes('ADVERTISING_CREDITS') &&
+    walletPageContent.includes('PUBLISHER_EARNINGS') &&
+    walletPageContent.includes('EXCHANGE_CREDITS') &&
+    walletPageContent.includes('DepositModal') &&
+    walletPageContent.includes('PayoutModal') &&
+    walletPageContent.includes('WalletLedger')
+);
+
+evaluate(
+  'Guia técnico de Faturamento, Payouts e Gateways documentado',
+  fileExists('docs/billing/01-payouts-and-billing-gateway.md')
+);
+
 // Resumo Final
 console.log(`\n${COLORS.bright}================================================================================${COLORS.reset}`);
 const scorePct = Math.round((passedChecks / totalChecks) * 100);
@@ -205,7 +294,7 @@ const statusColor = scorePct === 100 ? COLORS.green : COLORS.red;
 console.log(` RESULTADO FINAL: ${statusColor}${passedChecks}/${totalChecks} verificações aprovadas (${scorePct}%)${COLORS.reset}`);
 
 if (scorePct === 100) {
-  console.log(`${COLORS.green}${COLORS.bright} 🎉 FASES 23 E 24 INTEGRALMENTE HOMOLOGADAS E CONFORMES COM TODOS OS REQUISITOS!${COLORS.reset}`);
+  console.log(`${COLORS.green}${COLORS.bright} 🎉 FASES 23, 24 E 25 INTEGRALMENTE HOMOLOGADAS E CONFORMES COM TODOS OS REQUISITOS!${COLORS.reset}`);
 } else {
   console.log(`${COLORS.red}${COLORS.bright} ⚠ Algumas verificações não passaram. Revise os itens acima.${COLORS.reset}`);
 }

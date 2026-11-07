@@ -99,3 +99,4 @@ MGP.loadNativeAd(this, "UUID_DO_BLOCO", object : MgpNativeAdCallback {
     override fun onAdFailed(error: String) { /* Tratar erro */ }
 })
 ```
+
