@@ -16,3 +16,4 @@ export class FraudMetricsQueryDto {
   @IsUUID()
   appId?: string;
 }
+

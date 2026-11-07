@@ -47,3 +47,4 @@ ALTER TABLE "fraud_incidents" ADD CONSTRAINT "fraud_incidents_app_id_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "fraud_incidents" ADD CONSTRAINT "fraud_incidents_campaign_id_fkey" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+

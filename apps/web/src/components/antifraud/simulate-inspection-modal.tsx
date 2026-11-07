@@ -283,3 +283,4 @@ export function SimulateInspectionModal({
     </div>
   );
 }
+

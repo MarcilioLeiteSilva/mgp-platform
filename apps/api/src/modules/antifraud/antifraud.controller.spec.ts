@@ -115,3 +115,4 @@ describe('AntifraudController', () => {
     expect(res.isFraud).toBe(true);
   });
 });
+

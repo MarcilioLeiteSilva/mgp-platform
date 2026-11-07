@@ -58,3 +58,4 @@ export class SimulateIvtInspectionDto {
   @IsBoolean()
   hasViewToken: boolean = true;
 }
+

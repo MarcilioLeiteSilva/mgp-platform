@@ -37,3 +37,4 @@ export class ResolveFraudIncidentDto {
   @MaxLength(500)
   notes?: string;
 }
+

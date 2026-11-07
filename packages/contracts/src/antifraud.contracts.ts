@@ -46,3 +46,4 @@ export const FraudMetricsQuerySchema = z.object({
 });
 
 export type FraudMetricsQueryInput = z.infer<typeof FraudMetricsQuerySchema>;
+

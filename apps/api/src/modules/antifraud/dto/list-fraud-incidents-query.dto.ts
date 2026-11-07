@@ -44,3 +44,4 @@ export class ListFraudIncidentsQueryDto {
   @Max(100)
   limit: number = 20;
 }
+

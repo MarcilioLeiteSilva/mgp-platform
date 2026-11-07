@@ -92,3 +92,4 @@ De acordo com as normas da IAB/MRC para o ecossistema programático:
 * **Taxa Crítica:** `> 5.0%` (Gera alerta operacional e paralisação automática de inventário não confiável).
 
 O painel de controle do MGP exibe em tempo real o status comparativo contra a meta de 2.0%, permitindo ações preventivas imediatas.
+

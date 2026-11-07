@@ -10,3 +10,4 @@ import { AntifraudService } from './antifraud.service';
   exports: [AntifraudService],
 })
 export class AntifraudModule {}
+

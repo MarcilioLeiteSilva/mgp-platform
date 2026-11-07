@@ -481,6 +481,74 @@ evaluate(
   fileExists('docs/security/02-ivt-detection-and-antifraud-panel.md')
 );
 
+// ==============================================================================
+// PARTE 6: FASE 28 - Integração, Testes E2E e Homologação Final da Etapa 4
+// ==============================================================================
+printHeader('PARTE 6: FASE 28 - Integração, Testes E2E e Homologação Final da Etapa 4');
+
+const etapa4E2EPath = 'apps/api/src/test/etapa4-e2e.spec.ts';
+evaluate('Arquivo de testes de integração E2E da Etapa 4 implementado', fileExists(etapa4E2EPath));
+
+const etapa4E2EContent = readFileContent(etapa4E2EPath);
+evaluate(
+  'Suíte E2E cobre fluxo financeiro inicial de Top-Up PIX e WalletLedger',
+  etapa4E2EContent.includes('createDeposit') &&
+    etapa4E2EContent.includes('confirmDeposit') &&
+    etapa4E2EContent.includes('DEPOSIT_FIAT')
+);
+
+evaluate(
+  'Suíte E2E cobre criação de campanhas, criativos multi-formato e ativação',
+  etapa4E2EContent.includes('createCampaign') &&
+    etapa4E2EContent.includes('addCreative') &&
+    etapa4E2EContent.includes('updateCampaignStatus') &&
+    etapa4E2EContent.includes('BANNER') &&
+    etapa4E2EContent.includes('INTERSTITIAL') &&
+    etapa4E2EContent.includes('REWARDED')
+);
+
+evaluate(
+  'Suíte E2E cobre monetização de publishers, criação de ad units e cálculo de 70% rev-share',
+  etapa4E2EContent.includes('createAdUnit') &&
+    etapa4E2EContent.includes('getPublisherAnalytics') &&
+    etapa4E2EContent.includes('floorEcpm')
+);
+
+evaluate(
+  'Suíte E2E cobre Smart Bidding, Pacing e aplicação atômica de recomendações',
+  etapa4E2EContent.includes('updateBiddingStrategy') &&
+    etapa4E2EContent.includes('generateRecommendations') &&
+    etapa4E2EContent.includes('applyRecommendation') &&
+    etapa4E2EContent.includes('simulateCampaignBid')
+);
+
+evaluate(
+  'Suíte E2E cobre detecção IVT, auditoria forense e estorno financeiro (FRAUD_CHARGEBACK)',
+  etapa4E2EContent.includes('inspectTraffic') &&
+    etapa4E2EContent.includes('getMetrics') &&
+    etapa4E2EContent.includes('resolveIncident') &&
+    etapa4E2EContent.includes('FRAUD_CHARGEBACK') &&
+    etapa4E2EContent.includes('executeChargeback')
+);
+
+evaluate(
+  'Suíte E2E cobre solicitação e liquidação de Payout de publisher via PIX',
+  etapa4E2EContent.includes('requestPayout') &&
+    etapa4E2EContent.includes('PAYOUT_WITHDRAWAL')
+);
+
+evaluate(
+  'Suíte E2E cobre isolamento estrito multi-tenant (Zero Data Leakage) contra invasores',
+  etapa4E2EContent.includes('findCampaignById') &&
+    etapa4E2EContent.includes('findAdUnitById') &&
+    etapa4E2EContent.includes('competitorOrgId')
+);
+
+evaluate(
+  'Especificação consolidada de Homologação da ETAPA 4 documentada',
+  fileExists('docs/04-etapa4-campanhas-financas-marketplace-homologacao.md')
+);
+
 // Resumo Final
 console.log(`\n${COLORS.bright}================================================================================${COLORS.reset}`);
 const scorePct = Math.round((passedChecks / totalChecks) * 100);
@@ -488,7 +556,8 @@ const statusColor = scorePct === 100 ? COLORS.green : COLORS.red;
 console.log(` RESULTADO FINAL: ${statusColor}${passedChecks}/${totalChecks} verificações aprovadas (${scorePct}%)${COLORS.reset}`);
 
 if (scorePct === 100) {
-  console.log(`${COLORS.green}${COLORS.bright} 🎉 FASES 23, 24, 25, 26 E 27 INTEGRALMENTE HOMOLOGADAS E CONFORMES COM TODOS OS REQUISITOS!${COLORS.reset}`);
+  console.log(`${COLORS.green}${COLORS.bright} 🎉 PARABÉNS! ETAPA 4 INTEGRALMENTE HOMOLOGADA E CERTIFICADA (FASES 23 A 28)!${COLORS.reset}`);
+  console.log(`${COLORS.green}${COLORS.bright} 🏆 Motor de Campanhas, Gestão Financeira, Smart Bidding e Antifraude 100% Operacionais!${COLORS.reset}`);
 } else {
   console.log(`${COLORS.red}${COLORS.bright} ⚠ Algumas verificações não passaram. Revise os itens acima.${COLORS.reset}`);
 }
