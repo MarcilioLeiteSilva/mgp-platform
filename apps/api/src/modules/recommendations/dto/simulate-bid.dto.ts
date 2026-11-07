@@ -37,3 +37,4 @@ export class SimulateBidDto {
   @IsString()
   category?: string;
 }
+

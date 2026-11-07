@@ -15,6 +15,7 @@ import {
   Sparkles,
   Megaphone,
   LayoutGrid,
+  ShieldAlert,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -48,6 +49,11 @@ const navigationItems = [
     name: 'Carteira & Finanças',
     href: '/wallet',
     icon: Wallet,
+  },
+  {
+    name: 'Controle de Fraudes',
+    href: '/fraud',
+    icon: ShieldAlert,
   },
   {
     name: 'Organização & Membros',

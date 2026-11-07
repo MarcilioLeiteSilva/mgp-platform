@@ -8,6 +8,8 @@
  * - Fase 23: Gestão de Campanhas, Criativos e Segmentação de Público
  * - Fase 24: Painel de Publishers, Configuração de Ad Units e Relatórios de Monetização
  * - Fase 25: Motor de Payouts, Faturamento e Integração com Gateways de Pagamento
+ * - Fase 26: Motor de Recomendações e Otimização Automática de Lances (Smart Bidding)
+ * - Fase 27: Painel de Controle de Fraudes e Detecção de Tráfego Inválido (IVT)
  */
 
 const fs = require('fs');
@@ -392,6 +394,93 @@ evaluate(
   fileExists('docs/campaigns/02-smart-bidding-and-recommendations.md')
 );
 
+// ==============================================================================
+// PARTE 5: FASE 27 - Painel de Controle de Fraudes e Detecção de Tráfego Inválido (IVT)
+// ==============================================================================
+printHeader('PARTE 5: FASE 27 - Painel de Controle de Fraudes e Detecção de Tráfego Inválido (IVT)');
+
+evaluate('Modelo FraudIncident presente no schema Prisma', schemaContent.includes('model FraudIncident {'));
+evaluate('Enum IvtCategory definido com categorias GIVT e SIVT no Prisma', 
+  schemaContent.includes('enum IvtCategory {') &&
+  schemaContent.includes('GIVT_BOT') &&
+  schemaContent.includes('GIVT_DATA_CENTER') &&
+  schemaContent.includes('GIVT_EMULATOR') &&
+  schemaContent.includes('SIVT_FAST_CLICK') &&
+  schemaContent.includes('SIVT_CLICK_SPAM') &&
+  schemaContent.includes('SIVT_VIEWABILITY_FRAUD')
+);
+evaluate('Enum FraudSeverity e FraudIncidentStatus definidos no Prisma', 
+  schemaContent.includes('enum FraudSeverity {') &&
+  schemaContent.includes('enum FraudIncidentStatus {')
+);
+evaluate(
+  'Migração de banco de dados para IVT e Fraud Detection criada',
+  fileExists('packages/database/prisma/migrations/20261107030000_ivt_and_fraud_detection/migration.sql')
+);
+
+const sharedEnumsContent = readFileContent('packages/shared/src/enums.ts');
+evaluate(
+  'Enums IvtCategory, FraudSeverity e FraudIncidentStatus exportados em @mgp/shared',
+  sharedEnumsContent.includes('export enum IvtCategory') &&
+    sharedEnumsContent.includes('export enum FraudSeverity') &&
+    sharedEnumsContent.includes('export enum FraudIncidentStatus')
+);
+
+evaluate(
+  'Contratos de antifraude e schemas Zod definidos em @mgp/contracts',
+  fileExists('packages/contracts/src/antifraud.contracts.ts') &&
+    readFileContent('packages/contracts/src/index.ts').includes('antifraud.contracts')
+);
+
+evaluate('Módulo AntifraudModule criado na API', fileExists('apps/api/src/modules/antifraud/antifraud.module.ts'));
+evaluate(
+  'AntifraudModule registrado em AppModule',
+  readFileContent('apps/api/src/app.module.ts').includes('AntifraudModule')
+);
+
+evaluate('DTOs de Antifraude criados', 
+  fileExists('apps/api/src/modules/antifraud/dto/list-fraud-incidents-query.dto.ts') &&
+  fileExists('apps/api/src/modules/antifraud/dto/resolve-fraud-incident.dto.ts') &&
+  fileExists('apps/api/src/modules/antifraud/dto/simulate-ivt-inspection.dto.ts') &&
+  fileExists('apps/api/src/modules/antifraud/dto/fraud-metrics-query.dto.ts')
+);
+
+const antifraudServiceContent = readFileContent('apps/api/src/modules/antifraud/antifraud.service.ts');
+evaluate('AntifraudService implementa método inspectTraffic com regras GIVT/SIVT', antifraudServiceContent.includes('inspectTraffic'));
+evaluate('AntifraudService implementa método getMetrics consolidando taxa IVT e capital protegido', antifraudServiceContent.includes('getMetrics'));
+evaluate('AntifraudService implementa método listIncidents com isolamento por organização', antifraudServiceContent.includes('listIncidents'));
+evaluate('AntifraudService implementa método getIncidentById com busca forense', antifraudServiceContent.includes('getIncidentById'));
+evaluate(
+  'AntifraudService implementa resolveIncident com estorno atômico (FRAUD_CHARGEBACK) e idempotencyKey',
+  antifraudServiceContent.includes('resolveIncident') &&
+    antifraudServiceContent.includes('executeChargeback') &&
+    antifraudServiceContent.includes('FRAUD_CHARGEBACK') &&
+    antifraudServiceContent.includes('idempotencyKey') &&
+    antifraudServiceContent.includes('$transaction')
+);
+
+const antifraudControllerContent = readFileContent('apps/api/src/modules/antifraud/antifraud.controller.ts');
+evaluate('Endpoint GET /antifraud/metrics mapeado no controller', antifraudControllerContent.includes("@Get('metrics')"));
+evaluate('Endpoint GET /antifraud/incidents mapeado no controller', antifraudControllerContent.includes("@Get('incidents')"));
+evaluate('Endpoint GET /antifraud/incidents/:id mapeado no controller', antifraudControllerContent.includes("@Get('incidents/:id')"));
+evaluate('Endpoint POST /antifraud/incidents/:id/resolve mapeado no controller', antifraudControllerContent.includes("@Post('incidents/:id/resolve')"));
+evaluate('Endpoint POST /antifraud/simulate-inspection mapeado no controller', antifraudControllerContent.includes("@Post('simulate-inspection')"));
+
+evaluate('Testes unitários de AntifraudService implementados', fileExists('apps/api/src/modules/antifraud/antifraud.service.spec.ts'));
+evaluate('Testes unitários de AntifraudController implementados', fileExists('apps/api/src/modules/antifraud/antifraud.controller.spec.ts'));
+
+evaluate('Componente IncidentDetailsModal implementado para auditoria forense', fileExists('apps/web/src/components/antifraud/incident-details-modal.tsx'));
+evaluate('Componente SimulateInspectionModal implementado com presets de teste', fileExists('apps/web/src/components/antifraud/simulate-inspection-modal.tsx'));
+evaluate('Página executiva /fraud implementada no painel web', fileExists('apps/web/src/app/(dashboard)/fraud/page.tsx'));
+
+const antifraudSidebarContent = readFileContent('apps/web/src/components/layout/sidebar.tsx');
+evaluate('Link de navegação para /fraud adicionado na Sidebar do painel', antifraudSidebarContent.includes('/fraud'));
+
+evaluate(
+  'Guia técnico de IVT e Painel Antifraude documentado em docs/security/',
+  fileExists('docs/security/02-ivt-detection-and-antifraud-panel.md')
+);
+
 // Resumo Final
 console.log(`\n${COLORS.bright}================================================================================${COLORS.reset}`);
 const scorePct = Math.round((passedChecks / totalChecks) * 100);
@@ -399,7 +488,7 @@ const statusColor = scorePct === 100 ? COLORS.green : COLORS.red;
 console.log(` RESULTADO FINAL: ${statusColor}${passedChecks}/${totalChecks} verificações aprovadas (${scorePct}%)${COLORS.reset}`);
 
 if (scorePct === 100) {
-  console.log(`${COLORS.green}${COLORS.bright} 🎉 FASES 23, 24, 25 E 26 INTEGRALMENTE HOMOLOGADAS E CONFORMES COM TODOS OS REQUISITOS!${COLORS.reset}`);
+  console.log(`${COLORS.green}${COLORS.bright} 🎉 FASES 23, 24, 25, 26 E 27 INTEGRALMENTE HOMOLOGADAS E CONFORMES COM TODOS OS REQUISITOS!${COLORS.reset}`);
 } else {
   console.log(`${COLORS.red}${COLORS.bright} ⚠ Algumas verificações não passaram. Revise os itens acima.${COLORS.reset}`);
 }

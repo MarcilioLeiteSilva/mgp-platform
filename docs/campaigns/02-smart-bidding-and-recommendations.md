@@ -106,3 +106,4 @@ Todas as alterações de lances, orçamentos e estratégias efetuadas por meio d
 - `action`: `RECOMMENDATION_APPLIED` ou `BID_STRATEGY_UPDATED`.
 - `entityType`: `CampaignRecommendation` ou `Campaign`.
 - `diffBefore` / `diffAfter`: Armazenamento do estado anterior e das propriedades modificadas.
+

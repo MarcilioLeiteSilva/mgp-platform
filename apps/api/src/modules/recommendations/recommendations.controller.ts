@@ -165,3 +165,4 @@ export class RecommendationsController {
     return this.service.simulateCampaignBid(organizationId, campaignId, dto);
   }
 }
+

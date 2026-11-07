@@ -11,3 +11,4 @@ import { SmartBiddingService } from './smart-bidding.service';
   exports: [RecommendationsService, SmartBiddingService],
 })
 export class RecommendationsModule {}
+

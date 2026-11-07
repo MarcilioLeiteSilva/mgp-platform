@@ -60,6 +60,7 @@ model Organization {
   telemetrySessions TelemetrySession[]
   payoutRequests  PayoutRequest[]
   depositInvoices DepositInvoice[]
+  fraudIncidents  FraudIncident[]
   createdAt       DateTime                 @default(now()) @map("created_at")
   updatedAt       DateTime                 @updatedAt @map("updated_at")
 
@@ -149,6 +150,7 @@ model App {
   adUnits        AdUnit[]
   telemetrySessions TelemetrySession[]
   telemetryEvents   TelemetryEventRecord[]
+  fraudIncidents    FraudIncident[]
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
 
@@ -253,6 +255,7 @@ model Campaign {
   endDate             DateTime?              @map("end_date")
   creatives           Creative[]
   recommendations     CampaignRecommendation[]
+  fraudIncidents      FraudIncident[]
   createdAt           DateTime               @default(now()) @map("created_at")
   updatedAt           DateTime               @updatedAt @map("updated_at")
 
@@ -631,4 +634,64 @@ model TelemetryEventRecord {
   @@index([organizationId, createdAt])
   @@map("telemetry_events")
 }
+
+// ==============================================================================
+// 9. Detecção de Fraude e Tráfego Inválido (IVT - Invalid Traffic Detection)
+// ==============================================================================
+
+enum IvtCategory {
+  GIVT_BOT
+  GIVT_DATA_CENTER
+  GIVT_EMULATOR
+  SIVT_CLICK_SPAM
+  SIVT_CLICK_INJECTION
+  SIVT_AD_STACKING
+  SIVT_FAST_CLICK
+  SIVT_GEO_MISMATCH
+  SIVT_VIEWABILITY_FRAUD
+}
+
+enum FraudSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum FraudIncidentStatus {
+  DETECTED
+  INVESTIGATING
+  CONFIRMED
+  DISMISSED
+  RESOLVED
+}
+
+model FraudIncident {
+  id                String              @id @default(uuid())
+  organizationId    String              @map("organization_id")
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  appId             String?             @map("app_id")
+  app               App?                @relation(fields: [appId], references: [id], onDelete: SetNull)
+  campaignId        String?             @map("campaign_id")
+  campaign          Campaign?           @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  adUnitId          String?             @map("ad_unit_id")
+  category          IvtCategory
+  severity          FraudSeverity       @default(MEDIUM)
+  status            FraudIncidentStatus @default(DETECTED)
+  sourceIp          String?             @map("source_ip")
+  deviceFingerprint String?             @map("device_fingerprint")
+  evidencePayload   Json                @map("evidence_payload")
+  impactAmount      Decimal             @default(0.0) @db.Decimal(10, 4) @map("impact_amount")
+  actionTaken       String?             @map("action_taken")
+  resolvedAt        DateTime?           @map("resolved_at")
+  resolvedBy        String?             @map("resolved_by")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+
+  @@index([organizationId, status])
+  @@index([category, severity])
+  @@index([appId, createdAt])
+  @@map("fraud_incidents")
+}
+
 

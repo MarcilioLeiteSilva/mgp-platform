@@ -11,3 +11,4 @@ export class DismissRecommendationDto {
   @MaxLength(255)
   reason?: string;
 }
+

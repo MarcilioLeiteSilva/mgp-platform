@@ -145,11 +145,10 @@ export function SmartBiddingModal({
 
         {feedback && (
           <div
-            className={`text-xs p-3.5 rounded-xl border flex items-center gap-2 ${
-              feedback.type === 'success'
+            className={`text-xs p-3.5 rounded-xl border flex items-center gap-2 ${feedback.type === 'success'
                 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
                 : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
-            }`}
+              }`}
           >
             {feedback.type === 'success' ? (
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
@@ -176,19 +175,18 @@ export function SmartBiddingModal({
                     Ritmo de Entrega Diário (Pacing às {pacing.currentHour}:00h)
                   </span>
                   <span
-                    className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                      pacing.pacingStatus === 'ON_TRACK'
+                    className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${pacing.pacingStatus === 'ON_TRACK'
                         ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                         : pacing.pacingStatus === 'AHEAD'
-                        ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                        : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                    }`}
+                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                          : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                      }`}
                   >
                     {pacing.pacingStatus === 'ON_TRACK'
                       ? 'No Ritmo Previsto'
                       : pacing.pacingStatus === 'AHEAD'
-                      ? 'Consumo Acelerado'
-                      : 'Consumo Retido'}
+                        ? 'Consumo Acelerado'
+                        : 'Consumo Retido'}
                   </span>
                 </div>
 
@@ -367,3 +365,4 @@ export function SmartBiddingModal({
     </div>
   );
 }
+

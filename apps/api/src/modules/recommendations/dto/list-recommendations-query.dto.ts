@@ -48,3 +48,4 @@ export class ListRecommendationsQueryDto {
   @Max(100)
   limit: number = 20;
 }
+

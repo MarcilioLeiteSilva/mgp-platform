@@ -13,6 +13,7 @@ import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { AdUnitsModule } from './modules/ad-units/ad-units.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
+import { AntifraudModule } from './modules/antifraud/antifraud.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -31,6 +32,7 @@ import { AppController } from './app.controller';
     AdUnitsModule,
     BillingModule,
     RecommendationsModule,
+    AntifraudModule,
   ],
   controllers: [AppController],
   providers: [],

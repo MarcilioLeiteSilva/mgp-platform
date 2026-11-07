@@ -6,4 +6,5 @@ export * from './campaigns.contracts.js';
 export * from './ad-units.contracts.js';
 export * from './billing.contracts.js';
 export * from './recommendations.contracts.js';
+export * from './antifraud.contracts.js';
 

@@ -10,3 +10,4 @@ export class ApplyRecommendationDto {
   @IsObject()
   overrideParams?: Record<string, any>;
 }
+

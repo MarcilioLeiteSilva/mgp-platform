@@ -48,3 +48,4 @@ CREATE INDEX "campaign_recommendations_campaign_id_status_idx" ON "campaign_reco
 
 -- AddForeignKey
 ALTER TABLE "campaign_recommendations" ADD CONSTRAINT "campaign_recommendations_campaign_id_fkey" FOREIGN KEY ("campaign_id") REFERENCES "campaigns"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
