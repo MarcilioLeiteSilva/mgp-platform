@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "campaigns" ADD COLUMN IF NOT EXISTS "spent_amount" DECIMAL(10,4) NOT NULL DEFAULT 0.0;
+ALTER TABLE "campaigns" ADD COLUMN IF NOT EXISTS "target_categories" TEXT DEFAULT 'ALL';
+ALTER TABLE "campaigns" ADD COLUMN IF NOT EXISTS "start_date" TIMESTAMP(3);
+ALTER TABLE "campaigns" ADD COLUMN IF NOT EXISTS "end_date" TIMESTAMP(3);
+

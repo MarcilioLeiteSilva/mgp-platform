@@ -327,10 +327,10 @@ Progresso atual: **6/6 fases concluídas (Etapa 3 — 100% Concluída e Homologa
 
 ## 5. Planejamento — ETAPA 4 (Motor de Campanhas, Gestão Financeira & Marketplace)
 
-Progresso atual: **0/6 fases concluídas (Etapa 4)**.
+Progresso atual: **1/6 fases concluídas (Etapa 4)**.
 
-- [ ] **Fase 23 — Gestão de Campanhas, Criativos e Segmentação de Público** ◀ **[PRÓXIMA FASE A EXECUTAR]**
-- [ ] **Fase 24 — Painel de Publishers, Configuração de Ad Units e Relatórios de Monetização**
+- [x] **Fase 23 — Gestão de Campanhas, Criativos e Segmentação de Público** ✅ **[HOMOLOGADA]**
+- [ ] **Fase 24 — Painel de Publishers, Configuração de Ad Units e Relatórios de Monetização** ◀ **[PRÓXIMA FASE A EXECUTAR]**
 - [ ] **Fase 25 — Motor de Payouts, Faturamento e Integração com Gateways de Pagamento**
 - [ ] **Fase 26 — Motor de Recomendações e Otimização Automática de Lances**
 - [ ] **Fase 27 — Painel de Controle de Fraudes e Detecção de Tráfego Inválido (IVT)**
@@ -347,18 +347,20 @@ Progresso atual: **0/6 fases concluídas (Etapa 4)**.
    * Auditoria geral Etapa 1: `node infrastructure/scripts/audit-etapa1.js` (**Score: 100% — 93/93 checks**).
    * Auditoria geral Etapa 2: `node infrastructure/scripts/audit-etapa2.js` (**Score: 100% — 82/82 checks**).
    * Auditoria geral Etapa 3: `node infrastructure/scripts/audit-etapa3.js` (**Score: 100% — 74/74 checks**).
-   * Total de verificações auditadas no monorepo: **249/249 checks aprovados (Score 100% global)**.
-   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**239 testes passing em 28 suítes, 0 falhas**).
+   * Auditoria geral Etapa 4: `node infrastructure/scripts/audit-etapa4.js` (**Score: 100% — 31/31 checks**).
+   * Total de verificações auditadas no monorepo: **280/280 checks aprovados (Score 100% global)**.
+   * Suíte completa de testes Jest da API: `npm test --prefix apps/api` (**263 testes passing em 30 suítes, 0 falhas**).
    * Suíte completa de testes Jest dos Workers: `npm test --prefix apps/workers` (**25 testes passing em 6 suítes, 0 falhas**).
    * Suíte completa de testes Jest do Ad Server: `npm test --prefix apps/ad-server` (**37 testes passing em 5 suítes, 0 falhas**).
-   * Total de testes automatizados da plataforma: **301 testes aprovados (100% green)**.
+   * Total de testes automatizados da plataforma: **325 testes aprovados (100% green)**.
    * Compilação dos contratos compartilhados: `pnpm --filter @mgp/contracts build` (**100% verde**).
    * Compilação do banco de dados & Prisma: `pnpm --filter @mgp/database build` (**100% verde**).
    * Compilação dos workers assíncronos: `npm run build --prefix apps/workers` (**100% verde**).
    * Compilação da API central NestJS: `npm run build --prefix apps/api` (**100% verde**).
    * Compilação do Ad Server Fastify: `npm run build --prefix apps/ad-server` (**100% verde**).
+   * Compilação do Frontend Next.js: `pnpm --filter @mgp/web build` (**100% verde**).
 3. **Ponto de Partida Imediato:**
-   * Iniciar diretamente a **ETAPA 4 — Fase 23: Gestão de Campanhas, Criativos e Segmentação de Público**.
+   * Iniciar diretamente a **ETAPA 4 — Fase 24: Painel de Publishers, Configuração de Ad Units e Relatórios de Monetização**.
 
 ---
 

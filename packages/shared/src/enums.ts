@@ -27,6 +27,14 @@ export enum CampaignBillingModel {
   CPI = 'CPI',
 }
 
+export enum CampaignStatus {
+  DRAFT = 'DRAFT',
+  ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
+  COMPLETED = 'COMPLETED',
+  SUSPENDED = 'SUSPENDED',
+}
+
 export enum WalletAccountType {
   ADVERTISING_CREDITS = 'ADVERTISING_CREDITS',
   EXCHANGE_CREDITS = 'EXCHANGE_CREDITS',

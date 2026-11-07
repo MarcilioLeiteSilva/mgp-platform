@@ -13,6 +13,7 @@ import {
   Activity,
   Layers,
   Sparkles,
+  Megaphone,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -26,6 +27,11 @@ const navigationItems = [
     name: 'Meus Aplicativos',
     href: '/apps',
     icon: Smartphone,
+  },
+  {
+    name: 'Campanhas',
+    href: '/campaigns',
+    icon: Megaphone,
   },
   {
     name: 'ASO Studio',
