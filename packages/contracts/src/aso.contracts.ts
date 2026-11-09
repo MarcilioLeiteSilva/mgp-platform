@@ -147,3 +147,80 @@ export interface AsoJobResult {
   processedAt: string;
   durationMs: number;
 }
+
+// ==============================================================================
+// Estimativas Preditivas de Downloads e Receita (Fase 29)
+// ==============================================================================
+
+export interface AsoEstimateRangeDto {
+  min: number;
+  median: number;
+  max: number;
+}
+
+export interface AsoAppEstimateDto {
+  id: string;
+  organizationId: string;
+  asoAppId: string;
+  date: string; // ISO date YYYY-MM-DD
+  country: string;
+  category: string;
+  categoryRankBasis: number | null;
+  dailyDownloads: AsoEstimateRangeDto;
+  monthlyDownloads: AsoEstimateRangeDto;
+  dailyRevenue: AsoEstimateRangeDto;
+  monthlyRevenue: AsoEstimateRangeDto;
+  currency: string;
+  confidenceScore: number; // 0 - 100
+  calculationMethod: string;
+  breakdown?: {
+    alphaCategory: number;
+    betaCategory: number;
+    reviewVelocityFactor: number;
+    scoreFactor: number;
+    arpuEstimate: number;
+    monetizationType: 'FREE_IAP' | 'PAID' | 'FREE_ADS';
+    minInstallsFloor: number;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AsoEstimatesSummaryDto {
+  appId: string;
+  title: string;
+  icon: string;
+  category: string;
+  country: string;
+  latestEstimate: AsoAppEstimateDto;
+  history: AsoAppEstimateDto[];
+  growthTrends: {
+    downloadGrowthRate7d: number;
+    downloadGrowthRate30d: number;
+    revenueGrowthRate7d: number;
+    revenueGrowthRate30d: number;
+  };
+  methodologyNotice: string;
+}
+
+export interface AsoCategoryBenchmarkDto {
+  category: string;
+  country: string;
+  alpha: number;
+  beta: number;
+  baseArpuBrl: number;
+  baseArpuUsd: number;
+  typicalConversionRate: number;
+  sampleTopRanks: {
+    rank: number;
+    estimatedDailyDownloads: number;
+    estimatedDailyRevenueBrl: number;
+  }[];
+}
+
+export interface AsoEstimateRecalculateDto {
+  asoAppId: string;
+  country?: string;
+  forceRankBasis?: number;
+}
+

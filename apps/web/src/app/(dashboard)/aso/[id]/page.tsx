@@ -30,6 +30,7 @@ import { api } from '@/lib/api';
 import { AuditGauge } from '@/components/aso/audit-gauge';
 import { RankingChart, RankingHistoryPoint } from '@/components/aso/ranking-chart';
 import { AddKeywordModal } from '@/components/aso/add-keyword-modal';
+import { PredictiveEstimates } from '@/components/aso/predictive-estimates';
 
 export default function AsoAppDetailPage() {
   const params = useParams();
@@ -42,7 +43,7 @@ export default function AsoAppDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<'keywords' | 'audit' | 'metadata'>('keywords');
+  const [activeTab, setActiveTab] = useState<'keywords' | 'audit' | 'estimates' | 'metadata'>('keywords');
 
   // Keyword Filters & Modal
   const [keywordFilter, setKeywordFilter] = useState('');
@@ -391,6 +392,18 @@ export default function AsoAppDetailPage() {
         >
           <Sparkles className="w-4 h-4" />
           Auditoria Heurística ASO
+        </button>
+
+        <button
+          onClick={() => setActiveTab('estimates')}
+          className={`px-4 py-2.5 text-xs font-bold rounded-t-lg transition-colors border-b-2 flex items-center gap-2 ${
+            activeTab === 'estimates'
+              ? 'border-blue-500 text-blue-400 bg-slate-900/60'
+              : 'border-transparent text-slate-400 hover:text-white'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          Estimativas Preditivas
         </button>
 
         <button
@@ -746,6 +759,11 @@ export default function AsoAppDetailPage() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Tab: Estimativas Preditivas */}
+      {activeTab === 'estimates' && (
+        <PredictiveEstimates asoAppId={appIdParam} app={app} />
       )}
 
       {/* Tab 3: Metadados & Galeria Visual */}

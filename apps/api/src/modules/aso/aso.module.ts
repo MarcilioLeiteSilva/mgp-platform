@@ -7,12 +7,14 @@ import { AsoAppsService } from './services/aso-apps.service';
 import { AsoKeywordsService } from './services/aso-keywords.service';
 import { AsoAuditService } from './services/aso-audit.service';
 import { AsoQueueService } from './services/aso-queue.service';
+import { AsoEstimatesService } from './services/aso-estimates.service';
 import { PlayScraperController } from './controllers/play-scraper.controller';
 import { AsoController } from './controllers/aso.controller';
+import { AsoEstimatesController } from './controllers/aso-estimates.controller';
 
 @Module({
   imports: [AuthModule],
-  controllers: [PlayScraperController, AsoController],
+  controllers: [PlayScraperController, AsoController, AsoEstimatesController],
   providers: [
     AsoCacheService,
     AsoRateLimiterService,
@@ -21,6 +23,7 @@ import { AsoController } from './controllers/aso.controller';
     AsoKeywordsService,
     AsoAuditService,
     AsoQueueService,
+    AsoEstimatesService,
   ],
   exports: [
     AsoCacheService,
@@ -30,6 +33,7 @@ import { AsoController } from './controllers/aso.controller';
     AsoKeywordsService,
     AsoAuditService,
     AsoQueueService,
+    AsoEstimatesService,
   ],
 })
 export class AsoModule {}

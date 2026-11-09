@@ -45,24 +45,25 @@ model User {
 }
 
 model Organization {
-  id              String                   @id @default(uuid())
-  name            String
-  slug            String                   @unique
-  documentCnpjCpf String?                  @map("document_cnpj_cpf")
-  planTier        String                   @default("FREE") @map("plan_tier")
-  isVerified      Boolean                  @default(false) @map("is_verified")
-  memberships     Membership[]
-  invitations     OrganizationInvitation[]
-  apps            App[]
-  campaigns       Campaign[]
-  wallet          Wallet?
-  asoApps         AsoApp[]
+  id                String                   @id @default(uuid())
+  name              String
+  slug              String                   @unique
+  documentCnpjCpf   String?                  @map("document_cnpj_cpf")
+  planTier          String                   @default("FREE") @map("plan_tier")
+  isVerified        Boolean                  @default(false) @map("is_verified")
+  memberships       Membership[]
+  invitations       OrganizationInvitation[]
+  apps              App[]
+  campaigns         Campaign[]
+  wallet            Wallet?
+  asoApps           AsoApp[]
+  asoAppEstimates   AsoAppEstimate[]
   telemetrySessions TelemetrySession[]
-  payoutRequests  PayoutRequest[]
-  depositInvoices DepositInvoice[]
-  fraudIncidents  FraudIncident[]
-  createdAt       DateTime                 @default(now()) @map("created_at")
-  updatedAt       DateTime                 @updatedAt @map("updated_at")
+  payoutRequests    PayoutRequest[]
+  depositInvoices   DepositInvoice[]
+  fraudIncidents    FraudIncident[]
+  createdAt         DateTime                 @default(now()) @map("created_at")
+  updatedAt         DateTime                 @updatedAt @map("updated_at")
 
   @@map("organizations")
 }
@@ -83,15 +84,15 @@ model Membership {
 }
 
 model Session {
-  id           String    @id @default(uuid())
-  userId       String    @map("user_id")
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  refreshToken String    @unique @map("refresh_token")
-  userAgent    String?   @map("user_agent")
-  ipAddress    String?   @map("ip_address")
-  isRevoked    Boolean   @default(false) @map("is_revoked")
-  expiresAt    DateTime  @map("expires_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken String   @unique @map("refresh_token")
+  userAgent    String?  @map("user_agent")
+  ipAddress    String?  @map("ip_address")
+  isRevoked    Boolean  @default(false) @map("is_revoked")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   @@index([userId, isRevoked])
   @@map("sessions")
@@ -139,20 +140,20 @@ enum AdFormat {
 }
 
 model App {
-  id             String        @id @default(uuid())
-  organizationId String        @map("organization_id")
-  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  name           String
-  packageName    String        @map("package_name")
-  platform       AppPlatform   @default(ANDROID)
-  status         AppStatus     @default(PENDING)
-  sdkKey         String        @unique @default(uuid()) @map("sdk_key")
-  adUnits        AdUnit[]
+  id                String                 @id @default(uuid())
+  organizationId    String                 @map("organization_id")
+  organization      Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name              String
+  packageName       String                 @map("package_name")
+  platform          AppPlatform            @default(ANDROID)
+  status            AppStatus              @default(PENDING)
+  sdkKey            String                 @unique @default(uuid()) @map("sdk_key")
+  adUnits           AdUnit[]
   telemetrySessions TelemetrySession[]
   telemetryEvents   TelemetryEventRecord[]
   fraudIncidents    FraudIncident[]
-  createdAt      DateTime      @default(now()) @map("created_at")
-  updatedAt      DateTime      @updatedAt @map("updated_at")
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
 
   @@unique([organizationId, packageName, platform])
   @@map("apps")
@@ -165,7 +166,7 @@ model AdUnit {
   name      String
   format    AdFormat
   placement String?
-  floorEcpm Decimal  @default(0.0) @db.Decimal(10, 4) @map("floor_ecpm")
+  floorEcpm Decimal  @default(0.0) @map("floor_ecpm") @db.Decimal(10, 4)
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -232,32 +233,32 @@ enum RecommendationPriority {
 }
 
 model Campaign {
-  id                  String                 @id @default(uuid())
-  organizationId      String                 @map("organization_id")
-  organization        Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id                  String                   @id @default(uuid())
+  organizationId      String                   @map("organization_id")
+  organization        Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   name                String
-  type                CampaignType           @default(PAID)
-  billingModel        CampaignBillingModel   @default(CPM) @map("billing_model")
-  bidAmount           Decimal                @db.Decimal(10, 4) @map("bid_amount")
-  dailyBudget         Decimal                @db.Decimal(10, 4) @map("daily_budget")
-  totalBudget         Decimal                @db.Decimal(10, 4) @map("total_budget")
-  spentAmount         Decimal                @default(0.0) @db.Decimal(10, 4) @map("spent_amount")
-  frequencyCapPerHour Int?                   @default(3) @map("frequency_cap_per_hour")
-  priorityTier        Int?                   @default(2) @map("priority_tier")
-  status              CampaignStatus         @default(DRAFT)
-  biddingStrategy     BiddingStrategy        @default(MANUAL) @map("bidding_strategy")
-  pacingMode          PacingMode             @default(EVEN) @map("pacing_mode")
-  targetCpa           Decimal?               @db.Decimal(10, 4) @map("target_cpa")
-  autoOptimize        Boolean                @default(false) @map("auto_optimize")
-  targetCountry       String                 @default("BR") @map("target_country")
-  targetCategories    String?                @default("ALL") @map("target_categories")
-  startDate           DateTime?              @map("start_date")
-  endDate             DateTime?              @map("end_date")
+  type                CampaignType             @default(PAID)
+  billingModel        CampaignBillingModel     @default(CPM) @map("billing_model")
+  bidAmount           Decimal                  @map("bid_amount") @db.Decimal(10, 4)
+  dailyBudget         Decimal                  @map("daily_budget") @db.Decimal(10, 4)
+  totalBudget         Decimal                  @map("total_budget") @db.Decimal(10, 4)
+  spentAmount         Decimal                  @default(0.0) @map("spent_amount") @db.Decimal(10, 4)
+  frequencyCapPerHour Int?                     @default(3) @map("frequency_cap_per_hour")
+  priorityTier        Int?                     @default(2) @map("priority_tier")
+  status              CampaignStatus           @default(DRAFT)
+  biddingStrategy     BiddingStrategy          @default(MANUAL) @map("bidding_strategy")
+  pacingMode          PacingMode               @default(EVEN) @map("pacing_mode")
+  targetCpa           Decimal?                 @map("target_cpa") @db.Decimal(10, 4)
+  autoOptimize        Boolean                  @default(false) @map("auto_optimize")
+  targetCountry       String                   @default("BR") @map("target_country")
+  targetCategories    String?                  @default("ALL") @map("target_categories")
+  startDate           DateTime?                @map("start_date")
+  endDate             DateTime?                @map("end_date")
   creatives           Creative[]
   recommendations     CampaignRecommendation[]
   fraudIncidents      FraudIncident[]
-  createdAt           DateTime               @default(now()) @map("created_at")
-  updatedAt           DateTime               @updatedAt @map("updated_at")
+  createdAt           DateTime                 @default(now()) @map("created_at")
+  updatedAt           DateTime                 @updatedAt @map("updated_at")
 
   @@index([organizationId, status])
   @@map("campaigns")
@@ -276,7 +277,7 @@ model Creative {
   height               Int      @default(50)
   iconUrl              String?  @map("icon_url")
   ctaText              String?  @default("Instalar") @map("cta_text")
-  starRating           Decimal? @db.Decimal(3, 2) @map("star_rating")
+  starRating           Decimal? @map("star_rating") @db.Decimal(3, 2)
   sponsorText          String?  @map("sponsor_text")
   skipOffsetSeconds    Int?     @default(5) @map("skip_offset_seconds")
   rewardType           String?  @map("reward_type")
@@ -349,7 +350,7 @@ model WalletAccount {
   wallet          Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
   type            WalletAccountType
   currency        String            @default("BRL")
-  cachedBalance   Decimal           @default(0.0) @db.Decimal(14, 4) @map("cached_balance")
+  cachedBalance   Decimal           @default(0.0) @map("cached_balance") @db.Decimal(14, 4)
   ledgerEntries   WalletLedger[]
   payoutRequests  PayoutRequest[]
   depositInvoices DepositInvoice[]
@@ -364,7 +365,7 @@ model WalletLedger {
   account         WalletAccount         @relation(fields: [accountId], references: [id], onDelete: Restrict)
   transactionType LedgerTransactionType @map("transaction_type")
   amount          Decimal               @db.Decimal(14, 4)
-  balanceAfter    Decimal               @db.Decimal(14, 4) @map("balance_after")
+  balanceAfter    Decimal               @map("balance_after") @db.Decimal(14, 4)
   referenceId     String?               @map("reference_id")
   idempotencyKey  String                @unique @map("idempotency_key")
   description     String
@@ -473,32 +474,33 @@ model AuditLog {
 // ==============================================================================
 
 model AsoApp {
-  id              String            @id @default(uuid())
-  organizationId  String            @map("organization_id")
-  organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  appId           String            @map("app_id")
-  platform        AppPlatform       @default(ANDROID)
+  id              String           @id @default(uuid())
+  organizationId  String           @map("organization_id")
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  appId           String           @map("app_id")
+  platform        AppPlatform      @default(ANDROID)
   title           String
   developer       String
-  developerId     String?           @map("developer_id")
+  developerId     String?          @map("developer_id")
   icon            String
   genre           String?
-  genreId         String?           @map("genre_id")
-  score           Decimal?          @default(0.0) @db.Decimal(3, 2)
-  ratings         Int?              @default(0)
-  reviews         Int?              @default(0)
-  minInstalls     BigInt?           @default(0) @map("min_installs")
-  isMonitored     Boolean           @default(true) @map("is_monitored")
-  isCompetitor    Boolean           @default(false) @map("is_competitor")
-  targetAppId     String?           @map("target_app_id")
-  country         String            @default("br")
-  lang            String            @default("pt-BR")
+  genreId         String?          @map("genre_id")
+  score           Decimal?         @default(0.0) @db.Decimal(3, 2)
+  ratings         Int?             @default(0)
+  reviews         Int?             @default(0)
+  minInstalls     BigInt?          @default(0) @map("min_installs")
+  isMonitored     Boolean          @default(true) @map("is_monitored")
+  isCompetitor    Boolean          @default(false) @map("is_competitor")
+  targetAppId     String?          @map("target_app_id")
+  country         String           @default("br")
+  lang            String           @default("pt-BR")
   metadata        Json?
-  lastScrapedAt   DateTime?         @map("last_scraped_at")
+  lastScrapedAt   DateTime?        @map("last_scraped_at")
   trackedKeywords AsoAppKeyword[]
   auditScores     AsoAuditScore[]
-  createdAt       DateTime          @default(now()) @map("created_at")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
+  estimates       AsoAppEstimate[]
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
 
   @@unique([organizationId, appId, country, lang])
   @@index([organizationId, isMonitored])
@@ -526,20 +528,20 @@ model AsoKeyword {
 }
 
 model AsoAppKeyword {
-  id             String                      @id @default(uuid())
-  asoAppId       String                      @map("aso_app_id")
-  asoApp         AsoApp                      @relation(fields: [asoAppId], references: [id], onDelete: Cascade)
-  keywordId      String                      @map("keyword_id")
-  keyword        AsoKeyword                  @relation(fields: [keywordId], references: [id], onDelete: Cascade)
-  currentRank    Int?                        @map("current_rank")
-  previousRank   Int?                        @map("previous_rank")
-  bestRank       Int?                        @map("best_rank")
+  id             String                     @id @default(uuid())
+  asoAppId       String                     @map("aso_app_id")
+  asoApp         AsoApp                     @relation(fields: [asoAppId], references: [id], onDelete: Cascade)
+  keywordId      String                     @map("keyword_id")
+  keyword        AsoKeyword                 @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  currentRank    Int?                       @map("current_rank")
+  previousRank   Int?                       @map("previous_rank")
+  bestRank       Int?                       @map("best_rank")
   tag            String?
-  isActive       Boolean                     @default(true) @map("is_active")
-  lastTrackedAt  DateTime?                   @map("last_tracked_at")
+  isActive       Boolean                    @default(true) @map("is_active")
+  lastTrackedAt  DateTime?                  @map("last_tracked_at")
   rankingHistory AsoKeywordRankingHistory[]
-  createdAt      DateTime                    @default(now()) @map("created_at")
-  updatedAt      DateTime                    @updatedAt @map("updated_at")
+  createdAt      DateTime                   @default(now()) @map("created_at")
+  updatedAt      DateTime                   @updatedAt @map("updated_at")
 
   @@unique([asoAppId, keywordId])
   @@index([asoAppId, currentRank])
@@ -574,6 +576,41 @@ model AsoAuditScore {
 
   @@index([asoAppId, auditDate])
   @@map("aso_audit_scores")
+}
+
+model AsoAppEstimate {
+  id                     String       @id @default(uuid())
+  organizationId         String       @map("organization_id")
+  organization           Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  asoAppId               String       @map("aso_app_id")
+  asoApp                 AsoApp       @relation(fields: [asoAppId], references: [id], onDelete: Cascade)
+  date                   DateTime     @map("date")
+  country                String       @default("br")
+  category               String
+  categoryRankBasis      Int?         @map("category_rank_basis")
+  dailyDownloadsMin      Int          @map("daily_downloads_min")
+  dailyDownloadsMedian   Int          @map("daily_downloads_median")
+  dailyDownloadsMax      Int          @map("daily_downloads_max")
+  monthlyDownloadsMin    Int          @map("monthly_downloads_min")
+  monthlyDownloadsMedian Int          @map("monthly_downloads_median")
+  monthlyDownloadsMax    Int          @map("monthly_downloads_max")
+  dailyRevenueMin        Decimal      @map("daily_revenue_min") @db.Decimal(12, 2)
+  dailyRevenueMedian     Decimal      @map("daily_revenue_median") @db.Decimal(12, 2)
+  dailyRevenueMax        Decimal      @map("daily_revenue_max") @db.Decimal(12, 2)
+  monthlyRevenueMin      Decimal      @map("monthly_revenue_min") @db.Decimal(12, 2)
+  monthlyRevenueMedian   Decimal      @map("monthly_revenue_median") @db.Decimal(12, 2)
+  monthlyRevenueMax      Decimal      @map("monthly_revenue_max") @db.Decimal(12, 2)
+  currency               String       @default("BRL")
+  confidenceScore        Decimal      @map("confidence_score") @db.Decimal(5, 2)
+  calculationMethod      String       @default("POWER_LAW_PARETO_V1") @map("calculation_method")
+  breakdownJson          Json?        @map("breakdown_json")
+  createdAt              DateTime     @default(now()) @map("created_at")
+  updatedAt              DateTime     @updatedAt @map("updated_at")
+
+  @@unique([asoAppId, date, country])
+  @@index([organizationId, date])
+  @@index([asoAppId, date])
+  @@map("aso_app_estimates")
 }
 
 // ==============================================================================
@@ -681,7 +718,7 @@ model FraudIncident {
   sourceIp          String?             @map("source_ip")
   deviceFingerprint String?             @map("device_fingerprint")
   evidencePayload   Json                @map("evidence_payload")
-  impactAmount      Decimal             @default(0.0) @db.Decimal(10, 4) @map("impact_amount")
+  impactAmount      Decimal             @default(0.0) @map("impact_amount") @db.Decimal(10, 4)
   actionTaken       String?             @map("action_taken")
   resolvedAt        DateTime?           @map("resolved_at")
   resolvedBy        String?             @map("resolved_by")
@@ -693,5 +730,3 @@ model FraudIncident {
   @@index([appId, createdAt])
   @@map("fraud_incidents")
 }
-
-
