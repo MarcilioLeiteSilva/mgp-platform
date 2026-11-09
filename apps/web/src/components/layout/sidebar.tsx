@@ -16,6 +16,7 @@ import {
   Megaphone,
   LayoutGrid,
   ShieldAlert,
+  Key,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -59,6 +60,11 @@ const navigationItems = [
     name: 'Organização & Membros',
     href: '/organization',
     icon: Users,
+  },
+  {
+    name: 'API & Desenvolvedores',
+    href: '/developers',
+    icon: Key,
   },
   {
     name: 'Configurações',
