@@ -8,13 +8,20 @@ import { AsoKeywordsService } from './services/aso-keywords.service';
 import { AsoAuditService } from './services/aso-audit.service';
 import { AsoQueueService } from './services/aso-queue.service';
 import { AsoEstimatesService } from './services/aso-estimates.service';
+import { AsoTrendsService } from './services/aso-trends.service';
 import { PlayScraperController } from './controllers/play-scraper.controller';
 import { AsoController } from './controllers/aso.controller';
 import { AsoEstimatesController } from './controllers/aso-estimates.controller';
+import { AsoTrendsController } from './controllers/aso-trends.controller';
 
 @Module({
   imports: [AuthModule],
-  controllers: [PlayScraperController, AsoController, AsoEstimatesController],
+  controllers: [
+    PlayScraperController,
+    AsoController,
+    AsoEstimatesController,
+    AsoTrendsController,
+  ],
   providers: [
     AsoCacheService,
     AsoRateLimiterService,
@@ -24,6 +31,7 @@ import { AsoEstimatesController } from './controllers/aso-estimates.controller';
     AsoAuditService,
     AsoQueueService,
     AsoEstimatesService,
+    AsoTrendsService,
   ],
   exports: [
     AsoCacheService,
@@ -34,6 +42,7 @@ import { AsoEstimatesController } from './controllers/aso-estimates.controller';
     AsoAuditService,
     AsoQueueService,
     AsoEstimatesService,
+    AsoTrendsService,
   ],
 })
 export class AsoModule {}

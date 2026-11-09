@@ -58,6 +58,7 @@ model Organization {
   wallet            Wallet?
   asoApps           AsoApp[]
   asoAppEstimates   AsoAppEstimate[]
+  trendAlerts       AsoTrendAlert[]
   telemetrySessions TelemetrySession[]
   payoutRequests    PayoutRequest[]
   depositInvoices   DepositInvoice[]
@@ -611,6 +612,40 @@ model AsoAppEstimate {
   @@index([organizationId, date])
   @@index([asoAppId, date])
   @@map("aso_app_estimates")
+}
+
+model AsoMarketTrend {
+  id                   String   @id @default(uuid())
+  category             String
+  country              String   @default("br")
+  date                 DateTime @map("date")
+  breakoutAppsJson     Json     @map("breakout_apps_json")
+  trendingKeywordsJson Json     @map("trending_keywords_json")
+  summaryMetricsJson   Json?    @map("summary_metrics_json")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@unique([category, country, date])
+  @@index([category, date])
+  @@map("aso_market_trends")
+}
+
+model AsoTrendAlert {
+  id             String       @id @default(uuid())
+  organizationId String       @map("organization_id")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category       String
+  title          String
+  message        String
+  severity       String       @default("INFO")
+  targetAppId    String?      @map("target_app_id")
+  metadata       Json?
+  isRead         Boolean      @default(false) @map("is_read")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  @@index([organizationId, isRead, createdAt])
+  @@map("aso_trend_alerts")
 }
 
 // ==============================================================================

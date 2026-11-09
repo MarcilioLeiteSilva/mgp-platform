@@ -224,3 +224,71 @@ export interface AsoEstimateRecalculateDto {
   forceRankBasis?: number;
 }
 
+// ==============================================================================
+// Monitoramento de Tendências & Detecção de Breakouts (Fase 30)
+// ==============================================================================
+
+export interface BreakoutAppDto {
+  appId: string;
+  title: string;
+  developer: string;
+  icon: string;
+  genre: string;
+  currentRank: number;
+  previousRank: number;
+  rankDelta: number; // positivo significa subiu posições
+  estimatedDailyDownloads: number;
+  growthPercentage7d: number;
+  breakoutScore: number; // 0 a 100
+  tractionIndicators: {
+    score: number;
+    ratings: number;
+    reviews: number;
+    minInstalls: number;
+  };
+  isMonitoredByOrganization?: boolean;
+}
+
+export interface TrendingKeywordDto {
+  keyword: string;
+  country: string;
+  searchVolume: number;
+  growthRate7d: number;
+  difficulty: number;
+  opportunityScore: number; // 0 a 100
+  topDominantApp?: string;
+}
+
+export interface CategoryTrendSummaryDto {
+  category: string;
+  country: string;
+  date: string;
+  totalAppsAnalyzed: number;
+  topBreakouts: BreakoutAppDto[];
+  trendingKeywords: TrendingKeywordDto[];
+  categoryGrowthIndex: number;
+  lastRefreshedAt: string;
+}
+
+export interface TrendAlertDto {
+  id: string;
+  organizationId: string;
+  category: string;
+  title: string;
+  message: string;
+  severity: 'INFO' | 'OPPORTUNITY' | 'HIGH';
+  targetAppId?: string | null;
+  metadata?: Record<string, any> | null;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AsoTrendsQueryDto {
+  category?: string;
+  country?: string;
+  limit?: number;
+  minBreakoutScore?: number;
+}
+
+

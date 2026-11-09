@@ -19,11 +19,13 @@ import {
   ArrowUpRight,
   Loader2,
   Layers,
+  Flame,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { AddAppModal } from '@/components/aso/add-app-modal';
 import { QueueStatusBadge } from '@/components/aso/queue-status-badge';
+import { MarketTrendsPanel } from '@/components/aso/market-trends-panel';
 
 export default function AsoStudioPage() {
   const { currentOrg } = useAuth();
@@ -33,7 +35,7 @@ export default function AsoStudioPage() {
   const [competitors, setCompetitors] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchFilter, setSearchFilter] = useState('');
-  const [activeTab, setActiveTab] = useState<'my-apps' | 'competitors' | 'explorer'>('my-apps');
+  const [activeTab, setActiveTab] = useState<'my-apps' | 'competitors' | 'explorer' | 'trends'>('my-apps');
 
   // Modals & Feedback
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -307,9 +309,20 @@ export default function AsoStudioPage() {
             <Search className="w-4 h-4" />
             Explorador da Loja
           </button>
+          <button
+            onClick={() => setActiveTab('trends')}
+            className={`px-4 py-2.5 text-xs font-bold rounded-t-lg transition-colors border-b-2 flex items-center gap-2 ${
+              activeTab === 'trends'
+                ? 'border-blue-500 text-blue-400 bg-slate-900/60'
+                : 'border-transparent text-slate-400 hover:text-white'
+            }`}
+          >
+            <Flame className="w-4 h-4 text-rose-500" />
+            Radar de Tendências & Breakouts
+          </button>
         </div>
 
-        {activeTab !== 'explorer' && (
+        {activeTab !== 'explorer' && activeTab !== 'trends' && (
           <div className="relative w-56">
             <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" />
             <input
@@ -658,6 +671,9 @@ export default function AsoStudioPage() {
           )}
         </div>
       )}
+
+      {/* Tab 4: Radar de Tendências & Breakouts */}
+      {activeTab === 'trends' && <MarketTrendsPanel />}
 
       {/* Modal Adicionar App / Concorrente */}
       <AddAppModal
