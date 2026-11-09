@@ -291,4 +291,58 @@ export interface AsoTrendsQueryDto {
   minBreakoutScore?: number;
 }
 
+// ==============================================================================
+// Recomendações de ASO & Campanhas com IA (Fase 31)
+// ==============================================================================
+
+export type AsoAiRecommendationType =
+  | 'TITLE_OPTIMIZATION'
+  | 'DESCRIPTION_OPTIMIZATION'
+  | 'KEYWORD_EXPANSION'
+  | 'CAMPAIGN_STRATEGY'
+  | 'CREATIVE_COPY';
+
+export type AsoAiRecommendationStatus = 'ACTIVE' | 'APPLIED' | 'DISMISSED';
+
+export interface AsoAiSuggestionItemDto {
+  id: string;
+  field: 'title' | 'shortDescription' | 'longDescription' | 'targetKeywords' | 'campaignHeadline' | 'campaignBid' | 'targetAudience';
+  currentValue?: string | null;
+  suggestedValue: string;
+  impactScore: number; // 0 a 100
+  rationale: string;
+  characterCount: number;
+  maxCharacters?: number;
+  keywordDensityScore?: number;
+}
+
+export interface AsoAiRecommendationDto {
+  id: string;
+  organizationId: string;
+  asoAppId?: string | null;
+  type: AsoAiRecommendationType;
+  status: AsoAiRecommendationStatus;
+  category?: string | null;
+  targetKeywords: string[];
+  inputContext?: Record<string, any> | null;
+  suggestions: AsoAiSuggestionItemDto[];
+  modelUsed: string;
+  appliedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GenerateAsoAiRecommendationsInputDto {
+  asoAppId?: string;
+  type: AsoAiRecommendationType;
+  focusKeywords?: string[];
+  competitorAppIds?: string[];
+  tone?: 'PROFESSIONAL' | 'PERSUASIVE' | 'PLAYFUL' | 'TECHNICAL';
+}
+
+export interface ApplyAiRecommendationDto {
+  suggestionId: string;
+}
+
+
 

@@ -10,5 +10,7 @@ export * from './list-aso-apps-query.dto';
 export * from './keyword-ranking-history-query.dto';
 export * from './aso-estimates.dto';
 export * from './aso-trends.dto';
+export * from './aso-ai-recommendations.dto';
+
 
 

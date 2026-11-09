@@ -9,10 +9,12 @@ import { AsoAuditService } from './services/aso-audit.service';
 import { AsoQueueService } from './services/aso-queue.service';
 import { AsoEstimatesService } from './services/aso-estimates.service';
 import { AsoTrendsService } from './services/aso-trends.service';
+import { AsoAiRecommendationsService } from './services/aso-ai-recommendations.service';
 import { PlayScraperController } from './controllers/play-scraper.controller';
 import { AsoController } from './controllers/aso.controller';
 import { AsoEstimatesController } from './controllers/aso-estimates.controller';
 import { AsoTrendsController } from './controllers/aso-trends.controller';
+import { AsoAiRecommendationsController } from './controllers/aso-ai-recommendations.controller';
 
 @Module({
   imports: [AuthModule],
@@ -21,6 +23,7 @@ import { AsoTrendsController } from './controllers/aso-trends.controller';
     AsoController,
     AsoEstimatesController,
     AsoTrendsController,
+    AsoAiRecommendationsController,
   ],
   providers: [
     AsoCacheService,
@@ -32,6 +35,7 @@ import { AsoTrendsController } from './controllers/aso-trends.controller';
     AsoQueueService,
     AsoEstimatesService,
     AsoTrendsService,
+    AsoAiRecommendationsService,
   ],
   exports: [
     AsoCacheService,
@@ -43,6 +47,7 @@ import { AsoTrendsController } from './controllers/aso-trends.controller';
     AsoQueueService,
     AsoEstimatesService,
     AsoTrendsService,
+    AsoAiRecommendationsService,
   ],
 })
 export class AsoModule {}

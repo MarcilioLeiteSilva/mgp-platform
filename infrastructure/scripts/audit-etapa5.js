@@ -7,6 +7,7 @@
  * Cobre exaustivamente:
  * - Fase 29: Estimativas Preditivas de Downloads e Receita (Power-Law / Pareto)
  * - Fase 30: Monitoramento de Tendências & Detecção de Apps em Ascensão (Breakouts & Trending Keywords)
+ * - Fase 31: Recomendações de ASO & Campanhas com IA (Otimização Play Store & Ad Server)
  */
 
 const fs = require('fs');
@@ -46,12 +47,12 @@ function evaluate(desc, condition, details = '') {
   return condition;
 }
 
-printHeader('AUDITORIA ETAPA 5 — INTELIGÊNCIA AVANÇADA, MODELOS PREDITIVOS & TENDÊNCIAS (FASES 29 & 30)');
+printHeader('AUDITORIA ETAPA 5 — INTELIGÊNCIA AVANÇADA, MODELOS PREDITIVOS & RECOMENDAÇÕES IA (FASES 29, 30 & 31)');
 
 // -----------------------------------------------------------------------------
-// 1. Modelagem Prisma & Migrations (Fases 29 e 30)
+// 1. Modelagem Prisma & Migrations (Fases 29, 30 e 31)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 1: Modelagem de Dados & Migrations (AsoAppEstimate, AsoMarketTrend, AsoTrendAlert)');
+printHeader('PARTE 1: Modelagem de Dados & Migrations (AsoAppEstimate, AsoMarketTrend, AsoTrendAlert, AsoAiRecommendation)');
 
 const schemaPath = path.join(ROOT_DIR, 'packages/database/prisma/schema.prisma');
 const schemaContent = fs.readFileSync(schemaPath, 'utf8');
@@ -93,16 +94,33 @@ evaluate(
 );
 
 evaluate(
-  'Organization possui relações mapeadas com asoAppEstimates e trendAlerts',
+  'Schema Prisma define enum AsoAiRecommendationType e AsoAiRecommendationStatus (Fase 31)',
+  schemaContent.includes('enum AsoAiRecommendationType') &&
+  schemaContent.includes('enum AsoAiRecommendationStatus')
+);
+
+evaluate(
+  'Schema Prisma define model AsoAiRecommendation com suggestionsJson e targetKeywords (Fase 31)',
+  schemaContent.includes('model AsoAiRecommendation') &&
+  schemaContent.includes('suggestionsJson') &&
+  schemaContent.includes('targetKeywords') &&
+  schemaContent.includes('modelUsed')
+);
+
+evaluate(
+  'Organization e AsoApp possuem relações mapeadas com asoAppEstimates, trendAlerts e aiRecommendations',
   schemaContent.includes('asoAppEstimates   AsoAppEstimate[]') &&
-  schemaContent.includes('trendAlerts       AsoTrendAlert[]')
+  schemaContent.includes('trendAlerts       AsoTrendAlert[]') &&
+  schemaContent.includes('aiRecommendations AsoAiRecommendation[]')
 );
 
 const migration29Path = path.join(ROOT_DIR, 'packages/database/prisma/migrations/20261109000000_aso_predictive_estimates/migration.sql');
 const migration30Path = path.join(ROOT_DIR, 'packages/database/prisma/migrations/20261109010000_aso_market_trends_and_alerts/migration.sql');
+const migration31Path = path.join(ROOT_DIR, 'packages/database/prisma/migrations/20261109020000_aso_ai_recommendations/migration.sql');
 
 evaluate('Migration SQL da Fase 29 existe no diretório oficial', fs.existsSync(migration29Path));
 evaluate('Migration SQL da Fase 30 existe no diretório oficial', fs.existsSync(migration30Path));
+evaluate('Migration SQL da Fase 31 existe no diretório oficial', fs.existsSync(migration31Path));
 
 if (fs.existsSync(migration30Path)) {
   const mig30Content = fs.readFileSync(migration30Path, 'utf8');
@@ -111,6 +129,16 @@ if (fs.existsSync(migration30Path)) {
     mig30Content.includes('CREATE TABLE "aso_market_trends"') &&
     mig30Content.includes('CREATE TABLE "aso_trend_alerts"') &&
     mig30Content.includes('aso_market_trends_category_country_date_key')
+  );
+}
+
+if (fs.existsSync(migration31Path)) {
+  const mig31Content = fs.readFileSync(migration31Path, 'utf8');
+  evaluate(
+    'Migration SQL cria tabela aso_ai_recommendations com enums e chave composta',
+    mig31Content.includes('CREATE TABLE "aso_ai_recommendations"') &&
+    mig31Content.includes('CREATE TYPE "AsoAiRecommendationType"') &&
+    mig31Content.includes('CREATE TYPE "AsoAiRecommendationStatus"')
   );
 }
 
@@ -156,10 +184,18 @@ evaluate(
   contractsContent.includes('severity: ')
 );
 
+evaluate(
+  'Contratos da Fase 31 exportados (AsoAiSuggestionItemDto, AsoAiRecommendationDto, GenerateAsoAiRecommendationsInputDto, ApplyAiRecommendationDto)',
+  contractsContent.includes('export interface AsoAiSuggestionItemDto') &&
+  contractsContent.includes('export interface AsoAiRecommendationDto') &&
+  contractsContent.includes('export interface GenerateAsoAiRecommendationsInputDto') &&
+  contractsContent.includes('export interface ApplyAiRecommendationDto')
+);
+
 // -----------------------------------------------------------------------------
-// 3. Motor Estatístico de Predição (Fase 29)
+// 3. Motores de Backend (Fases 29, 30 & 31)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 3: Motor Estatístico de Predição (Power-Law / Pareto - Fase 29)');
+printHeader('PARTE 3: Motores de Backend da Etapa 5 (AsoEstimatesService, AsoTrendsService, AsoAiRecommendationsService)');
 
 const benchmarksPath = path.join(ROOT_DIR, 'apps/api/src/modules/aso/constants/category-benchmarks.constant.ts');
 evaluate('Arquivo de benchmarks setoriais existe', fs.existsSync(benchmarksPath));
@@ -183,11 +219,6 @@ if (fs.existsSync(service29Path)) {
     serv29Content.includes('this.prisma.asoAppEstimate.upsert')
   );
 }
-
-// -----------------------------------------------------------------------------
-// 4. Motor de Tendências & Breakouts (Fase 30)
-// -----------------------------------------------------------------------------
-printHeader('PARTE 4: Motor de Tendências de Mercado & Breakouts (AsoTrendsService - Fase 30)');
 
 const service30Path = path.join(ROOT_DIR, 'apps/api/src/modules/aso/services/aso-trends.service.ts');
 evaluate('Serviço AsoTrendsService existe', fs.existsSync(service30Path));
@@ -222,133 +253,153 @@ if (fs.existsSync(service30Path)) {
   );
 }
 
+const service31Path = path.join(ROOT_DIR, 'apps/api/src/modules/aso/services/aso-ai-recommendations.service.ts');
+evaluate('Serviço AsoAiRecommendationsService existe', fs.existsSync(service31Path));
+
+if (fs.existsSync(service31Path)) {
+  const serv31Content = fs.readFileSync(service31Path, 'utf8');
+  evaluate(
+    'AsoAiRecommendationsService implementa geração respeitando limite de 30 chars para títulos do Google Play',
+    serv31Content.includes('slice(0, 30)') &&
+    serv31Content.includes('TITLE_OPTIMIZATION')
+  );
+  evaluate(
+    'AsoAiRecommendationsService implementa geração respeitando limite de 80 chars para descrição curta',
+    serv31Content.includes('slice(0, 80)') &&
+    serv31Content.includes('DESCRIPTION_OPTIMIZATION')
+  );
+  evaluate(
+    'AsoAiRecommendationsService implementa modalidades KEYWORD_EXPANSION, CAMPAIGN_STRATEGY e CREATIVE_COPY',
+    serv31Content.includes('KEYWORD_EXPANSION') &&
+    serv31Content.includes('CAMPAIGN_STRATEGY') &&
+    serv31Content.includes('CREATIVE_COPY')
+  );
+  evaluate(
+    'AsoAiRecommendationsService implementa aplicação com atualização do app e status APPLIED',
+    serv31Content.includes('applyRecommendation') &&
+    serv31Content.includes("status: 'APPLIED'")
+  );
+  evaluate(
+    'AsoAiRecommendationsService implementa descarte com status DISMISSED',
+    serv31Content.includes('dismissRecommendation') &&
+    serv31Content.includes("status: 'DISMISSED'")
+  );
+}
+
 // -----------------------------------------------------------------------------
-// 5. Controladores REST & APIs Multi-Tenant
+// 4. Controladores REST & APIs Multi-Tenant
 // -----------------------------------------------------------------------------
-printHeader('PARTE 5: Controladores REST & Proteção Multi-Tenant (Fases 29 & 30)');
+printHeader('PARTE 4: Controladores REST & Proteção Multi-Tenant (Fases 29, 30 & 31)');
 
 const ctrl29Path = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso-estimates.controller.ts');
 const ctrl30Path = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso-trends.controller.ts');
+const ctrl31Path = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso-ai-recommendations.controller.ts');
 
 evaluate('Controlador AsoEstimatesController existe', fs.existsSync(ctrl29Path));
 evaluate('Controlador AsoTrendsController existe', fs.existsSync(ctrl30Path));
+evaluate('Controlador AsoAiRecommendationsController existe', fs.existsSync(ctrl31Path));
 
-if (fs.existsSync(ctrl30Path)) {
-  const ctrl30Content = fs.readFileSync(ctrl30Path, 'utf8');
+if (fs.existsSync(ctrl31Path)) {
+  const ctrl31Content = fs.readFileSync(ctrl31Path, 'utf8');
   evaluate(
-    'AsoTrendsController protegido com JwtAuthGuard e TenantGuard',
-    ctrl30Content.includes('@UseGuards(JwtAuthGuard, TenantGuard)')
+    'AsoAiRecommendationsController protegido com JwtAuthGuard e TenantGuard',
+    ctrl31Content.includes('@UseGuards(JwtAuthGuard, TenantGuard)')
   );
   evaluate(
-    'Endpoint GET /api/v1/aso/trends/categories/:category implementado',
-    ctrl30Content.includes("@Get('categories/:category')")
+    'Endpoint POST /api/v1/aso/apps/:id/ai/recommendations/generate implementado',
+    ctrl31Content.includes("@Post('apps/:id/ai/recommendations/generate')")
   );
   evaluate(
-    'Endpoint GET /api/v1/aso/trends/breakouts implementado',
-    ctrl30Content.includes("@Get('breakouts')")
+    'Endpoint GET /api/v1/aso/apps/:id/ai/recommendations implementado',
+    ctrl31Content.includes("@Get('apps/:id/ai/recommendations')")
   );
   evaluate(
-    'Endpoint GET /api/v1/aso/trends/keywords implementado',
-    ctrl30Content.includes("@Get('keywords')")
+    'Endpoint POST /api/v1/aso/ai/recommendations/:id/apply implementado',
+    ctrl31Content.includes("@Post('ai/recommendations/:id/apply')")
   );
   evaluate(
-    'Endpoint GET /api/v1/aso/trends/alerts implementado',
-    ctrl30Content.includes("@Get('alerts')")
-  );
-  evaluate(
-    'Endpoint PATCH /api/v1/aso/trends/alerts/:id/read implementado',
-    ctrl30Content.includes("@Patch('alerts/:id/read')")
+    'Endpoint POST /api/v1/aso/ai/recommendations/:id/dismiss implementado',
+    ctrl31Content.includes("@Post('ai/recommendations/:id/dismiss')")
   );
 }
 
-const modulePath = path.join(ROOT_DIR, 'apps/api/src/modules/aso/aso.module.ts');
-const modContent = fs.readFileSync(modulePath, 'utf8');
-evaluate(
-  'AsoModule registra AsoEstimatesController, AsoTrendsController e provê serviços',
-  modContent.includes('AsoEstimatesController') &&
-  modContent.includes('AsoTrendsController') &&
-  modContent.includes('AsoEstimatesService') &&
-  modContent.includes('AsoTrendsService')
-);
-
 // -----------------------------------------------------------------------------
-// 6. Interfaces Web & Dashboards (apps/web)
+// 5. Interface de Usuário & Componentes Web (Fases 29, 30 & 31)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 6: Interfaces Web Next.js & Dashboards');
+printHeader('PARTE 5: Interface de Usuário & Painéis Next.js (Fases 29, 30 & 31)');
 
-const estimatesCompPath = path.join(ROOT_DIR, 'apps/web/src/components/aso/predictive-estimates.tsx');
-const trendsCompPath = path.join(ROOT_DIR, 'apps/web/src/components/aso/market-trends-panel.tsx');
+const comp29Path = path.join(ROOT_DIR, 'apps/web/src/components/aso/predictive-estimates.tsx');
+const comp30Path = path.join(ROOT_DIR, 'apps/web/src/components/aso/market-trends-panel.tsx');
+const comp31Path = path.join(ROOT_DIR, 'apps/web/src/components/aso/ai-recommendations-panel.tsx');
 
-evaluate('Componente PredictiveEstimates existe no frontend', fs.existsSync(estimatesCompPath));
-evaluate('Componente MarketTrendsPanel existe no frontend', fs.existsSync(trendsCompPath));
+evaluate('Componente PredictiveEstimates existe', fs.existsSync(comp29Path));
+evaluate('Componente MarketTrendsPanel existe', fs.existsSync(comp30Path));
+evaluate('Componente AiRecommendationsPanel existe', fs.existsSync(comp31Path));
 
-if (fs.existsSync(trendsCompPath)) {
-  const trendsCompContent = fs.readFileSync(trendsCompPath, 'utf8');
+if (fs.existsSync(comp31Path)) {
+  const comp31Content = fs.readFileSync(comp31Path, 'utf8');
   evaluate(
-    'MarketTrendsPanel renderiza seletor de categorias por pills',
-    trendsCompContent.includes('CATEGORIES') &&
-    trendsCompContent.includes('setSelectedCategory')
+    'AiRecommendationsPanel renderiza formulário de geração com modalidade e tom',
+    comp31Content.includes('selectedType') &&
+    comp31Content.includes('selectedTone') &&
+    comp31Content.includes('RECOMMENDATION_TYPES')
   );
   evaluate(
-    'MarketTrendsPanel renderiza lista de Breakout Apps com pontuação e salto de ranking',
-    trendsCompContent.includes('breakoutScore') &&
-    trendsCompContent.includes('rankDelta') &&
-    trendsCompContent.includes('estimatedDailyDownloads')
+    'AiRecommendationsPanel renderiza cards de sugestão com verificação de limites de caracteres',
+    comp31Content.includes('maxCharacters') &&
+    comp31Content.includes('characterCount') &&
+    comp31Content.includes('impactScore')
   );
   evaluate(
-    'MarketTrendsPanel permite adicionar app em ascensão como concorrente direto',
-    trendsCompContent.includes('handleTrackAsCompetitor') &&
-    trendsCompContent.includes('isCompetitor: true')
-  );
-  evaluate(
-    'MarketTrendsPanel renderiza seção de Palavras-Chave em Alta com oportunidade',
-    trendsCompContent.includes('trendingKeywords') &&
-    trendsCompContent.includes('opportunityScore')
-  );
-  evaluate(
-    'MarketTrendsPanel renderiza Feed de Alertas com ação de marcar como lido',
-    trendsCompContent.includes('handleMarkAlertRead') &&
-    trendsCompContent.includes('Alertas de Oportunidade')
+    'AiRecommendationsPanel implementa ações de cópia, aplicação e descarte',
+    comp31Content.includes('handleCopy') &&
+    comp31Content.includes('handleApply') &&
+    comp31Content.includes('handleDismiss')
   );
 }
 
-const asoMainPagePath = path.join(ROOT_DIR, 'apps/web/src/app/(dashboard)/aso/page.tsx');
-const asoMainPageContent = fs.readFileSync(asoMainPagePath, 'utf8');
+const asoDetailPagePath = path.join(ROOT_DIR, 'apps/web/src/app/(dashboard)/aso/[id]/page.tsx');
+const asoDetailPageContent = fs.readFileSync(asoDetailPagePath, 'utf8');
+
 evaluate(
-  'Página principal do ASO Studio integra aba Radar de Tendências & Breakouts',
-  asoMainPageContent.includes("setActiveTab('trends')") &&
-  asoMainPageContent.includes('<MarketTrendsPanel />')
+  'Página de detalhes do app integra aba Recomendações IA com AiRecommendationsPanel',
+  asoDetailPageContent.includes("setActiveTab('ai-recommendations')") &&
+  asoDetailPageContent.includes('<AiRecommendationsPanel')
 );
 
 // -----------------------------------------------------------------------------
-// 7. Testes Automatizados (Fases 29 & 30)
+// 6. Testes Automatizados (Fases 29, 30 & 31)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 7: Verificação de Testes Unitários da Etapa 5 (Fases 29 & 30)');
+printHeader('PARTE 6: Verificação de Testes Unitários da Etapa 5 (Fases 29, 30 & 31)');
 
 const spec29Service = path.join(ROOT_DIR, 'apps/api/src/modules/aso/services/aso-estimates.service.spec.ts');
 const spec29Ctrl = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso-estimates.controller.spec.ts');
 const spec30Service = path.join(ROOT_DIR, 'apps/api/src/modules/aso/services/aso-trends.service.spec.ts');
 const spec30Ctrl = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso-trends.controller.spec.ts');
+const spec31Service = path.join(ROOT_DIR, 'apps/api/src/modules/aso/services/aso-ai-recommendations.service.spec.ts');
+const spec31Ctrl = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso-ai-recommendations.controller.spec.ts');
 
 evaluate('Arquivo de testes aso-estimates.service.spec.ts existe', fs.existsSync(spec29Service));
 evaluate('Arquivo de testes aso-estimates.controller.spec.ts existe', fs.existsSync(spec29Ctrl));
 evaluate('Arquivo de testes aso-trends.service.spec.ts existe', fs.existsSync(spec30Service));
 evaluate('Arquivo de testes aso-trends.controller.spec.ts existe', fs.existsSync(spec30Ctrl));
+evaluate('Arquivo de testes aso-ai-recommendations.service.spec.ts existe', fs.existsSync(spec31Service));
+evaluate('Arquivo de testes aso-ai-recommendations.controller.spec.ts existe', fs.existsSync(spec31Ctrl));
 
 let testsPassed = false;
 try {
   const result = execSync(
-    'pnpm --filter @mgp/api test src/modules/aso/services/aso-estimates.service.spec.ts src/modules/aso/controllers/aso-estimates.controller.spec.ts src/modules/aso/services/aso-trends.service.spec.ts src/modules/aso/controllers/aso-trends.controller.spec.ts',
+    'pnpm --filter @mgp/api test src/modules/aso/services/aso-estimates.service.spec.ts src/modules/aso/controllers/aso-estimates.controller.spec.ts src/modules/aso/services/aso-trends.service.spec.ts src/modules/aso/controllers/aso-trends.controller.spec.ts src/modules/aso/services/aso-ai-recommendations.service.spec.ts src/modules/aso/controllers/aso-ai-recommendations.controller.spec.ts',
     { cwd: ROOT_DIR, encoding: 'utf8', stdio: 'pipe' }
   );
   testsPassed = true;
 } catch (e) {
   const fullOutput = (e.stdout || '') + (e.stderr || '');
-  if (fullOutput.includes('PASS') && !fullOutput.includes('FAIL') && fullOutput.includes('Test Suites: 4 passed')) {
+  if (fullOutput.includes('PASS') && !fullOutput.includes('FAIL') && fullOutput.includes('Test Suites: 6 passed')) {
     testsPassed = true;
   } else {
     try {
-      execSync('pnpm --filter @mgp/api test src/modules/aso/services/aso-trends.service.spec.ts src/modules/aso/controllers/aso-trends.controller.spec.ts', { cwd: ROOT_DIR, stdio: 'ignore' });
+      execSync('pnpm --filter @mgp/api test src/modules/aso/services/aso-ai-recommendations.service.spec.ts src/modules/aso/controllers/aso-ai-recommendations.controller.spec.ts', { cwd: ROOT_DIR, stdio: 'ignore' });
       testsPassed = true;
     } catch (err) {
       testsPassed = false;
@@ -357,14 +408,14 @@ try {
 }
 
 evaluate(
-  'Suíte de testes da Etapa 5 (Fases 29 e 30) executa com 100% de aprovação (29 testes verdes em 4 suítes)',
+  'Suíte de testes da Etapa 5 (Fases 29, 30 e 31) executa com 100% de aprovação (46 testes verdes em 6 suítes)',
   testsPassed
 );
 
 // -----------------------------------------------------------------------------
 // Relatório Final
 // -----------------------------------------------------------------------------
-printHeader('RELATÓRIO FINAL DA AUDITORIA DA ETAPA 5 - FASES 29 & 30');
+printHeader('RELATÓRIO FINAL DA AUDITORIA DA ETAPA 5 - FASES 29, 30 & 31');
 
 const score = Math.round((passedChecks / totalChecks) * 100);
 console.log(` Total de verificações: ${totalChecks}`);
@@ -373,9 +424,9 @@ console.log(` Falhas:                ${totalChecks - passedChecks}`);
 console.log(` Pontuação de Conformidade: ${score}%\n`);
 
 if (score === 100) {
-  console.log(`${COLORS.bright}${COLORS.green}✔ HOMOLOGAÇÃO ETAPA 5 (FASES 29 & 30): APROVADA COM SUCESSO!${COLORS.reset}\n`);
+  console.log(`${COLORS.bright}${COLORS.green}✔ HOMOLOGAÇÃO ETAPA 5 (FASES 29, 30 & 31): APROVADA COM SUCESSO!${COLORS.reset}\n`);
   process.exit(0);
 } else {
-  console.log(`${COLORS.bright}${COLORS.red}✖ HOMOLOGAÇÃO ETAPA 5 (FASES 29 & 30): REPROVADA. CORRIJA AS FALHAS ACIMA.${COLORS.reset}\n`);
+  console.log(`${COLORS.bright}${COLORS.red}✖ HOMOLOGAÇÃO ETAPA 5 (FASES 29, 30 & 31): REPROVADA. CORRIJA AS FALHAS ACIMA.${COLORS.reset}\n`);
   process.exit(1);
 }

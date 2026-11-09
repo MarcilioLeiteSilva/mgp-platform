@@ -31,6 +31,7 @@ import { AuditGauge } from '@/components/aso/audit-gauge';
 import { RankingChart, RankingHistoryPoint } from '@/components/aso/ranking-chart';
 import { AddKeywordModal } from '@/components/aso/add-keyword-modal';
 import { PredictiveEstimates } from '@/components/aso/predictive-estimates';
+import { AiRecommendationsPanel } from '@/components/aso/ai-recommendations-panel';
 
 export default function AsoAppDetailPage() {
   const params = useParams();
@@ -43,7 +44,7 @@ export default function AsoAppDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<'keywords' | 'audit' | 'estimates' | 'metadata'>('keywords');
+  const [activeTab, setActiveTab] = useState<'keywords' | 'audit' | 'estimates' | 'ai-recommendations' | 'metadata'>('keywords');
 
   // Keyword Filters & Modal
   const [keywordFilter, setKeywordFilter] = useState('');
@@ -407,6 +408,18 @@ export default function AsoAppDetailPage() {
         </button>
 
         <button
+          onClick={() => setActiveTab('ai-recommendations')}
+          className={`px-4 py-2.5 text-xs font-bold rounded-t-lg transition-colors border-b-2 flex items-center gap-2 ${
+            activeTab === 'ai-recommendations'
+              ? 'border-purple-500 text-purple-400 bg-slate-900/60'
+              : 'border-transparent text-slate-400 hover:text-white'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-purple-400" />
+          Recomendações IA
+        </button>
+
+        <button
           onClick={() => setActiveTab('metadata')}
           className={`px-4 py-2.5 text-xs font-bold rounded-t-lg transition-colors border-b-2 flex items-center gap-2 ${
             activeTab === 'metadata'
@@ -764,6 +777,11 @@ export default function AsoAppDetailPage() {
       {/* Tab: Estimativas Preditivas */}
       {activeTab === 'estimates' && (
         <PredictiveEstimates asoAppId={appIdParam} app={app} />
+      )}
+
+      {/* Tab: Recomendações de IA */}
+      {activeTab === 'ai-recommendations' && (
+        <AiRecommendationsPanel asoAppId={appIdParam} app={app} onAppUpdated={loadAppData} />
       )}
 
       {/* Tab 3: Metadados & Galeria Visual */}

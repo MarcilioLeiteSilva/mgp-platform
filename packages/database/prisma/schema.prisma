@@ -59,6 +59,7 @@ model Organization {
   asoApps           AsoApp[]
   asoAppEstimates   AsoAppEstimate[]
   trendAlerts       AsoTrendAlert[]
+  aiRecommendations AsoAiRecommendation[]
   telemetrySessions TelemetrySession[]
   payoutRequests    PayoutRequest[]
   depositInvoices   DepositInvoice[]
@@ -475,33 +476,34 @@ model AuditLog {
 // ==============================================================================
 
 model AsoApp {
-  id              String           @id @default(uuid())
-  organizationId  String           @map("organization_id")
-  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  appId           String           @map("app_id")
-  platform        AppPlatform      @default(ANDROID)
-  title           String
-  developer       String
-  developerId     String?          @map("developer_id")
-  icon            String
-  genre           String?
-  genreId         String?          @map("genre_id")
-  score           Decimal?         @default(0.0) @db.Decimal(3, 2)
-  ratings         Int?             @default(0)
-  reviews         Int?             @default(0)
-  minInstalls     BigInt?          @default(0) @map("min_installs")
-  isMonitored     Boolean          @default(true) @map("is_monitored")
-  isCompetitor    Boolean          @default(false) @map("is_competitor")
-  targetAppId     String?          @map("target_app_id")
-  country         String           @default("br")
-  lang            String           @default("pt-BR")
-  metadata        Json?
-  lastScrapedAt   DateTime?        @map("last_scraped_at")
-  trackedKeywords AsoAppKeyword[]
-  auditScores     AsoAuditScore[]
-  estimates       AsoAppEstimate[]
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
+  id                String                @id @default(uuid())
+  organizationId    String                @map("organization_id")
+  organization      Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  appId             String                @map("app_id")
+  platform          AppPlatform           @default(ANDROID)
+  title             String
+  developer         String
+  developerId       String?               @map("developer_id")
+  icon              String
+  genre             String?
+  genreId           String?               @map("genre_id")
+  score             Decimal?              @default(0.0) @db.Decimal(3, 2)
+  ratings           Int?                  @default(0)
+  reviews           Int?                  @default(0)
+  minInstalls       BigInt?               @default(0) @map("min_installs")
+  isMonitored       Boolean               @default(true) @map("is_monitored")
+  isCompetitor      Boolean               @default(false) @map("is_competitor")
+  targetAppId       String?               @map("target_app_id")
+  country           String                @default("br")
+  lang              String                @default("pt-BR")
+  metadata          Json?
+  lastScrapedAt     DateTime?             @map("last_scraped_at")
+  trackedKeywords   AsoAppKeyword[]
+  auditScores       AsoAuditScore[]
+  estimates         AsoAppEstimate[]
+  aiRecommendations AsoAiRecommendation[]
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @updatedAt @map("updated_at")
 
   @@unique([organizationId, appId, country, lang])
   @@index([organizationId, isMonitored])
@@ -646,6 +648,42 @@ model AsoTrendAlert {
 
   @@index([organizationId, isRead, createdAt])
   @@map("aso_trend_alerts")
+}
+
+enum AsoAiRecommendationType {
+  TITLE_OPTIMIZATION
+  DESCRIPTION_OPTIMIZATION
+  KEYWORD_EXPANSION
+  CAMPAIGN_STRATEGY
+  CREATIVE_COPY
+}
+
+enum AsoAiRecommendationStatus {
+  ACTIVE
+  APPLIED
+  DISMISSED
+}
+
+model AsoAiRecommendation {
+  id              String                    @id @default(uuid())
+  organizationId  String                    @map("organization_id")
+  organization    Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  asoAppId        String?                   @map("aso_app_id")
+  asoApp          AsoApp?                   @relation(fields: [asoAppId], references: [id], onDelete: Cascade)
+  type            AsoAiRecommendationType   @default(TITLE_OPTIMIZATION)
+  status          AsoAiRecommendationStatus @default(ACTIVE)
+  category        String?
+  targetKeywords  String[]                  @map("target_keywords")
+  inputContext    Json                      @map("input_context")
+  suggestionsJson Json                      @map("suggestions_json")
+  modelUsed       String                    @default("gemini-1.5-flash") @map("model_used")
+  appliedAt       DateTime?                 @map("applied_at")
+  createdAt       DateTime                  @default(now()) @map("created_at")
+  updatedAt       DateTime                  @updatedAt @map("updated_at")
+
+  @@index([organizationId, type, status])
+  @@index([asoAppId, type])
+  @@map("aso_ai_recommendations")
 }
 
 // ==============================================================================
