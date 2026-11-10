@@ -65,6 +65,7 @@ model Organization {
   payoutRequests    PayoutRequest[]
   depositInvoices   DepositInvoice[]
   fraudIncidents    FraudIncident[]
+  subscription      Subscription?
   createdAt         DateTime                 @default(now()) @map("created_at")
   updatedAt         DateTime                 @updatedAt @map("updated_at")
 
@@ -830,4 +831,46 @@ model ApiKey {
   @@index([organizationId, revokedAt])
   @@index([keyHash])
   @@map("api_keys")
+}
+
+// ==============================================================================
+// ETAPA 5 — FASE 33: Motor de Planos SaaS, Quotas Dinâmicas e Assinaturas
+// ==============================================================================
+
+enum PlanTier {
+  FREE
+  STARTER
+  PRO
+  BUSINESS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+model Subscription {
+  id                 String             @id @default(uuid())
+  organizationId     String             @unique @map("organization_id")
+  planTier           PlanTier           @default(FREE) @map("plan_tier")
+  status             SubscriptionStatus @default(ACTIVE)
+  billingCycle       BillingCycle       @default(MONTHLY) @map("billing_cycle")
+  priceMonthly       Decimal            @default(0.0) @map("price_monthly") @db.Decimal(10, 2)
+  currentPeriodStart DateTime           @default(now()) @map("current_period_start")
+  currentPeriodEnd   DateTime           @map("current_period_end")
+  canceledAt         DateTime?          @map("canceled_at")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@map("subscriptions")
 }

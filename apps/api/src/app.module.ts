@@ -15,6 +15,7 @@ import { BillingModule } from './modules/billing/billing.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 import { AntifraudModule } from './modules/antifraud/antifraud.module';
 import { ApiKeysModule } from './modules/api-keys/api-keys.module';
+import { PlansModule } from './modules/plans/plans.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -35,8 +36,9 @@ import { AppController } from './app.controller';
     RecommendationsModule,
     AntifraudModule,
     ApiKeysModule,
+    PlansModule,
   ],
   controllers: [AppController],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

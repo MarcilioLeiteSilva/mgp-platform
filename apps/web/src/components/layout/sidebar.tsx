@@ -17,6 +17,7 @@ import {
   LayoutGrid,
   ShieldAlert,
   Key,
+  CreditCard,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -65,6 +66,11 @@ const navigationItems = [
     name: 'API & Desenvolvedores',
     href: '/developers',
     icon: Key,
+  },
+  {
+    name: 'Planos & Assinatura',
+    href: '/plans',
+    icon: CreditCard,
   },
   {
     name: 'Configurações',

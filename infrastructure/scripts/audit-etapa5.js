@@ -9,6 +9,7 @@
  * - Fase 30: Monitoramento de Tendências & Detecção de Apps em Ascensão (Breakouts & Trending Keywords)
  * - Fase 31: Recomendações de ASO & Campanhas com IA (Otimização Play Store & Ad Server)
  * - Fase 32: API Pública Comercial & Gestão de API Keys (Quotas, Rate Limiting & Swagger Público)
+ * - Fase 33: Motor de Planos SaaS, Quotas Dinâmicas e Monetização por Assinatura (FREE, STARTER, PRO, BUSINESS)
  */
 
 const fs = require('fs');
@@ -48,12 +49,12 @@ function evaluate(desc, condition, details = '') {
   return condition;
 }
 
-printHeader('AUDITORIA ETAPA 5 — INTELIGÊNCIA AVANÇADA, MODELOS PREDITIVOS, IA & API PÚBLICA (FASES 29 A 32)');
+printHeader('AUDITORIA ETAPA 5 — INTELIGÊNCIA AVANÇADA, MODELOS PREDITIVOS, IA, API PÚBLICA & PLANOS SAAS (FASES 29 A 33)');
 
 // -----------------------------------------------------------------------------
-// 1. Modelagem Prisma & Migrations (Fases 29, 30, 31 e 32)
+// 1. Modelagem Prisma & Migrations (Fases 29 a 33)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 1: Modelagem de Dados & Migrations (AsoAppEstimate, AsoMarketTrend, AsoTrendAlert, AsoAiRecommendation, ApiKey)');
+printHeader('PARTE 1: Modelagem de Dados & Migrations (AsoAppEstimate, AsoMarketTrend, AsoTrendAlert, AsoAiRecommendation, ApiKey, Subscription)');
 
 const schemaPath = path.join(ROOT_DIR, 'packages/database/prisma/schema.prisma');
 const schemaContent = fs.readFileSync(schemaPath, 'utf8');
@@ -120,22 +121,47 @@ evaluate(
 );
 
 evaluate(
-  'Organization possui relações mapeadas com asoAppEstimates, trendAlerts, aiRecommendations e apiKeys',
+  'Schema Prisma define enums PlanTier, SubscriptionStatus e BillingCycle (Fase 33)',
+  schemaContent.includes('enum PlanTier') &&
+  schemaContent.includes('FREE') &&
+  schemaContent.includes('STARTER') &&
+  schemaContent.includes('PRO') &&
+  schemaContent.includes('BUSINESS') &&
+  schemaContent.includes('enum SubscriptionStatus') &&
+  schemaContent.includes('enum BillingCycle')
+);
+
+evaluate(
+  'Schema Prisma define model Subscription com relations, ciclo de vida e vigência (Fase 33)',
+  schemaContent.includes('model Subscription') &&
+  schemaContent.includes('planTier           PlanTier') &&
+  schemaContent.includes('status             SubscriptionStatus') &&
+  schemaContent.includes('billingCycle       BillingCycle') &&
+  schemaContent.includes('currentPeriodStart DateTime') &&
+  schemaContent.includes('currentPeriodEnd   DateTime') &&
+  schemaContent.includes('canceledAt         DateTime?')
+);
+
+evaluate(
+  'Organization possui relações mapeadas com asoAppEstimates, trendAlerts, aiRecommendations, apiKeys e subscription (Fase 33)',
   schemaContent.includes('asoAppEstimates   AsoAppEstimate[]') &&
   schemaContent.includes('trendAlerts       AsoTrendAlert[]') &&
   schemaContent.includes('aiRecommendations AsoAiRecommendation[]') &&
-  schemaContent.includes('apiKeys           ApiKey[]')
+  schemaContent.includes('apiKeys           ApiKey[]') &&
+  schemaContent.includes('subscription      Subscription?')
 );
 
 const migration29Path = path.join(ROOT_DIR, 'packages/database/prisma/migrations/20261109000000_aso_predictive_estimates/migration.sql');
 const migration30Path = path.join(ROOT_DIR, 'packages/database/prisma/migrations/20261109010000_aso_market_trends_and_alerts/migration.sql');
 const migration31Path = path.join(ROOT_DIR, 'packages/database/prisma/migrations/20261109020000_aso_ai_recommendations/migration.sql');
 const migration32Path = path.join(ROOT_DIR, 'packages/database/prisma/migrations/20261109030000_api_keys_and_public_api/migration.sql');
+const migration33Path = path.join(ROOT_DIR, 'packages/database/prisma/migrations/20261109040000_saas_plans_and_subscriptions/migration.sql');
 
 evaluate('Migration SQL da Fase 29 existe no diretório oficial', fs.existsSync(migration29Path));
 evaluate('Migration SQL da Fase 30 existe no diretório oficial', fs.existsSync(migration30Path));
 evaluate('Migration SQL da Fase 31 existe no diretório oficial', fs.existsSync(migration31Path));
 evaluate('Migration SQL da Fase 32 existe no diretório oficial', fs.existsSync(migration32Path));
+evaluate('Migration SQL da Fase 33 existe no diretório oficial', fs.existsSync(migration33Path));
 
 if (fs.existsSync(migration30Path)) {
   const mig30Content = fs.readFileSync(migration30Path, 'utf8');
@@ -167,54 +193,68 @@ if (fs.existsSync(migration32Path)) {
   );
 }
 
+if (fs.existsSync(migration33Path)) {
+  const mig33Content = fs.readFileSync(migration33Path, 'utf8');
+  evaluate(
+    'Migration SQL cria tabela subscriptions com enums PlanTier, SubscriptionStatus e BillingCycle (Fase 33)',
+    mig33Content.includes('CREATE TABLE "subscriptions"') &&
+    mig33Content.includes('CREATE TYPE "PlanTier"') &&
+    mig33Content.includes('CREATE TYPE "SubscriptionStatus"') &&
+    mig33Content.includes('CREATE TYPE "BillingCycle"') &&
+    mig33Content.includes('CREATE UNIQUE INDEX "subscriptions_organization_id_key"')
+  );
+}
+
 // -----------------------------------------------------------------------------
 // 2. Contratos & DTOs em @mgp/contracts
 // -----------------------------------------------------------------------------
 printHeader('PARTE 2: Contratos & DTOs Compartilhados (@mgp/contracts)');
 
-const contractsPath = path.join(ROOT_DIR, 'packages/contracts/src/aso.contracts.ts');
-const contractsContent = fs.readFileSync(contractsPath, 'utf8');
+const asoContractsPath = path.join(ROOT_DIR, 'packages/contracts/src/aso.contracts.ts');
+evaluate('Arquivo packages/contracts/src/aso.contracts.ts existe', fs.existsSync(asoContractsPath));
+
+const asoContractsContent = fs.readFileSync(asoContractsPath, 'utf8');
 
 evaluate(
   'Contratos da Fase 29 exportados (AsoEstimateRangeDto, AsoAppEstimateDto, AsoEstimatesSummaryDto, AsoCategoryBenchmarkDto)',
-  contractsContent.includes('export interface AsoEstimateRangeDto') &&
-  contractsContent.includes('export interface AsoAppEstimateDto') &&
-  contractsContent.includes('export interface AsoEstimatesSummaryDto') &&
-  contractsContent.includes('export interface AsoCategoryBenchmarkDto')
+  asoContractsContent.includes('export interface AsoEstimateRangeDto') &&
+  asoContractsContent.includes('export interface AsoAppEstimateDto') &&
+  asoContractsContent.includes('export interface AsoEstimatesSummaryDto') &&
+  asoContractsContent.includes('export interface AsoCategoryBenchmarkDto')
 );
 
 evaluate(
   'Contrato BreakoutAppDto exportado com rankDelta, growthPercentage7d e breakoutScore (Fase 30)',
-  contractsContent.includes('export interface BreakoutAppDto') &&
-  contractsContent.includes('rankDelta: number;') &&
-  contractsContent.includes('breakoutScore: number;')
+  asoContractsContent.includes('export interface BreakoutAppDto') &&
+  asoContractsContent.includes('rankDelta: number;') &&
+  asoContractsContent.includes('breakoutScore: number;')
 );
 
 evaluate(
   'Contrato TrendingKeywordDto exportado com searchVolume, growthRate7d e opportunityScore (Fase 30)',
-  contractsContent.includes('export interface TrendingKeywordDto') &&
-  contractsContent.includes('opportunityScore: number;')
+  asoContractsContent.includes('export interface TrendingKeywordDto') &&
+  asoContractsContent.includes('opportunityScore: number;')
 );
 
 evaluate(
   'Contrato CategoryTrendSummaryDto exportado com topBreakouts e trendingKeywords (Fase 30)',
-  contractsContent.includes('export interface CategoryTrendSummaryDto') &&
-  contractsContent.includes('topBreakouts: BreakoutAppDto[];') &&
-  contractsContent.includes('trendingKeywords: TrendingKeywordDto[];')
+  asoContractsContent.includes('export interface CategoryTrendSummaryDto') &&
+  asoContractsContent.includes('topBreakouts: BreakoutAppDto[];') &&
+  asoContractsContent.includes('trendingKeywords: TrendingKeywordDto[];')
 );
 
 evaluate(
   'Contrato TrendAlertDto exportado com severity e isRead (Fase 30)',
-  contractsContent.includes('export interface TrendAlertDto') &&
-  contractsContent.includes('severity: ')
+  asoContractsContent.includes('export interface TrendAlertDto') &&
+  asoContractsContent.includes('severity: ')
 );
 
 evaluate(
   'Contratos da Fase 31 exportados (AsoAiSuggestionItemDto, AsoAiRecommendationDto, GenerateAsoAiRecommendationsInputDto, ApplyAiRecommendationDto)',
-  contractsContent.includes('export interface AsoAiSuggestionItemDto') &&
-  contractsContent.includes('export interface AsoAiRecommendationDto') &&
-  contractsContent.includes('export interface GenerateAsoAiRecommendationsInputDto') &&
-  contractsContent.includes('export interface ApplyAiRecommendationDto')
+  asoContractsContent.includes('export interface AsoAiSuggestionItemDto') &&
+  asoContractsContent.includes('export interface AsoAiRecommendationDto') &&
+  asoContractsContent.includes('export interface GenerateAsoAiRecommendationsInputDto') &&
+  asoContractsContent.includes('export interface ApplyAiRecommendationDto')
 );
 
 const apiKeysContractsPath = path.join(ROOT_DIR, 'packages/contracts/src/api-keys.contracts.ts');
@@ -232,10 +272,36 @@ if (fs.existsSync(apiKeysContractsPath)) {
   );
 }
 
+const plansContractsPath = path.join(ROOT_DIR, 'packages/contracts/src/plans.contracts.ts');
+const contractsIndexPath = path.join(ROOT_DIR, 'packages/contracts/src/index.ts');
+evaluate('Arquivo de contratos plans.contracts.ts existe (Fase 33)', fs.existsSync(plansContractsPath));
+
+if (fs.existsSync(plansContractsPath)) {
+  const pcContent = fs.readFileSync(plansContractsPath, 'utf8');
+  evaluate(
+    'Contratos da Fase 33 exportados (PlanLimitsDto, PlanDetailsDto, OrganizationSubscriptionDto, PlanUsageDto, CurrentPlanResponseDto, SubscribePlanInputDto)',
+    pcContent.includes('export interface PlanLimitsDto') &&
+    pcContent.includes('export interface PlanDetailsDto') &&
+    pcContent.includes('export interface OrganizationSubscriptionDto') &&
+    pcContent.includes('export interface PlanUsageDto') &&
+    pcContent.includes('export interface CurrentPlanResponseDto') &&
+    pcContent.includes('export interface SubscribePlanInputDto')
+  );
+}
+
+if (fs.existsSync(contractsIndexPath)) {
+  const indexContent = fs.readFileSync(contractsIndexPath, 'utf8');
+  evaluate(
+    'index.ts de contratos reexporta plans.contracts',
+    indexContent.includes("export * from './plans.contracts.js';") ||
+    indexContent.includes("export * from './plans.contracts';")
+  );
+}
+
 // -----------------------------------------------------------------------------
-// 3. Motores de Backend (Fases 29, 30, 31 & 32)
+// 3. Motores de Backend (Fases 29 a 33)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 3: Motores de Backend da Etapa 5 (Estimativas, Tendências, IA e API Keys)');
+printHeader('PARTE 3: Motores de Backend da Etapa 5 (Estimativas, Tendências, IA, API Keys e Planos SaaS)');
 
 const benchmarksPath = path.join(ROOT_DIR, 'apps/api/src/modules/aso/constants/category-benchmarks.constant.ts');
 evaluate('Arquivo de benchmarks setoriais existe', fs.existsSync(benchmarksPath));
@@ -344,10 +410,65 @@ if (fs.existsSync(service32Path)) {
   );
 }
 
+const plansConstantsPath = path.join(ROOT_DIR, 'apps/api/src/modules/plans/constants/plans.constants.ts');
+evaluate('Arquivo de constantes de planos plans.constants.ts existe (Fase 33)', fs.existsSync(plansConstantsPath));
+
+if (fs.existsSync(plansConstantsPath)) {
+  const pcContent = fs.readFileSync(plansConstantsPath, 'utf8');
+  evaluate(
+    'Catálogo PLANS_CATALOG define tiers FREE, STARTER, PRO e BUSINESS com limites e preços',
+    pcContent.includes('FREE:') &&
+    pcContent.includes('STARTER:') &&
+    pcContent.includes('PRO:') &&
+    pcContent.includes('BUSINESS:') &&
+    pcContent.includes('priceMonthlyBrl') &&
+    pcContent.includes('priceYearlyMonthlyBrl') &&
+    pcContent.includes('maxMonitoredApps') &&
+    pcContent.includes('maxTrackedKeywordsPerApp')
+  );
+}
+
+const service33Path = path.join(ROOT_DIR, 'apps/api/src/modules/plans/services/plans.service.ts');
+evaluate('Serviço PlansService existe (Fase 33)', fs.existsSync(service33Path));
+
+if (fs.existsSync(service33Path)) {
+  const serv33Content = fs.readFileSync(service33Path, 'utf8');
+  evaluate(
+    'PlansService auto-inicializa plano FREE para organizações sem assinatura prévia',
+    serv33Content.includes('getOrganizationPlan') &&
+    serv33Content.includes('this.prisma.subscription.findUnique') &&
+    serv33Content.includes('this.prisma.subscription.create') &&
+    serv33Content.includes("planTier: 'FREE'")
+  );
+  evaluate(
+    'PlansService calcula consumo de quotas em tempo real (apps, keywords, chamadas de API, usuários)',
+    serv33Content.includes('this.prisma.asoApp.count') &&
+    serv33Content.includes('this.prisma.asoAppKeyword.count') &&
+    serv33Content.includes('this.prisma.membership.count') &&
+    serv33Content.includes('this.prisma.apiKey.aggregate')
+  );
+  evaluate(
+    'PlansService implementa alteração de plano e ciclo de faturamento (mensal/anual)',
+    serv33Content.includes('subscribeOrChangePlan') &&
+    serv33Content.includes('periodDays =') &&
+    serv33Content.includes('this.prisma.subscription.upsert')
+  );
+  evaluate(
+    'PlansService implementa cancelamento elegante com vigência até final do período',
+    serv33Content.includes('cancelSubscription') &&
+    serv33Content.includes('canceledAt: new Date()')
+  );
+  evaluate(
+    'PlansService implementa guard de quotas checkQuota',
+    serv33Content.includes('checkQuota') &&
+    serv33Content.includes('QUOTA_EXCEEDED')
+  );
+}
+
 // -----------------------------------------------------------------------------
-// 4. Controladores REST, Guards & Proteção Multi-Tenant
+// 4. Controladores REST, Guards & Proteção Multi-Tenant (Fases 29 a 33)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 4: Controladores REST, Guards & Proteção Multi-Tenant (Fases 29 a 32)');
+printHeader('PARTE 4: Controladores REST, Guards & Proteção Multi-Tenant (Fases 29 a 33)');
 
 const ctrl29Path = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso-estimates.controller.ts');
 const ctrl30Path = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso-trends.controller.ts');
@@ -355,6 +476,8 @@ const ctrl31Path = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso
 const ctrl32PrivatePath = path.join(ROOT_DIR, 'apps/api/src/modules/api-keys/controllers/api-keys.controller.ts');
 const ctrl32PublicPath = path.join(ROOT_DIR, 'apps/api/src/modules/api-keys/controllers/public-aso.controller.ts');
 const guard32Path = path.join(ROOT_DIR, 'apps/api/src/modules/api-keys/guards/api-key-auth.guard.ts');
+const ctrl33Path = path.join(ROOT_DIR, 'apps/api/src/modules/plans/controllers/plans.controller.ts');
+const module33Path = path.join(ROOT_DIR, 'apps/api/src/modules/plans/plans.module.ts');
 
 evaluate('Controlador AsoEstimatesController existe', fs.existsSync(ctrl29Path));
 evaluate('Controlador AsoTrendsController existe', fs.existsSync(ctrl30Path));
@@ -362,6 +485,8 @@ evaluate('Controlador AsoAiRecommendationsController existe', fs.existsSync(ctrl
 evaluate('Controlador privado ApiKeysController existe (Fase 32)', fs.existsSync(ctrl32PrivatePath));
 evaluate('Controlador comercial PublicAsoController existe (Fase 32)', fs.existsSync(ctrl32PublicPath));
 evaluate('Guard ApiKeyAuthGuard existe (Fase 32)', fs.existsSync(guard32Path));
+evaluate('Controlador PlansController existe (Fase 33)', fs.existsSync(ctrl33Path));
+evaluate('Módulo PlansModule existe (Fase 33)', fs.existsSync(module33Path));
 
 if (fs.existsSync(guard32Path)) {
   const guardContent = fs.readFileSync(guard32Path, 'utf8');
@@ -399,21 +524,43 @@ if (fs.existsSync(ctrl32PublicPath)) {
   );
 }
 
+if (fs.existsSync(ctrl33Path)) {
+  const ctrl33Content = fs.readFileSync(ctrl33Path, 'utf8');
+  evaluate(
+    'PlansController expõe catálogo público GET /plans e operações privadas protegidas por JwtAuthGuard e TenantGuard',
+    ctrl33Content.includes("@Get('current')") &&
+    ctrl33Content.includes("@Post('subscribe')") &&
+    ctrl33Content.includes("@Post('cancel')") &&
+    ctrl33Content.includes('@UseGuards(JwtAuthGuard, TenantGuard)')
+  );
+}
+
+const appModulePath = path.join(ROOT_DIR, 'apps/api/src/app.module.ts');
+if (fs.existsSync(appModulePath)) {
+  const appModuleContent = fs.readFileSync(appModulePath, 'utf8');
+  evaluate(
+    'AppModule importa e registra PlansModule',
+    appModuleContent.includes('PlansModule')
+  );
+}
+
 // -----------------------------------------------------------------------------
-// 5. Interface de Usuário & Painéis Next.js (Fases 29 a 32)
+// 5. Interface de Usuário & Painéis Next.js (Fases 29 a 33)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 5: Interface de Usuário & Painéis Next.js (Fases 29 a 32)');
+printHeader('PARTE 5: Interface de Usuário & Painéis Next.js (Fases 29 a 33)');
 
 const comp29Path = path.join(ROOT_DIR, 'apps/web/src/components/aso/predictive-estimates.tsx');
 const comp30Path = path.join(ROOT_DIR, 'apps/web/src/components/aso/market-trends-panel.tsx');
 const comp31Path = path.join(ROOT_DIR, 'apps/web/src/components/aso/ai-recommendations-panel.tsx');
 const page32Path = path.join(ROOT_DIR, 'apps/web/src/app/(dashboard)/developers/page.tsx');
+const page33Path = path.join(ROOT_DIR, 'apps/web/src/app/(dashboard)/plans/page.tsx');
 const sidebarPath = path.join(ROOT_DIR, 'apps/web/src/components/layout/sidebar.tsx');
 
 evaluate('Componente PredictiveEstimates existe', fs.existsSync(comp29Path));
 evaluate('Componente MarketTrendsPanel existe', fs.existsSync(comp30Path));
 evaluate('Componente AiRecommendationsPanel existe', fs.existsSync(comp31Path));
 evaluate('Página DevelopersPage (/developers) existe (Fase 32)', fs.existsSync(page32Path));
+evaluate('Página PlansPage (/plans) existe (Fase 33)', fs.existsSync(page33Path));
 
 if (fs.existsSync(page32Path)) {
   const page32Content = fs.readFileSync(page32Path, 'utf8');
@@ -433,19 +580,39 @@ if (fs.existsSync(page32Path)) {
   );
 }
 
+if (fs.existsSync(page33Path)) {
+  const page33Content = fs.readFileSync(page33Path, 'utf8');
+  evaluate(
+    'PlansPage renderiza switch mensal/anual com desconto de 20% OFF e barras de consumo de quotas em tempo real',
+    page33Content.includes('billingCycle') &&
+    page33Content.includes('20% OFF') &&
+    page33Content.includes('usage.appsUsed') &&
+    page33Content.includes('usage.keywordsUsed')
+  );
+  evaluate(
+    'PlansPage renderiza os 4 cartões de planos e modal de confirmação de contratação/cancelamento',
+    page33Content.includes('FREE') &&
+    page33Content.includes('handleSubscribe') &&
+    page33Content.includes('handleCancelSubscription') &&
+    page33Content.includes('Confirmar Alteração de Plano')
+  );
+}
+
 if (fs.existsSync(sidebarPath)) {
   const sidebarContent = fs.readFileSync(sidebarPath, 'utf8');
   evaluate(
-    'Sidebar integra navegação para API & Desenvolvedores (/developers)',
+    'Sidebar integra navegação para API & Desenvolvedores (/developers) e Planos & Assinatura (/plans)',
     sidebarContent.includes("href: '/developers'") &&
-    sidebarContent.includes("name: 'API & Desenvolvedores'")
+    sidebarContent.includes("name: 'API & Desenvolvedores'") &&
+    sidebarContent.includes("href: '/plans'") &&
+    sidebarContent.includes("name: 'Planos & Assinatura'")
   );
 }
 
 // -----------------------------------------------------------------------------
-// 6. Testes Automatizados (Fases 29 a 32)
+// 6. Testes Automatizados (Fases 29 a 33)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 6: Verificação de Testes Unitários da Etapa 5 (Fases 29 a 32)');
+printHeader('PARTE 6: Verificação de Testes Unitários da Etapa 5 (Fases 29 a 33)');
 
 const spec29Service = path.join(ROOT_DIR, 'apps/api/src/modules/aso/services/aso-estimates.service.spec.ts');
 const spec29Ctrl = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso-estimates.controller.spec.ts');
@@ -457,6 +624,8 @@ const spec32Service = path.join(ROOT_DIR, 'apps/api/src/modules/api-keys/service
 const spec32Guard = path.join(ROOT_DIR, 'apps/api/src/modules/api-keys/guards/api-key-auth.guard.spec.ts');
 const spec32PrivateCtrl = path.join(ROOT_DIR, 'apps/api/src/modules/api-keys/controllers/api-keys.controller.spec.ts');
 const spec32PublicCtrl = path.join(ROOT_DIR, 'apps/api/src/modules/api-keys/controllers/public-aso.controller.spec.ts');
+const spec33Service = path.join(ROOT_DIR, 'apps/api/src/modules/plans/services/plans.service.spec.ts');
+const spec33Ctrl = path.join(ROOT_DIR, 'apps/api/src/modules/plans/controllers/plans.controller.spec.ts');
 
 evaluate('Arquivo de testes aso-estimates.service.spec.ts existe', fs.existsSync(spec29Service));
 evaluate('Arquivo de testes aso-estimates.controller.spec.ts existe', fs.existsSync(spec29Ctrl));
@@ -468,27 +637,62 @@ evaluate('Arquivo de testes api-keys.service.spec.ts existe (Fase 32)', fs.exist
 evaluate('Arquivo de testes api-key-auth.guard.spec.ts existe (Fase 32)', fs.existsSync(spec32Guard));
 evaluate('Arquivo de testes api-keys.controller.spec.ts existe (Fase 32)', fs.existsSync(spec32PrivateCtrl));
 evaluate('Arquivo de testes public-aso.controller.spec.ts existe (Fase 32)', fs.existsSync(spec32PublicCtrl));
+evaluate('Arquivo de testes plans.service.spec.ts existe (Fase 33)', fs.existsSync(spec33Service));
+evaluate('Arquivo de testes plans.controller.spec.ts existe (Fase 33)', fs.existsSync(spec33Ctrl));
 
-let testsPassed = false;
+let tests32Passed = false;
 try {
   execSync(
     'pnpm --filter @mgp/api test src/modules/api-keys/services/api-keys.service.spec.ts src/modules/api-keys/guards/api-key-auth.guard.spec.ts src/modules/api-keys/controllers/api-keys.controller.spec.ts src/modules/api-keys/controllers/public-aso.controller.spec.ts',
     { cwd: ROOT_DIR, encoding: 'utf8', stdio: 'pipe' }
   );
-  testsPassed = true;
+  tests32Passed = true;
 } catch (e) {
-  testsPassed = false;
+  tests32Passed = false;
 }
 
 evaluate(
   'Suíte de testes da Fase 32 executa com 100% de aprovação (24 testes verdes em 4 suítes)',
-  testsPassed
+  tests32Passed
 );
+
+let tests33Passed = false;
+try {
+  execSync(
+    'pnpm --filter @mgp/api test src/modules/plans/services/plans.service.spec.ts src/modules/plans/controllers/plans.controller.spec.ts',
+    { cwd: ROOT_DIR, encoding: 'utf8', stdio: 'pipe' }
+  );
+  tests33Passed = true;
+} catch (e) {
+  tests33Passed = false;
+}
+
+evaluate(
+  'Suíte de testes da Fase 33 executa com 100% de aprovação (14 testes verdes em 2 suítes)',
+  tests33Passed
+);
+
+// -----------------------------------------------------------------------------
+// 7. Documentação Técnica (Fases 29 a 33)
+// -----------------------------------------------------------------------------
+printHeader('PARTE 7: Documentação Técnica da Etapa 5');
+
+const doc29Path = path.join(ROOT_DIR, 'docs/aso/06-predictive-download-revenue-engine.md');
+const doc30Path = path.join(ROOT_DIR, 'docs/aso/07-market-trends-and-breakout-detection.md');
+const doc31Path = path.join(ROOT_DIR, 'docs/aso/08-ai-aso-and-campaign-recommendations.md');
+const doc32Path = path.join(ROOT_DIR, 'docs/api/01-public-commercial-api-and-api-keys.md');
+const doc33Path = path.join(ROOT_DIR, 'docs/saas/01-plans-quotas-and-subscriptions.md');
+
+evaluate('Documentação técnica da Fase 29 existe', fs.existsSync(doc29Path));
+evaluate('Documentação técnica da Fase 30 existe', fs.existsSync(doc30Path));
+evaluate('Documentação técnica da Fase 31 existe', fs.existsSync(doc31Path));
+evaluate('Documentação técnica da Fase 32 existe', fs.existsSync(doc32Path));
+evaluate('Documentação técnica da Fase 33 existe', fs.existsSync(doc33Path));
 
 // -----------------------------------------------------------------------------
 // Relatório Final
 // -----------------------------------------------------------------------------
-printHeader('RELATÓRIO FINAL DA AUDITORIA DA ETAPA 5 - FASES 29 A 32');
+printHeader('RELATÓRIO FINAL DA AUDITORIA DA ETAPA 5 - FASES 29 A 33');
 
 const score = Math.round((passedChecks / totalChecks) * 100);
 console.log(` Total de verificações: ${totalChecks}`);
@@ -497,9 +701,9 @@ console.log(` Falhas:                ${totalChecks - passedChecks}`);
 console.log(` Pontuação de Conformidade: ${score}%\n`);
 
 if (score === 100) {
-  console.log(`${COLORS.bright}${COLORS.green}✔ HOMOLOGAÇÃO ETAPA 5 (FASES 29 A 32): APROVADA COM SUCESSO!${COLORS.reset}\n`);
+  console.log(`${COLORS.bright}${COLORS.green}✔ HOMOLOGAÇÃO ETAPA 5 (FASES 29 A 33): APROVADA COM SUCESSO!${COLORS.reset}\n`);
   process.exit(0);
 } else {
-  console.log(`${COLORS.bright}${COLORS.red}✖ HOMOLOGAÇÃO ETAPA 5 (FASES 29 A 32): REPROVADA. CORRIJA AS FALHAS ACIMA.${COLORS.reset}\n`);
+  console.log(`${COLORS.bright}${COLORS.red}✖ HOMOLOGAÇÃO ETAPA 5 (FASES 29 A 33): REPROVADA. CORRIJA AS FALHAS ACIMA.${COLORS.reset}\n`);
   process.exit(1);
 }
