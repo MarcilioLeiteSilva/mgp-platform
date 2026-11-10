@@ -18,6 +18,7 @@ import {
   ShieldAlert,
   Key,
   CreditCard,
+  BookOpen,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -41,6 +42,11 @@ const navigationItems = [
     name: 'Campanhas',
     href: '/campaigns',
     icon: Megaphone,
+  },
+  {
+    name: 'House Ads & SDK Docs',
+    href: '/house-ads-docs',
+    icon: BookOpen,
   },
   {
     name: 'ASO Studio',
