@@ -31,7 +31,7 @@ interface CampaignItem {
   id: string;
   organizationId: string;
   name: string;
-  type: 'PAID' | 'CROSS_PROMO' | 'HOUSE';
+  type: 'PAID' | 'EXCHANGE' | 'HOUSE_AD' | 'CROSS_PROMO' | 'HOUSE';
   billingModel: 'CPM' | 'CPC';
   bidAmount: number;
   dailyBudget: number;

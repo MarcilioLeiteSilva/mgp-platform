@@ -12,7 +12,7 @@ interface CreateCampaignModalProps {
 
 export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampaignModalProps) {
   const [name, setName] = useState('');
-  const [type, setType] = useState<'PAID' | 'CROSS_PROMO' | 'HOUSE'>('PAID');
+  const [type, setType] = useState<'PAID' | 'EXCHANGE' | 'HOUSE_AD'>('HOUSE_AD');
   const [billingModel, setBillingModel] = useState<'CPM' | 'CPC'>('CPM');
   const [bidAmount, setBidAmount] = useState('2.50');
   const [dailyBudget, setDailyBudget] = useState('50.00');
@@ -126,9 +126,9 @@ export function CreateCampaignModal({ isOpen, onClose, onSuccess }: CreateCampai
                 onChange={(e) => setType(e.target.value as any)}
                 className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
               >
-                <option value="PAID">PAID (Paga - requer saldo)</option>
-                <option value="CROSS_PROMO">CROSS_PROMO (Promoção Cruzada)</option>
-                <option value="HOUSE">HOUSE (Anúncios Próprios)</option>
+                <option value="HOUSE_AD">HOUSE_AD (Anúncios Próprios - Isento de saldo)</option>
+                <option value="EXCHANGE">EXCHANGE (Promoção Cruzada / Permuta)</option>
+                <option value="PAID">PAID (Paga - requer saldo em carteira)</option>
               </select>
             </div>
 
