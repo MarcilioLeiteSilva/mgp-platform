@@ -10,6 +10,7 @@
  * - Fase 31: Recomendações de ASO & Campanhas com IA (Otimização Play Store & Ad Server)
  * - Fase 32: API Pública Comercial & Gestão de API Keys (Quotas, Rate Limiting & Swagger Público)
  * - Fase 33: Motor de Planos SaaS, Quotas Dinâmicas e Monetização por Assinatura (FREE, STARTER, PRO, BUSINESS)
+ * - Fase 34: Testes de Integração E2E & Homologação Final da Etapa 5
  */
 
 const fs = require('fs');
@@ -49,7 +50,7 @@ function evaluate(desc, condition, details = '') {
   return condition;
 }
 
-printHeader('AUDITORIA ETAPA 5 — INTELIGÊNCIA AVANÇADA, MODELOS PREDITIVOS, IA, API PÚBLICA & PLANOS SAAS (FASES 29 A 33)');
+printHeader('AUDITORIA ETAPA 5 — INTELIGÊNCIA AVANÇADA, MODELOS PREDITIVOS, IA, API PÚBLICA, PLANOS SAAS & E2E (FASES 29 A 34)');
 
 // -----------------------------------------------------------------------------
 // 1. Modelagem Prisma & Migrations (Fases 29 a 33)
@@ -610,9 +611,9 @@ if (fs.existsSync(sidebarPath)) {
 }
 
 // -----------------------------------------------------------------------------
-// 6. Testes Automatizados (Fases 29 a 33)
+// 6. Testes Automatizados (Fases 29 a 34)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 6: Verificação de Testes Unitários da Etapa 5 (Fases 29 a 33)');
+printHeader('PARTE 6: Verificação de Testes Unitários e E2E da Etapa 5 (Fases 29 a 34)');
 
 const spec29Service = path.join(ROOT_DIR, 'apps/api/src/modules/aso/services/aso-estimates.service.spec.ts');
 const spec29Ctrl = path.join(ROOT_DIR, 'apps/api/src/modules/aso/controllers/aso-estimates.controller.spec.ts');
@@ -626,6 +627,7 @@ const spec32PrivateCtrl = path.join(ROOT_DIR, 'apps/api/src/modules/api-keys/con
 const spec32PublicCtrl = path.join(ROOT_DIR, 'apps/api/src/modules/api-keys/controllers/public-aso.controller.spec.ts');
 const spec33Service = path.join(ROOT_DIR, 'apps/api/src/modules/plans/services/plans.service.spec.ts');
 const spec33Ctrl = path.join(ROOT_DIR, 'apps/api/src/modules/plans/controllers/plans.controller.spec.ts');
+const spec34E2e = path.join(ROOT_DIR, 'apps/api/src/test/etapa5-e2e.spec.ts');
 
 evaluate('Arquivo de testes aso-estimates.service.spec.ts existe', fs.existsSync(spec29Service));
 evaluate('Arquivo de testes aso-estimates.controller.spec.ts existe', fs.existsSync(spec29Ctrl));
@@ -639,6 +641,7 @@ evaluate('Arquivo de testes api-keys.controller.spec.ts existe (Fase 32)', fs.ex
 evaluate('Arquivo de testes public-aso.controller.spec.ts existe (Fase 32)', fs.existsSync(spec32PublicCtrl));
 evaluate('Arquivo de testes plans.service.spec.ts existe (Fase 33)', fs.existsSync(spec33Service));
 evaluate('Arquivo de testes plans.controller.spec.ts existe (Fase 33)', fs.existsSync(spec33Ctrl));
+evaluate('Arquivo de testes etapa5-e2e.spec.ts existe (Fase 34)', fs.existsSync(spec34E2e));
 
 let tests32Passed = false;
 try {
@@ -672,27 +675,45 @@ evaluate(
   tests33Passed
 );
 
+let tests34Passed = false;
+try {
+  execSync(
+    'pnpm --filter @mgp/api test src/test/etapa5-e2e.spec.ts',
+    { cwd: ROOT_DIR, encoding: 'utf8', stdio: 'pipe' }
+  );
+  tests34Passed = true;
+} catch (e) {
+  tests34Passed = false;
+}
+
+evaluate(
+  'Suíte de testes ponta a ponta (E2E) da Fase 34 executa com 100% de aprovação (18 testes verdes)',
+  tests34Passed
+);
+
 // -----------------------------------------------------------------------------
-// 7. Documentação Técnica (Fases 29 a 33)
+// 7. Documentação Técnica (Fases 29 a 34)
 // -----------------------------------------------------------------------------
-printHeader('PARTE 7: Documentação Técnica da Etapa 5');
+printHeader('PARTE 7: Documentação Técnica da Etapa 5 (Fases 29 a 34)');
 
 const doc29Path = path.join(ROOT_DIR, 'docs/aso/06-predictive-download-revenue-engine.md');
 const doc30Path = path.join(ROOT_DIR, 'docs/aso/07-market-trends-and-breakout-detection.md');
 const doc31Path = path.join(ROOT_DIR, 'docs/aso/08-ai-aso-and-campaign-recommendations.md');
 const doc32Path = path.join(ROOT_DIR, 'docs/api/01-public-commercial-api-and-api-keys.md');
 const doc33Path = path.join(ROOT_DIR, 'docs/saas/01-plans-quotas-and-subscriptions.md');
+const doc34Path = path.join(ROOT_DIR, 'docs/aso/09-etapa5-final-audit-and-certification.md');
 
 evaluate('Documentação técnica da Fase 29 existe', fs.existsSync(doc29Path));
 evaluate('Documentação técnica da Fase 30 existe', fs.existsSync(doc30Path));
 evaluate('Documentação técnica da Fase 31 existe', fs.existsSync(doc31Path));
 evaluate('Documentação técnica da Fase 32 existe', fs.existsSync(doc32Path));
 evaluate('Documentação técnica da Fase 33 existe', fs.existsSync(doc33Path));
+evaluate('Documentação técnica de certificação final da Etapa 5 existe (Fase 34)', fs.existsSync(doc34Path));
 
 // -----------------------------------------------------------------------------
 // Relatório Final
 // -----------------------------------------------------------------------------
-printHeader('RELATÓRIO FINAL DA AUDITORIA DA ETAPA 5 - FASES 29 A 33');
+printHeader('RELATÓRIO FINAL DA AUDITORIA DA ETAPA 5 - FASES 29 A 34 (CERTIFICAÇÃO COMPLETA)');
 
 const score = Math.round((passedChecks / totalChecks) * 100);
 console.log(` Total de verificações: ${totalChecks}`);
@@ -701,9 +722,9 @@ console.log(` Falhas:                ${totalChecks - passedChecks}`);
 console.log(` Pontuação de Conformidade: ${score}%\n`);
 
 if (score === 100) {
-  console.log(`${COLORS.bright}${COLORS.green}✔ HOMOLOGAÇÃO ETAPA 5 (FASES 29 A 33): APROVADA COM SUCESSO!${COLORS.reset}\n`);
+  console.log(`${COLORS.bright}${COLORS.green}✔ HOMOLOGAÇÃO ETAPA 5 (FASES 29 A 34): APROVADA COM 100% DE SUCESSO! ETAPA 5 CERTIFICADA!${COLORS.reset}\n`);
   process.exit(0);
 } else {
-  console.log(`${COLORS.bright}${COLORS.red}✖ HOMOLOGAÇÃO ETAPA 5 (FASES 29 A 33): REPROVADA. CORRIJA AS FALHAS ACIMA.${COLORS.reset}\n`);
+  console.log(`${COLORS.bright}${COLORS.red}✖ HOMOLOGAÇÃO ETAPA 5 (FASES 29 A 34): REPROVADA. CORRIJA AS FALHAS ACIMA.${COLORS.reset}\n`);
   process.exit(1);
 }
